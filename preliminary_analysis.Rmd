@@ -22,6 +22,8 @@ read_html(url) %>%
 
 ```
 
+#### Salaries Dataset
+
 ```{r}
 
 salaries = read_excel(
@@ -38,4 +40,20 @@ salaries
 
 ```
 
+#### Batting and Pitching Datasets
 
+```{r}
+
+batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
+                     locale = locale(encoding = "latin1")) |>
+  janitor::clean_names()
+
+```
+
+```{r}
+
+pitching = read_delim("data/2022 MLB Player Stats - Pitching.csv", delim = ";",
+                     locale = locale(encoding = "latin1")) |>
+  janitor::clean_names()
+
+```
