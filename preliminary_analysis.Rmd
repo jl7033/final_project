@@ -29,8 +29,10 @@ salaries = read_excel(
   sheet = "2022.xls",
   skip = 1) |>
   select(1:4) |>
-  rename(Position = "Pos'n",
-         Salary_2022 = "2022.0")
+  rename(position = "Pos'n",
+         salary_2022 = "2022.0",
+         service_time_yrs = "MLS",
+         player = "Player")
 
 salaries
 
