@@ -37,7 +37,7 @@ salary.
 
 - Website
 
-- screencast
+- Screencast
 
 # Anticipated data sources
 
@@ -45,22 +45,11 @@ salary.
 
 <https://www.kaggle.com/datasets/vivovinco/2022-mlb-player-stats/data>
 
-## Major League Baseball Salaries 2022 (USA Today)
-
-<https://databases.usatoday.com/mlb-salaries-2022/>
-
 ## Major League Baseball Salaries 2022 (Cot’s Contracts)
 
 <https://docs.google.com/spreadsheets/d/12XSXOQpjDJDCJKsA4xC1e_9FlS11aeioZy_p1nqpclg/edit?gid=1811400237#gid=1811400237>
 
 # Planned analyses / visualizations / coding challenges
-
-## Coding challenges:
-
-- Merging the two datasets
-
-- Checking data quality (players with few at bats, those listed for
-  multiple teams)
 
 ## Planned analyses:
 
@@ -74,6 +63,13 @@ salary.
 - Distribution of Salary and OPS+/ERA+ by Team / League
 - Scatterplot of OPS+ (an all-encompassing hitting metric) or ERA+ (an
   all-encompassing pitching metric) vs. salary
+
+## Coding challenges:
+
+- Merging the two datasets
+
+- Checking data quality (players with few at bats, those listed for
+  multiple teams)
 
 # Planned timeline
 
