@@ -22,3 +22,16 @@ read_html(url) %>%
 
 ```
 
+```{r}
+
+contracts = read_excel(
+  "data/MLB-Salaries 2000-24.xlsx", 
+  sheet = "2022.xls",
+  skip = 1) |>
+  select(1:4) 
+
+contracts
+
+```
+
+
