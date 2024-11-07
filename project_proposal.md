@@ -89,26 +89,32 @@ salary.
 
 - November 15
 
-  - Import, clean, and merge data
+  - Import, clean, and merge together our data with the goal to create
+    our final dataset.
 
 - November 22
 
-  - EDA
+  - EDA: Exploratory data analysis of the data with appropriate plots,
+    tables, and an accompanying writeup.
 
-  - Statistical analysis/EDA
+  - Statistical analysis: Construction of linear regression model and
+    accompanying writeup.
 
 - December 2
 
-  - Website and dashboards created
+  - Website and dashboards: Construction of an aesthetically pleasing
+    website containing our previously made EDA and regression models,
+    alongside accompanying writeup.
 
 - December 2-7
 
-  - Record video screencast once everything is completed
+  - Screencast: Video of each team member walking through the project in
+    under 2 minutes.
 
 - December 7 by 11:59 pm
 
-  - Report, webpage, screencast, and peer assessment due
+  - Report, webpage, screencast, and peer assessment due.
 
 - December 12
 
-  - Discuss in class
+  - Discuss in class.
