@@ -24,13 +24,15 @@ read_html(url) %>%
 
 ```{r}
 
-contracts = read_excel(
+salaries = read_excel(
   "data/MLB-Salaries 2000-24.xlsx", 
   sheet = "2022.xls",
   skip = 1) |>
-  select(1:4) 
+  select(1:4) |>
+  rename(Position = "Pos'n",
+         Salary_2022 = "2022.0")
 
-contracts
+salaries
 
 ```
 
