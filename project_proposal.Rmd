@@ -25,7 +25,17 @@ Many Major League Baseball players make a lot of money, and the sport is rich in
 
 # Intended final products
 
-Report EDA Basic statistical analysis Regression analysis Website screencast
+-   Report 
+
+-   EDA 
+
+-   Basic statistical analysis 
+
+-   Regression analysis 
+
+-   Website 
+
+-   screencast
 
 # Anticipated data sources
 

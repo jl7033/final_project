@@ -27,8 +27,17 @@ salary.
 
 # Intended final products
 
-Report EDA Basic statistical analysis Regression analysis Website
-screencast
+- Report
+
+- EDA
+
+- Basic statistical analysis
+
+- Regression analysis
+
+- Website
+
+- screencast
 
 # Anticipated data sources
 
@@ -39,6 +48,10 @@ screencast
 ## Major League Baseball Salaries 2022 (USA Today)
 
 <https://databases.usatoday.com/mlb-salaries-2022/>
+
+## Major League Baseball Salaries 2022 (Cot’s Contracts)
+
+<https://docs.google.com/spreadsheets/d/12XSXOQpjDJDCJKsA4xC1e_9FlS11aeioZy_p1nqpclg/edit?gid=1811400237#gid=1811400237>
 
 # Planned analyses / visualizations / coding challenges
 
