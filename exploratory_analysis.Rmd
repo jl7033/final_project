@@ -8,21 +8,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(rvest)
 library(readxl)
-<<<<<<< HEAD:exploratory_analysis.Rmd
-<<<<<<< HEAD:exploratory_analysis.Rmd
-=======
-=======
->>>>>>> main:preliminary_analysis.Rmd
 ```
 
-```{r}
-
-url = "https://www.spotrac.com/mlb/contracts"
-read_html(url) |>
-  html_table()
-
->>>>>>> 93fec6e (showing data doc to rest of group):preliminary_analysis.Rmd
-```
 
 #### Salaries Dataset
 
