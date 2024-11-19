@@ -11,13 +11,12 @@ library(tidyverse)
 library(rvest)
 library(httr)
 library(readxl)
-
 ```
 
 ```{r}
 
 url = "https://www.spotrac.com/mlb/contracts"
-read_html(url) %>%
+read_html(url) |>
   html_table()
 
 ```
