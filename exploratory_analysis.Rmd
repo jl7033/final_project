@@ -1,7 +1,5 @@
 ---
-title: "preliminary_analysis"
-author: "Joe LaRocca"
-date: "2024-11-07"
+title: "Exploratory Data Analysis"
 output: html_document
 ---
 
@@ -9,23 +7,12 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(rvest)
-library(httr)
 library(readxl)
-
-```
-
-```{r}
-
-url = "https://www.spotrac.com/mlb/contracts"
-read_html(url) %>%
-  html_table()
-
 ```
 
 #### Salaries Dataset
 
 ```{r}
-
 salaries = read_excel(
   "data/MLB-Salaries 2000-24.xlsx", 
   sheet = "2022.xls",
@@ -37,23 +24,18 @@ salaries = read_excel(
          player = "Player")
 
 salaries
-
 ```
 
 #### Batting and Pitching Datasets
 
 ```{r}
-
 batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
   janitor::clean_names()
-
 ```
 
 ```{r}
-
 pitching = read_delim("data/2022 MLB Player Stats - Pitching.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
   janitor::clean_names()
-
 ```
