@@ -32,7 +32,9 @@ salaries = read_excel(
   rename(position = "Pos'n",
          salary_2022 = "2022.0",
          service_time_yrs = "MLS",
-         player = "Player")
+         name = "Player")%>%
+  mutate(name = str_replace_all(name, "[*#\\.,]", ""))
+
 
 ```
 
@@ -42,7 +44,20 @@ salaries = read_excel(
 
 batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
-  janitor::clean_names()
+  janitor::clean_names()%>%
+  filter(tm == "TOT")%>%
+  mutate(name = str_replace_all(name, "[*#\\.]$", ""))
+library(tidyverse)
+
+batting <- batting %>%
+  mutate(name = str_split(name, "\\s+")) %>% 
+  mutate(name = map(name, rev)) %>%           
+  mutate(name = map_chr(name, str_c, collapse = " ")) %>% 
+  mutate(name = str_trim(name))               
+
+merged_batting <- inner_join(salaries, batting, by = "name")
+
+
 
 ```
 
@@ -50,6 +65,19 @@ batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
 
 pitching = read_delim("data/2022 MLB Player Stats - Pitching.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
-  janitor::clean_names()
+  janitor::clean_names()%>%
+  filter(tm == "TOT")%>%
+  filter(!str_detect(name, "[*#]$"))
+library(tidyverse)
+
+pitching <- pitching %>%
+  mutate(name = str_split(name, "\\s+")) %>%  
+  mutate(name = map(name, rev)) %>%           
+  mutate(name = map_chr(name, str_c, collapse = " ")) %>% 
+  mutate(name = str_trim(name))               
+merged_pitching <- inner_join(salaries, pitching, by = "name")
+
+
+
 
 ```
