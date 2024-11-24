@@ -357,27 +357,6 @@ display: none;
 </div>
 
 
-<pre class="r"><code>url = &quot;https://www.spotrac.com/mlb/contracts&quot;
-read_html(url) |&gt;
-  html_table()</code></pre>
-<pre><code>## [[1]]
-## # A tibble: 100 × 10
-##    Rank  Player  Pos   Team\n              …¹ Age\n               …² Start   End
-##    &lt;chr&gt; &lt;chr&gt;   &lt;chr&gt; &lt;chr&gt;                                   &lt;int&gt; &lt;int&gt; &lt;int&gt;
-##  1 1     Shohei… DH    &quot;LAD\n               …                     29  2024  2033
-##  2 2     Mike T… CF    &quot;LAA\n               …                     27  2019  2030
-##  3 3     Mookie… RF    &quot;LAD\n               …                     28  2021  2032
-##  4 4     Aaron … CF    &quot;NYY\n               …                     30  2023  2031
-##  5 5     Manny … 3B    &quot;SD\n                …                     30  2023  2033
-##  6 6     Franci… SS    &quot;NYM\n               …                     28  2022  2031
-##  7 7     Fernan… RF    &quot;SD\n                …                     21  2021  2034
-##  8 8     Bryce … 1B    &quot;PHI\n               …                     26  2019  2031
-##  9 T9    Gianca… DH    &quot;NYY\n               …                     25  2015  2027
-## 10 T9    Corey … SS    &quot;TEX\n               …                     27  2022  2031
-## # ℹ 90 more rows
-## # ℹ abbreviated names: ¹​`Team\n                        Currently With`,
-## #   ²​`Age\n                        At Signing`
-## # ℹ 3 more variables: Yrs &lt;int&gt;, Value &lt;chr&gt;, AAV &lt;chr&gt;</code></pre>
 <div id="salaries-dataset" class="section level4">
 <h4>Salaries Dataset</h4>
 <pre class="r"><code>salaries = read_excel(
@@ -397,8 +376,8 @@ read_html(url) |&gt;
 <h4>Batting and Pitching Datasets</h4>
 <pre class="r"><code>batting = read_delim(&quot;data/2022 MLB Player Stats - Batting.csv&quot;, delim = &quot;;&quot;,
                      locale = locale(encoding = &quot;latin1&quot;)) |&gt;
-  janitor::clean_names()%&gt;%
-  filter(tm == &quot;TOT&quot;)%&gt;%
+  janitor::clean_names() %&gt;%
+  filter(tm == &quot;TOT&quot;) %&gt;%
   mutate(name = str_replace_all(name, &quot;[*#\\.]$&quot;, &quot;&quot;))</code></pre>
 <pre><code>## Rows: 992 Columns: 29
 ## ── Column specification ────────────────────────────────────────────────────────
@@ -408,9 +387,7 @@ read_html(url) |&gt;
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>library(tidyverse)
-
-batting &lt;- batting %&gt;%
+<pre class="r"><code>batting &lt;- batting %&gt;%
   mutate(name = str_split(name, &quot;\\s+&quot;)) %&gt;% 
   mutate(name = map(name, rev)) %&gt;%           
   mutate(name = map_chr(name, str_c, collapse = &quot; &quot;)) %&gt;% 
@@ -419,8 +396,8 @@ batting &lt;- batting %&gt;%
 merged_batting &lt;- inner_join(salaries, batting, by = &quot;name&quot;)</code></pre>
 <pre class="r"><code>pitching = read_delim(&quot;data/2022 MLB Player Stats - Pitching.csv&quot;, delim = &quot;;&quot;,
                      locale = locale(encoding = &quot;latin1&quot;)) |&gt;
-  janitor::clean_names()%&gt;%
-  filter(tm == &quot;TOT&quot;)%&gt;%
+  janitor::clean_names() %&gt;%
+  filter(tm == &quot;TOT&quot;) %&gt;%
   filter(!str_detect(name, &quot;[*#]$&quot;))</code></pre>
 <pre><code>## Rows: 1081 Columns: 35
 ## ── Column specification ────────────────────────────────────────────────────────
@@ -430,9 +407,7 @@ merged_batting &lt;- inner_join(salaries, batting, by = &quot;name&quot;)</code>
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>library(tidyverse)
-
-pitching &lt;- pitching %&gt;%
+<pre class="r"><code>pitching &lt;- pitching %&gt;%
   mutate(name = str_split(name, &quot;\\s+&quot;)) %&gt;%  
   mutate(name = map(name, rev)) %&gt;%           
   mutate(name = map_chr(name, str_c, collapse = &quot; &quot;)) %&gt;% 
