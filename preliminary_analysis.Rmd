@@ -1,7 +1,5 @@
 ---
-title: "preliminary_analysis"
-author: "Joe LaRocca"
-date: "2024-11-07"
+title: "Preliminary analysis"
 output: html_document
 ---
 
@@ -48,7 +46,6 @@ batting <- batting %>%
   mutate(name = str_trim(name))               
 
 merged_batting <- inner_join(salaries, batting, by = "name")
-
 ```
 
 ```{r}
@@ -63,6 +60,7 @@ pitching <- pitching %>%
   mutate(name = str_split(name, "\\s+")) %>%  
   mutate(name = map(name, rev)) %>%           
   mutate(name = map_chr(name, str_c, collapse = " ")) %>% 
-  mutate(name = str_trim(name))               
+  mutate(name = str_trim(name))   
+
 merged_pitching <- inner_join(salaries, pitching, by = "name")
 ```

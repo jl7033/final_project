@@ -9,11 +9,9 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
-<meta name="author" content="Joe LaRocca" />
 
-<meta name="date" content="2024-11-07" />
 
-<title>preliminary_analysis</title>
+<title>Preliminary analysis</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -350,9 +348,7 @@ display: none;
 
 
 
-<h1 class="title toc-ignore">preliminary_analysis</h1>
-<h4 class="author">Joe LaRocca</h4>
-<h4 class="date">2024-11-07</h4>
+<h1 class="title toc-ignore">Preliminary analysis</h1>
 
 </div>
 
@@ -411,7 +407,8 @@ merged_batting &lt;- inner_join(salaries, batting, by = &quot;name&quot;)</code>
   mutate(name = str_split(name, &quot;\\s+&quot;)) %&gt;%  
   mutate(name = map(name, rev)) %&gt;%           
   mutate(name = map_chr(name, str_c, collapse = &quot; &quot;)) %&gt;% 
-  mutate(name = str_trim(name))               
+  mutate(name = str_trim(name))   
+
 merged_pitching &lt;- inner_join(salaries, pitching, by = &quot;name&quot;)</code></pre>
 </div>
 
