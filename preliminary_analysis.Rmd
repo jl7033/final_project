@@ -13,6 +13,18 @@ library(readxl)
 
 #### Salaries Dataset
 
+Descrition of data cleaning: 
+
+-   reading in data
+
+-   selecting and renaming the columns
+
+-   since names are in last, first format, reorder them to be first last
+
+-   make sure all "Jr"s go at the end
+
+-   remove accents using stringi::stri_trans_general
+
 ```{r}
 salaries = read_excel(
   "data/MLB-Salaries 2000-24.xlsx", 
@@ -36,6 +48,14 @@ salaries = read_excel(
 ```
 
 #### Batting and Pitching Datasets
+
+Descrition of data cleaning: 
+
+-   reading in data and clean names
+
+-   grouping by name and using a count to ensure we only end up with one of each name (slightly complicated due to interleague trades and potential for players with the same name)
+
+-  remove whitespace, from names and use stringi again to remove accents so that the formatting exactly matches the salaries tibble
 
 ```{r}
 batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
@@ -65,6 +85,7 @@ salary_not_in_batting <- anti_join(salaries, batting, by = "name")
 batting_not_in_salary <- anti_join(batting, salaries, by = "name")
 ```
 
+(same data cleaning process as above)
 ```{r}
 pitching = read_delim("data/2022 MLB Player Stats - Pitching.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
@@ -92,3 +113,5 @@ merged_pitching <- inner_join(salaries, pitching, by = "name")
 salary_not_in_pitching <- anti_join(salaries, pitching, by = "name")
 pitching_not_in_salary <- anti_join(pitching, salaries, by = "name")
 ```
+
+Note that there are a number of names in `salaries` not found in `batting` or `pitching`, and vice versa. Some of this may be genuine missingness (e.g. salaries has fewer rows than pitching and batting combined), but some is also due to alternative spellings of names in the datasets. Possibly could be fixed using other matching methods, but the analysis pipeline will still work from here.

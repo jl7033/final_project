@@ -355,6 +355,15 @@ display: none;
 
 <div id="salaries-dataset" class="section level4">
 <h4>Salaries Dataset</h4>
+<p>Descrition of data cleaning:</p>
+<ul>
+<li><p>reading in data</p></li>
+<li><p>selecting and renaming the columns</p></li>
+<li><p>since names are in last, first format, reorder them to be first
+last</p></li>
+<li><p>make sure all “Jr”s go at the end</p></li>
+<li><p>remove accents using stringi::stri_trans_general</p></li>
+</ul>
 <pre class="r"><code>salaries = read_excel(
   &quot;data/MLB-Salaries 2000-24.xlsx&quot;, 
   sheet = &quot;2022.xls&quot;,
@@ -379,6 +388,16 @@ display: none;
 </div>
 <div id="batting-and-pitching-datasets" class="section level4">
 <h4>Batting and Pitching Datasets</h4>
+<p>Descrition of data cleaning:</p>
+<ul>
+<li><p>reading in data and clean names</p></li>
+<li><p>grouping by name and using a count to ensure we only end up with
+one of each name (slightly complicated due to interleague trades and
+potential for players with the same name)</p></li>
+<li><p>remove whitespace, from names and use stringi again to remove
+accents so that the formatting exactly matches the salaries
+tibble</p></li>
+</ul>
 <pre class="r"><code>batting = read_delim(&quot;data/2022 MLB Player Stats - Batting.csv&quot;, delim = &quot;;&quot;,
                      locale = locale(encoding = &quot;latin1&quot;)) |&gt;
   janitor::clean_names() %&gt;%
@@ -411,6 +430,7 @@ display: none;
 
 salary_not_in_batting &lt;- anti_join(salaries, batting, by = &quot;name&quot;)
 batting_not_in_salary &lt;- anti_join(batting, salaries, by = &quot;name&quot;)</code></pre>
+<p>(same data cleaning process as above)</p>
 <pre class="r"><code>pitching = read_delim(&quot;data/2022 MLB Player Stats - Pitching.csv&quot;, delim = &quot;;&quot;,
                      locale = locale(encoding = &quot;latin1&quot;)) |&gt;
   janitor::clean_names() %&gt;%
@@ -447,6 +467,13 @@ batting_not_in_salary &lt;- anti_join(batting, salaries, by = &quot;name&quot;)<
 ##   &quot;many-to-many&quot;` to silence this warning.</code></pre>
 <pre class="r"><code>salary_not_in_pitching &lt;- anti_join(salaries, pitching, by = &quot;name&quot;)
 pitching_not_in_salary &lt;- anti_join(pitching, salaries, by = &quot;name&quot;)</code></pre>
+<p>Note that there are a number of names in <code>salaries</code> not
+found in <code>batting</code> or <code>pitching</code>, and vice versa.
+Some of this may be genuine missingness (e.g. salaries has fewer rows
+than pitching and batting combined), but some is also due to alternative
+spellings of names in the datasets. Possibly could be fixed using other
+matching methods, but the analysis pipeline will still work from
+here.</p>
 </div>
 
 
