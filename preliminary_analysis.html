@@ -363,8 +363,17 @@ display: none;
   rename(position = &quot;Pos&#39;n&quot;,
          salary_2022 = &quot;2022.0&quot;,
          service_time_yrs = &quot;MLS&quot;,
-         name = &quot;Player&quot;)%&gt;%
-  mutate(name = str_replace_all(name, &quot;[*#\\.,]&quot;, &quot;&quot;))</code></pre>
+         name = &quot;Player&quot;) %&gt;%
+  mutate(name = str_split(name, &quot;,&quot;),
+         name = map(name, rev),       
+         name = map_chr(name, str_c, collapse = &quot; &quot;),
+         name = str_trim(name),
+         name = str_replace_all(name, &quot;[*#\\.,]&quot;, &quot;&quot;),
+         junior = str_detect(name, &quot;Jr&quot;),
+         name = if_else(junior == TRUE, str_remove(name, &quot; Jr&quot;), name),
+         name = if_else(junior == TRUE, str_c(name, &quot; Jr&quot;), name),
+         name = stringi::stri_trans_general(name,id = &quot;Latin-ASCII&quot;)) |&gt;
+  select(-junior)</code></pre>
 <pre><code>## New names:
 ## • `` -&gt; `...5`</code></pre>
 </div>
@@ -373,8 +382,23 @@ display: none;
 <pre class="r"><code>batting = read_delim(&quot;data/2022 MLB Player Stats - Batting.csv&quot;, delim = &quot;;&quot;,
                      locale = locale(encoding = &quot;latin1&quot;)) |&gt;
   janitor::clean_names() %&gt;%
-  filter(tm == &quot;TOT&quot;) %&gt;%
-  mutate(name = str_replace_all(name, &quot;[*#\\.]$&quot;, &quot;&quot;))</code></pre>
+  group_by(name) |&gt;
+  mutate(name_count = n(),
+         keep_row = case_when(name_count == 1 ~ TRUE,
+                              name_count &gt; 1 &amp; tm == &quot;TOT&quot; ~ TRUE,
+                              .default = FALSE)) |&gt;
+  filter(keep_row == TRUE) %&gt;%
+  mutate(name_count = n(),
+         keep_row = case_when(name_count == 1 ~ TRUE,
+                              name_count &gt; 1 &amp; lg == &quot;MLB&quot; ~ TRUE,
+                              .default = FALSE)) |&gt;
+  ungroup() |&gt;
+  filter(keep_row == TRUE) %&gt;%
+  mutate(name = str_split(name, &quot;\\s+&quot;),
+         name = map_chr(name, str_c, collapse = &quot; &quot;),
+         name = str_trim(name),
+         name = str_replace_all(name, &quot;[*#\\.]&quot;, &quot;&quot;),
+         name = stringi::stri_trans_general(name,id = &quot;Latin-ASCII&quot;))</code></pre>
 <pre><code>## Rows: 992 Columns: 29
 ## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
@@ -383,18 +407,30 @@ display: none;
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>batting &lt;- batting %&gt;%
-  mutate(name = str_split(name, &quot;\\s+&quot;)) %&gt;% 
-  mutate(name = map(name, rev)) %&gt;%           
-  mutate(name = map_chr(name, str_c, collapse = &quot; &quot;)) %&gt;% 
-  mutate(name = str_trim(name))               
+<pre class="r"><code>merged_batting &lt;- inner_join(salaries, batting, by = &quot;name&quot;)
 
-merged_batting &lt;- inner_join(salaries, batting, by = &quot;name&quot;)</code></pre>
+salary_not_in_batting &lt;- anti_join(salaries, batting, by = &quot;name&quot;)
+batting_not_in_salary &lt;- anti_join(batting, salaries, by = &quot;name&quot;)</code></pre>
 <pre class="r"><code>pitching = read_delim(&quot;data/2022 MLB Player Stats - Pitching.csv&quot;, delim = &quot;;&quot;,
                      locale = locale(encoding = &quot;latin1&quot;)) |&gt;
   janitor::clean_names() %&gt;%
-  filter(tm == &quot;TOT&quot;) %&gt;%
-  filter(!str_detect(name, &quot;[*#]$&quot;))</code></pre>
+  group_by(name) |&gt;
+  mutate(name_count = n(),
+         keep_row = case_when(name_count == 1 ~ TRUE,
+                              name_count &gt; 1 &amp; tm == &quot;TOT&quot; ~ TRUE,
+                              .default = FALSE)) |&gt;
+  filter(keep_row == TRUE) %&gt;%
+  mutate(name_count = n(),
+         keep_row = case_when(name_count == 1 ~ TRUE,
+                              name_count &gt; 1 &amp; lg == &quot;MLB&quot; ~ TRUE,
+                              .default = FALSE)) |&gt;
+  ungroup() |&gt;
+  filter(keep_row == TRUE) %&gt;%
+  mutate(name = str_split(name, &quot;\\s+&quot;),
+         name = map_chr(name, str_c, collapse = &quot; &quot;),
+         name = str_trim(name),
+         name = str_replace_all(name, &quot;[*#\\.]&quot;, &quot;&quot;),
+         name = stringi::stri_trans_general(name,id = &quot;Latin-ASCII&quot;))</code></pre>
 <pre><code>## Rows: 1081 Columns: 35
 ## ── Column specification ────────────────────────────────────────────────────────
 ## Delimiter: &quot;;&quot;
@@ -403,13 +439,14 @@ merged_batting &lt;- inner_join(salaries, batting, by = &quot;name&quot;)</code>
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>pitching &lt;- pitching %&gt;%
-  mutate(name = str_split(name, &quot;\\s+&quot;)) %&gt;%  
-  mutate(name = map(name, rev)) %&gt;%           
-  mutate(name = map_chr(name, str_c, collapse = &quot; &quot;)) %&gt;% 
-  mutate(name = str_trim(name))   
-
-merged_pitching &lt;- inner_join(salaries, pitching, by = &quot;name&quot;)</code></pre>
+<pre class="r"><code>merged_pitching &lt;- inner_join(salaries, pitching, by = &quot;name&quot;)</code></pre>
+<pre><code>## Warning in inner_join(salaries, pitching, by = &quot;name&quot;): Detected an unexpected many-to-many relationship between `x` and `y`.
+## ℹ Row 325 of `x` matches multiple rows in `y`.
+## ℹ Row 265 of `y` matches multiple rows in `x`.
+## ℹ If a many-to-many relationship is expected, set `relationship =
+##   &quot;many-to-many&quot;` to silence this warning.</code></pre>
+<pre class="r"><code>salary_not_in_pitching &lt;- anti_join(salaries, pitching, by = &quot;name&quot;)
+pitching_not_in_salary &lt;- anti_join(pitching, salaries, by = &quot;name&quot;)</code></pre>
 </div>
 
 
