@@ -8,6 +8,23 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(rvest)
 library(readxl)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%",
+  dpi = 300
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 
 
@@ -115,3 +132,90 @@ pitching_not_in_salary <- anti_join(pitching, salaries, by = "name")
 ```
 
 Note that there are a number of names in `salaries` not found in `batting` or `pitching`, and vice versa. Some of this may be genuine missingness (e.g. salaries has fewer rows than pitching and batting combined), but some is also due to alternative spellings of names in the datasets. Possibly could be fixed using other matching methods, but the analysis pipeline will still work from here.
+
+
+## Batting EDA
+
+Start with some descriptive statistics/plots
+```{r}
+merged_batting |>
+  ggplot(aes(x = service_time_yrs)) + 
+  geom_density()
+```
+
+```{r}
+merged_batting |>
+  ggplot(aes(x = salary_2022)) + 
+  geom_density()
+```
+
+Position type (note that some players are categorized at multiple positions)
+```{r}
+merged_batting |>
+  mutate(positions = case_when(str_detect(position, "rhp") ~ list("rhp"),
+                               str_detect(position, "lhp") ~ list("lhp"),
+                               .default = str_split(position, "-")))  |>
+  unnest(positions) |>
+  count(positions) |> 
+  arrange(-n)
+```
+
+
+
+Looking at some hitting statistics
+```{r}
+merged_batting |> 
+  ggplot(aes(x = hr)) + 
+  geom_histogram()
+
+merged_batting |> 
+  ggplot(aes(x = rbi)) + 
+  geom_histogram()
+
+merged_batting |> 
+  ggplot(aes(x = ops)) + 
+  geom_histogram()
+
+merged_batting |> 
+  ggplot(aes(x = ops_2)) + 
+  geom_histogram()
+```
+
+Looking at some relationships to salary
+
+Position vs. salary
+```{r}
+merged_batting |>
+  mutate(positions = case_when(str_detect(position, "rhp") ~ list("rhp"),
+                               str_detect(position, "lhp") ~ list("lhp"),
+                               .default = str_split(position, "-")))  |>
+  unnest(positions) |>
+  ggplot(aes(x = positions,y= salary_2022)) +
+  geom_boxplot()
+
+merged_batting |>
+  mutate(positions = case_when(str_detect(position, "rhp") ~ list("rhp"),
+                               str_detect(position, "lhp") ~ list("lhp"),
+                               .default = str_split(position, "-")))  |>
+  unnest(positions) |>
+  group_by(positions) |>
+  summarize(avg_salary = mean(salary_2022, na.rm = TRUE),
+            median_salary = median(salary_2022, na.rm = TRUE))
+```
+
+HR vs. salary
+```{r}
+merged_batting |>
+  ggplot(aes(x = hr, y = salary_2022)) + 
+  geom_point()
+```
+
+OPS+ vs salary
+```{r}
+merged_batting |>
+  ggplot(aes(x = ops_2, y = salary_2022)) + 
+  geom_point()
+```
+
+
+## Pitching EDA
