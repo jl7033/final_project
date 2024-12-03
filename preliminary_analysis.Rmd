@@ -31,7 +31,7 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 
-#### Salaries Dataset
+## Salaries Data import and cleaning
 
 Descrition of data cleaning: 
 
@@ -64,19 +64,18 @@ salaries = read_excel(
          name = if_else(junior == TRUE, str_remove(name, " Jr"), name),
          name = if_else(junior == TRUE, str_c(name, " Jr"), name),
          name = stringi::stri_trans_general(name,id = "Latin-ASCII")) |>
-  select(-junior)
-
-salaries_position_split = salaries %>%
-  mutate(simple_position = str_split_i(position, "-", 1)) %>%
-  mutate(simple_position = as.factor(simple_position)) %>%
-  mutate(simple_position = fct_relevel(simple_position,
+  select(-junior) %>%
+  mutate(simple_position = str_split_i(position, "-", 1),
+         simple_position = fct_relevel(simple_position,
                                        c("c", "1b", "2b", "3b", "ss",
                                          "lf", "cf", "rf", "inf", "of",
-                                         "dh", "rhp", "lhp")))
+                                         "dh", "rhp", "lhp")),
+         service_time_floor = floor(service_time_yrs))
 ```
 
-#### Batting and Pitching Datasets
+## Batting and Pitching data import and cleaning
 
+### Batting 
 Descrition of data cleaning: 
 
 -   reading in data and clean names
@@ -119,6 +118,8 @@ salary_not_in_batting <- anti_join(salaries, batting, by = "name")
 batting_not_in_salary <- anti_join(batting, salaries, by = "name")
 ```
 
+### Pitching
+
 (same data cleaning process as above)
 ```{r}
 pitching = read_delim("data/2022 MLB Player Stats - Pitching.csv", delim = ";",
@@ -158,6 +159,41 @@ pitching_not_in_salary <- anti_join(pitching, salaries, by = "name")
 ```
 
 Note that there are a number of names in `salaries` not found in `batting` or `pitching`, and vice versa. Some of this may be genuine missingness (e.g. salaries has fewer rows than pitching and batting combined), but some is also due to alternative spellings of names in the datasets. Possibly could be fixed using other matching methods, but the analysis pipeline will still work from here.
+
+## Salaries EDA
+
+Some Basic EDA for salaries on their own
+
+### Salaries by Position Boxplots
+
+```{r}
+salaries %>% 
+  ggplot(aes(x=simple_position,y=salary_2022)) +
+  geom_boxplot()
+```
+
+### Salaries by Experience
+```{r}
+salaries %>%
+  ggplot(aes(x=floor(service_time_yrs),y=salary_2022)) +
+  geom_col() 
+```
+
+### Positions by Experience
+
+```{r}
+salaries %>%
+  ggplot(aes(x=floor(service_time_yrs),fill = simple_position)) +
+  geom_bar(position = "fill") 
+```
+
+### Salary Distribution by Experience
+
+```{r}
+salaries %>%
+  ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
+  geom_boxplot()
+```
 
 ## Batting EDA
 
@@ -457,42 +493,5 @@ summary(lm_pitching)
 ```
 
 
-## Salaries EDA
 
-Some Basic EDA for salaries on their own
-```{r}
-
-salaries_position_split = salaries %>%
-  mutate(simple_position = str_split_i(position, "-", 1)) %>%
-  mutate(simple_position = as.factor(simple_position)) %>%
-  mutate(simple_position = fct_relevel(simple_position,
-                                       c("c", "1b", "2b", "3b", "ss",
-                                         "lf", "cf", "rf", "inf", "of",
-                                         "dh", "rhp", "lhp")))
-
-# Salaries by Position Boxplots
-
-salaries_position_split %>% 
-  ggplot(aes(x=simple_position,y=salary_2022)) +
-  geom_boxplot()
-
-# Salaries by Experience 
-
-salaries_position_split %>%
-  ggplot(aes(x=floor(service_time_yrs),y=salary_2022)) +
-  geom_col() 
-
-# Positions by Experience
-
-salaries_position_split %>%
-  ggplot(aes(x=floor(service_time_yrs),fill = simple_position)) +
-  geom_bar(position = "fill") 
-
-# Salary Distribution by Experience
-
-salaries_position_split %>%
-  ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
-  geom_boxplot()
-
-```
 
