@@ -74,6 +74,8 @@ Descrition of data cleaning:
 
 -  remove whitespace, from names and use stringi again to remove accents so that the formatting exactly matches the salaries tibble
 
+-   Filter out those with fewer than 100 plate appearances
+
 ```{r}
 batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
@@ -96,7 +98,8 @@ batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
          name = str_replace_all(name, "[*#\\.]", ""),
          name = stringi::stri_trans_general(name,id = "Latin-ASCII"))
 
-merged_batting <- inner_join(salaries, batting, by = "name")
+merged_batting <- inner_join(salaries, batting, by = "name") |>
+  filter(pa >= 100)
 
 salary_not_in_batting <- anti_join(salaries, batting, by = "name")
 batting_not_in_salary <- anti_join(batting, salaries, by = "name")
@@ -137,67 +140,97 @@ Note that there are a number of names in `salaries` not found in `batting` or `p
 ## Batting EDA
 
 Start with some descriptive statistics/plots
+
+Service time (i.e. number of years of experience)
 ```{r}
 merged_batting |>
   ggplot(aes(x = service_time_yrs)) + 
-  geom_density()
+  geom_density() +
+  labs(x = "Service time")
 ```
+This is left skewed, so may need to transform it if used in regression
 
+Salary
 ```{r}
 merged_batting |>
   ggplot(aes(x = salary_2022)) + 
-  geom_density()
+  geom_density() + 
+  labs(x = "Salary")
 ```
+This is also heavily left skewed, with many players having salary under $1,000,000
 
-Position type (note that some players are categorized at multiple positions)
+
+Salary and service time are likely related, since rookies have contract minimums
 ```{r}
 merged_batting |>
-  mutate(positions = case_when(str_detect(position, "rhp") ~ list("rhp"),
-                               str_detect(position, "lhp") ~ list("lhp"),
-                               .default = str_split(position, "-")))  |>
-  unnest(positions) |>
-  count(positions) |> 
-  arrange(-n)
+  ggplot(aes(x = service_time_yrs, y = salary_2022)) + 
+  geom_point(alpha = 0.5) 
 ```
 
+
+
+Position type 
+```{r}
+merged_batting |>
+  mutate(positions = str_split_i(position, "-",1))  |>
+  count(positions) |> 
+  arrange(-n) |>
+  knitr::kable()
+```
+
+Since we filtered on plate appearances, most players in the batting dataset are position players (i.e., not pitchers). If we use this in regression analysis, we may want to filter out pitchers entirely.
 
 
 Looking at some hitting statistics
 ```{r}
 merged_batting |> 
   ggplot(aes(x = hr)) + 
-  geom_histogram()
+  geom_histogram() +
+  labs(x = "Number of home runs (HRs)")
 
 merged_batting |> 
   ggplot(aes(x = rbi)) + 
-  geom_histogram()
+  geom_histogram() +
+  labs(x = "Runs batted in (RBI)")
+```
 
+These are also left skewed so will need to normalize for any linear model.
+
+OPS is an "all in one" statistic combining on-base percentage (OBP) and slugging (SLG).
+
+OBP is calculated as $\frac{Hits (H) + Walks (BB) + Hit by pitch (HBP)}{At \ bats (AB) + Walks (BB) + sacrifice \ flies (SF) + Hit by pitch (HBP)}$ 
+
+Slugging is calculated as $\frac{total \ bases (TB)}{At \ bats (AB)}$
+
+OPS is the sum of these two statistics.
+
+OPS+ (or adjusted OPS) is adjusted for the park and league averages.
+
+```{r}
 merged_batting |> 
   ggplot(aes(x = ops)) + 
-  geom_histogram()
+  geom_histogram() +
+  labs(x = "OPS")
 
 merged_batting |> 
   ggplot(aes(x = ops_2)) + 
-  geom_histogram()
+  geom_histogram() +
+  labs(x = "OPS+")
 ```
+
+One idea might be to compare OPS or OPS+ to more traditional statistics, like RBIs, HRs, or batting averages to OPS or OPS+ as single predictors of salary.
 
 Looking at some relationships to salary
 
 Position vs. salary
 ```{r}
 merged_batting |>
-  mutate(positions = case_when(str_detect(position, "rhp") ~ list("rhp"),
-                               str_detect(position, "lhp") ~ list("lhp"),
-                               .default = str_split(position, "-")))  |>
-  unnest(positions) |>
+  mutate(positions = str_split_i(position, "-",1))  |>
   ggplot(aes(x = positions,y= salary_2022)) +
   geom_boxplot()
 
 merged_batting |>
-  mutate(positions = case_when(str_detect(position, "rhp") ~ list("rhp"),
-                               str_detect(position, "lhp") ~ list("lhp"),
-                               .default = str_split(position, "-")))  |>
-  unnest(positions) |>
+  mutate(positions = str_split_i(position, "-",1))  |>
   group_by(positions) |>
   summarize(avg_salary = mean(salary_2022, na.rm = TRUE),
             median_salary = median(salary_2022, na.rm = TRUE))
@@ -210,6 +243,27 @@ merged_batting |>
   geom_point()
 ```
 
+RBI vs. salary
+```{r}
+merged_batting |>
+  ggplot(aes(x = rbi, y = salary_2022)) + 
+  geom_point()
+```
+
+BA vs. salary 
+```{r}
+merged_batting |>
+  ggplot(aes(x = ba, y = salary_2022)) + 
+  geom_point()
+```
+
+Plate appearances vs. salary
+```{r}
+merged_batting |>
+  ggplot(aes(x = pa, y = salary_2022)) + 
+  geom_point()
+```
+
 OPS+ vs salary
 ```{r}
 merged_batting |>
@@ -217,5 +271,13 @@ merged_batting |>
   geom_point()
 ```
 
+One other factor to consider is the correlation between some of these variables
+```{r}
+merged_batting |>
+  select(hr, rbi, pa, ba, ops) |>
+  GGally::ggpairs()
+```
+
+Some of these potential predictors are fairly strongly correlated (like RBI and HR, or BA and OPS), so it's important not to include to many collinear variables in a potential linear model.
 
 ## Pitching EDA
