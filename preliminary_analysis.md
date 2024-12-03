@@ -53,6 +53,8 @@ Descrition of data cleaning:
 - remove whitespace, from names and use stringi again to remove accents
   so that the formatting exactly matches the salaries tibble
 
+- Filter out those with fewer than 100 plate appearances
+
 ``` r
 batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
@@ -86,7 +88,8 @@ batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
 ``` r
-merged_batting <- inner_join(salaries, batting, by = "name")
+merged_batting <- inner_join(salaries, batting, by = "name") |>
+  filter(pa >= 100)
 
 salary_not_in_batting <- anti_join(salaries, batting, by = "name")
 batting_not_in_salary <- anti_join(batting, salaries, by = "name")
@@ -127,7 +130,13 @@ pitching = read_delim("data/2022 MLB Player Stats - Pitching.csv", delim = ";",
     ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 
 ``` r
-merged_pitching <- inner_join(salaries, pitching, by = "name")
+merged_pitching <- inner_join(salaries, pitching, by = "name") |>
+  filter(ip >= 10) |>
+  separate(ip, into = c("ip", "ip_dec"), remove = FALSE, convert = TRUE) |>
+  mutate(ip_dec_333 = ifelse(is.na(ip_dec), 0, ip_dec * 333)  ,
+         ip_total = paste(ip, ip_dec_333, sep = "."),
+         ip_total = as.numeric(ip_total)) |>
+  select(-ip, -ip_dec, -ip_dec_333)
 ```
 
     ## Warning in inner_join(salaries, pitching, by = "name"): Detected an unexpected many-to-many relationship between `x` and `y`.
@@ -135,6 +144,9 @@ merged_pitching <- inner_join(salaries, pitching, by = "name")
     ## ℹ Row 265 of `y` matches multiple rows in `x`.
     ## ℹ If a many-to-many relationship is expected, set `relationship =
     ##   "many-to-many"` to silence this warning.
+
+    ## Warning: Expected 2 pieces. Missing pieces filled with `NA` in 190 rows [5, 6, 10, 12,
+    ## 14, 22, 24, 27, 30, 32, 33, 34, 36, 37, 39, 41, 42, 43, 44, 46, ...].
 
 ``` r
 salary_not_in_pitching <- anti_join(salaries, pitching, by = "name")
@@ -150,98 +162,167 @@ analysis pipeline will still work from here.
 
 ## Batting EDA
 
+### Distributions of variables
+
 Start with some descriptive statistics/plots
+
+Service time (i.e. number of years of experience)
 
 ``` r
 merged_batting |>
   ggplot(aes(x = service_time_yrs)) + 
-  geom_density()
+  geom_density() +
+  labs(x = "Service time")
 ```
 
 <img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-4-1.png" width="90%" />
+This is left skewed, so may need to transform it if used in regression
+
+Salary
 
 ``` r
 merged_batting |>
   ggplot(aes(x = salary_2022)) + 
-  geom_density()
+  geom_density() + 
+  labs(x = "Salary")
 ```
 
-    ## Warning: Removed 109 rows containing non-finite outside the scale range
+    ## Warning: Removed 45 rows containing non-finite outside the scale range
     ## (`stat_density()`).
 
 <img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-5-1.png" width="90%" />
+This is also heavily left skewed, with many players having salary under
+\$1,000,000
 
-Position type (note that some players are categorized at multiple
-positions)
+Salary and service time are likely related, since rookies have contract
+minimums
 
 ``` r
 merged_batting |>
-  mutate(positions = case_when(str_detect(position, "rhp") ~ list("rhp"),
-                               str_detect(position, "lhp") ~ list("lhp"),
-                               .default = str_split(position, "-")))  |>
-  unnest(positions) |>
-  count(positions) |> 
-  arrange(-n)
+  ggplot(aes(x = service_time_yrs, y = salary_2022)) + 
+  geom_point(alpha = 0.5) 
 ```
 
-    ## # A tibble: 13 × 2
-    ##    positions     n
-    ##    <chr>     <int>
-    ##  1 c            87
-    ##  2 2b           80
-    ##  3 ss           78
-    ##  4 rhp          69
-    ##  5 3b           68
-    ##  6 of           67
-    ##  7 1b           51
-    ##  8 cf           43
-    ##  9 rf           40
-    ## 10 lf           29
-    ## 11 lhp          23
-    ## 12 dh           13
-    ## 13 inf           3
+    ## Warning: Removed 45 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-6-1.png" width="90%" />
+
+Position type
+
+``` r
+merged_batting |>
+  mutate(positions = str_split_i(position, "-",1))  |>
+  count(positions) |> 
+  arrange(-n) |>
+  knitr::kable()
+```
+
+| positions |   n |
+|:----------|----:|
+| 2b        |  64 |
+| c         |  59 |
+| ss        |  54 |
+| 3b        |  46 |
+| 1b        |  40 |
+| of        |  38 |
+| cf        |  33 |
+| rf        |  30 |
+| lf        |  25 |
+| dh        |   7 |
+| rhp       |   4 |
+| inf       |   2 |
+| lhp       |   2 |
+
+Since we filtered on plate appearances, most players in the batting
+dataset are position players (i.e., not pitchers). If we use this in
+regression analysis, we may want to filter out pitchers entirely.
 
 Looking at some hitting statistics
 
 ``` r
 merged_batting |> 
   ggplot(aes(x = hr)) + 
-  geom_histogram()
+  geom_histogram() +
+  labs(x = "Number of home runs (HRs)")
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-7-1.png" width="90%" />
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-8-1.png" width="90%" />
 
 ``` r
 merged_batting |> 
   ggplot(aes(x = rbi)) + 
-  geom_histogram()
+  geom_histogram() +
+  labs(x = "Runs batted in (RBI)")
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-7-2.png" width="90%" />
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-8-2.png" width="90%" />
+
+These are also left skewed so will need to normalize for any linear
+model.
+
+OPS is an “all in one” statistic combining on-base percentage (OBP) and
+slugging (SLG).
+
+OBP is calculated as
+$\frac{Hits (H) + Walks (BB) + Hit by pitch (HBP)}{At \ bats (AB) + Walks (BB) + sacrifice \ flies (SF) + Hit by pitch (HBP)}$
+
+Slugging is calculated as $\frac{total \ bases (TB)}{At \ bats (AB)}$
+
+OPS is the sum of these two statistics.
+
+OPS+ (or adjusted OPS) is adjusted for the park and league averages.
 
 ``` r
 merged_batting |> 
   ggplot(aes(x = ops)) + 
-  geom_histogram()
+  geom_histogram() +
+  labs(x = "OPS")
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-7-3.png" width="90%" />
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-9-1.png" width="90%" />
 
 ``` r
 merged_batting |> 
   ggplot(aes(x = ops_2)) + 
-  geom_histogram()
+  geom_histogram() +
+  labs(x = "OPS+")
 ```
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-7-4.png" width="90%" />
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-9-2.png" width="90%" />
+
+One idea might be to compare OPS or OPS+ to more traditional statistics,
+like RBIs, HRs, or batting averages to OPS or OPS+ as single predictors
+of salary.
+
+One other factor to consider is the correlation between some of these
+variables
+
+``` r
+merged_batting |>
+  select(hr, rbi, pa, ba, ops) |>
+  GGally::ggpairs()
+```
+
+    ## Registered S3 method overwritten by 'GGally':
+    ##   method from   
+    ##   +.gg   ggplot2
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-10-1.png" width="90%" />
+
+Some of these potential predictors are fairly strongly correlated (like
+RBI and HR, or BA and OPS), so it’s important not to include to many
+collinear variables in a potential linear model.
+
+### Relationship to salary
 
 Looking at some relationships to salary
 
@@ -249,25 +330,19 @@ Position vs. salary
 
 ``` r
 merged_batting |>
-  mutate(positions = case_when(str_detect(position, "rhp") ~ list("rhp"),
-                               str_detect(position, "lhp") ~ list("lhp"),
-                               .default = str_split(position, "-")))  |>
-  unnest(positions) |>
+  mutate(positions = str_split_i(position, "-",1))  |>
   ggplot(aes(x = positions,y= salary_2022)) +
   geom_boxplot()
 ```
 
-    ## Warning: Removed 115 rows containing non-finite outside the scale range
+    ## Warning: Removed 45 rows containing non-finite outside the scale range
     ## (`stat_boxplot()`).
 
-<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-8-1.png" width="90%" />
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-11-1.png" width="90%" />
 
 ``` r
 merged_batting |>
-  mutate(positions = case_when(str_detect(position, "rhp") ~ list("rhp"),
-                               str_detect(position, "lhp") ~ list("lhp"),
-                               .default = str_split(position, "-")))  |>
-  unnest(positions) |>
+  mutate(positions = str_split_i(position, "-",1))  |>
   group_by(positions) |>
   summarize(avg_salary = mean(salary_2022, na.rm = TRUE),
             median_salary = median(salary_2022, na.rm = TRUE))
@@ -276,19 +351,19 @@ merged_batting |>
     ## # A tibble: 13 × 3
     ##    positions avg_salary median_salary
     ##    <chr>          <dbl>         <dbl>
-    ##  1 1b          7602152.       3475000
-    ##  2 2b          4682245.       2530000
-    ##  3 3b          7091750.       2800000
-    ##  4 c           3223272.       1062500
-    ##  5 cf          7341665.       3273077
-    ##  6 dh         12252795.      12000000
+    ##  1 1b          8845755.       6225000
+    ##  2 2b          5010094.       2550000
+    ##  3 3b          8302384.       3375000
+    ##  4 c           3669983.       1750000
+    ##  5 cf          8145270.       5500000
+    ##  6 dh         11857143.      12000000
     ##  7 inf         1312500        1312500
-    ##  8 lf          7136788.       6125000
-    ##  9 lhp         4051080        1400000
-    ## 10 of          2545303.        800000
-    ## 11 rf          8815324.       6875000
-    ## 12 rhp         2629638.       1251500
-    ## 13 ss          6339882.       2325000
+    ##  8 lf          6971404.       6125000
+    ##  9 lhp        13000000       13000000
+    ## 10 of          2211196.        746100
+    ## 11 rf          7833411.       4875000
+    ## 12 rhp         2679125        2250750
+    ## 13 ss          7266837        4000000
 
 HR vs. salary
 
@@ -298,10 +373,49 @@ merged_batting |>
   geom_point()
 ```
 
-    ## Warning: Removed 109 rows containing missing values or values outside the scale range
+    ## Warning: Removed 45 rows containing missing values or values outside the scale range
     ## (`geom_point()`).
 
-<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-9-1.png" width="90%" />
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-12-1.png" width="90%" />
+
+RBI vs. salary
+
+``` r
+merged_batting |>
+  ggplot(aes(x = rbi, y = salary_2022)) + 
+  geom_point()
+```
+
+    ## Warning: Removed 45 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-13-1.png" width="90%" />
+
+BA vs. salary
+
+``` r
+merged_batting |>
+  ggplot(aes(x = ba, y = salary_2022)) + 
+  geom_point()
+```
+
+    ## Warning: Removed 45 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-14-1.png" width="90%" />
+
+Plate appearances vs. salary
+
+``` r
+merged_batting |>
+  ggplot(aes(x = pa, y = salary_2022)) + 
+  geom_point()
+```
+
+    ## Warning: Removed 45 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-15-1.png" width="90%" />
 
 OPS+ vs salary
 
@@ -311,9 +425,239 @@ merged_batting |>
   geom_point()
 ```
 
-    ## Warning: Removed 109 rows containing missing values or values outside the scale range
+    ## Warning: Removed 45 rows containing missing values or values outside the scale range
     ## (`geom_point()`).
 
-<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-10-1.png" width="90%" />
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-16-1.png" width="90%" />
+
+### Regression models
 
 ## Pitching EDA
+
+In order to eliminate pitchers with very few appearances or position
+players (catchers, first basemen, etc.) who came in to pitch in
+blowouts, I filtered only for pitchers with at least 10 innings pitches.
+
+### Distribution of Innings Pitched
+
+``` r
+merged_pitching |> 
+  ggplot(aes(x = ip_total)) + 
+  geom_histogram(binwidth = 2, fill = "lightblue", col = "black")
+```
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-17-1.png" width="90%" />
+
+### Distribution of ERA+
+
+``` r
+merged_pitching |>
+  ggplot(aes(x = era_2)) + 
+  geom_histogram(fill = "lightblue", col = "black")
+```
+
+    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-18-1.png" width="90%" />
+
+### IP vs. Salary Plot
+
+``` r
+merged_pitching |> 
+  ggplot(aes(x = ip_total, y = salary_2022)) + 
+  geom_point() + 
+  scale_x_continuous(lim = c(0, 400))
+```
+
+    ## Warning: Removed 82 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-19-1.png" width="90%" />
+
+### ERA+ vs. Salary Plot
+
+``` r
+merged_pitching |> 
+  ggplot(aes(x = era_2, y = salary_2022)) + 
+  geom_point() +
+  scale_x_continuous(lim = c(0, 400))
+```
+
+    ## Warning: Removed 83 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-20-1.png" width="90%" />
+
+### IP vs. Log Salary Plot
+
+``` r
+merged_pitching |> 
+  ggplot(aes(x = ip_total, y = log(salary_2022))) + 
+  geom_point() + 
+  scale_x_continuous(lim = c(0, 400))
+```
+
+    ## Warning: Removed 82 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-21-1.png" width="90%" />
+
+### ERA+ vs. Log Salary Plot
+
+``` r
+merged_pitching |> 
+  ggplot(aes(x = era_2, y = log(salary_2022))) + 
+  geom_point() + 
+  scale_x_continuous(lim = c(0, 400))
+```
+
+    ## Warning: Removed 83 rows containing missing values or values outside the scale range
+    ## (`geom_point()`).
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-22-1.png" width="90%" />
+
+### LMs
+
+``` r
+lm_ip = lm(salary_2022 ~ ip_total, data = merged_pitching)
+summary(lm_ip)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = salary_2022 ~ ip_total, data = merged_pitching)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -7812921 -2275356 -1243946   468480 36893416 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)   553313     445037   1.243    0.214    
+    ## ip_total       40504       4819   8.405 5.69e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 5226000 on 450 degrees of freedom
+    ##   (82 observations deleted due to missingness)
+    ## Multiple R-squared:  0.1357, Adjusted R-squared:  0.1338 
+    ## F-statistic: 70.64 on 1 and 450 DF,  p-value: 5.692e-16
+
+``` r
+lm_ip_data = tibble(fitted.values(lm_ip), residuals(lm_ip))
+
+names(lm_ip_data) = c("fitted", "resid")
+
+lm_ip_data |>
+  ggplot(aes(x = fitted, y = resid)) +
+  geom_point()
+```
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-23-1.png" width="90%" />
+
+``` r
+view(lm_ip_data)
+```
+
+``` r
+lm_era_2 = lm(salary_2022 ~ era_2, data = merged_pitching)
+summary(lm_era_2)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = salary_2022 ~ era_2, data = merged_pitching)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -4479909 -2909137 -2622729   250452 39463896 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)  3263308     630867   5.173 3.48e-07 ***
+    ## era_2           3587       5034   0.712    0.477    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 5618000 on 450 degrees of freedom
+    ##   (82 observations deleted due to missingness)
+    ## Multiple R-squared:  0.001127,   Adjusted R-squared:  -0.001093 
+    ## F-statistic: 0.5076 on 1 and 450 DF,  p-value: 0.4765
+
+``` r
+lm_era_2_data = tibble(fitted.values(lm_era_2), residuals(lm_era_2))
+
+names(lm_era_2_data) = c("fitted", "resid")
+
+lm_era_2_data |>
+  ggplot(aes(x = fitted, y = resid)) +
+  geom_point()
+```
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-24-1.png" width="90%" />
+
+``` r
+view(lm_era_2_data)
+```
+
+### Log-Transformed LMs
+
+``` r
+lm_ip_log = lm(log(salary_2022) ~ ip_total, data = merged_pitching)
+```
+
+## Salaries EDA
+
+Some Basic EDA for salaries on their own
+
+``` r
+salaries_position_split = salaries %>%
+  mutate(simple_position = str_split_i(position, "-", 1))
+
+# Salaries by Position Boxplots
+
+salaries_position_split %>% 
+  ggplot(aes(x=simple_position,y=salary_2022)) +
+  geom_boxplot()
+```
+
+    ## Warning: Removed 295 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-26-1.png" width="90%" />
+
+``` r
+# Salaries by Experience 
+
+salaries_position_split %>%
+  ggplot(aes(x=floor(service_time_yrs),y=salary_2022)) +
+  geom_col() 
+```
+
+    ## Warning: Removed 295 rows containing missing values or values outside the scale range
+    ## (`geom_col()`).
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-26-2.png" width="90%" />
+
+``` r
+# Positions by Experience
+
+salaries_position_split %>%
+  ggplot(aes(x=floor(service_time_yrs),fill = simple_position)) +
+  geom_bar(position = "fill") 
+```
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-26-3.png" width="90%" />
+
+``` r
+# Salary Distribution by Experience
+
+salaries_position_split %>%
+  ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
+  geom_boxplot()
+```
+
+    ## Warning: Removed 295 rows containing non-finite outside the scale range
+    ## (`stat_boxplot()`).
+
+<img src="preliminary_analysis_files/figure-gfm/unnamed-chunk-26-4.png" width="90%" />
