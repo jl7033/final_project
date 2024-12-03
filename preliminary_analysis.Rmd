@@ -405,6 +405,32 @@ view(lm_era_2_data)
 ```{r}
 
 lm_ip_log = lm(log(salary_2022) ~ ip_total, data = merged_pitching)
+summary(lm_ip_log)
+
+lm_ip_log_data = tibble(fitted.values(lm_ip_log), residuals(lm_ip_log))
+
+names(lm_ip_log_data) = c("fitted", "resid")
+
+lm_ip_log_data |>
+  ggplot(aes(x = fitted, y = resid)) +
+  geom_point()
+
+view(lm_ip_log_data)
+
+```
+
+```{r}
+
+lm_era_2_log = lm(log(salary_2022) ~ era_2, data = merged_pitching)
+summary(lm_era_2_log)
+
+lm_era_2_data_log = tibble(fitted.values(lm_era_2_log), residuals(lm_era_2_log))
+
+names(lm_era_2_data_log) = c("fitted", "resid")
+
+lm_era_2_data_log |>
+  ggplot(aes(x = fitted, y = resid)) +
+  geom_point()
 
 ```
 
