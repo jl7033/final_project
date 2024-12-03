@@ -281,3 +281,37 @@ merged_batting |>
 Some of these potential predictors are fairly strongly correlated (like RBI and HR, or BA and OPS), so it's important not to include to many collinear variables in a potential linear model.
 
 ## Pitching EDA
+## Salaries EDA
+
+Some Basic EDA for salaries on their own
+```{r}
+
+salaries_position_split = salaries %>%
+  mutate(simple_position = str_split_i(position, "-", 1))
+
+# Salaries by Position Boxplots
+
+salaries_position_split %>% 
+  ggplot(aes(x=simple_position,y=salary_2022)) +
+  geom_boxplot()
+
+# Salaries by Experience 
+
+salaries_position_split %>%
+  ggplot(aes(x=floor(service_time_yrs),y=salary_2022)) +
+  geom_col() 
+
+# Positions by Experience
+
+salaries_position_split %>%
+  ggplot(aes(x=floor(service_time_yrs),fill = simple_position)) +
+  geom_bar(position = "fill") 
+
+# Salary Distribution by Experience
+
+salaries_position_split %>%
+  ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
+  geom_boxplot()
+
+```
+
