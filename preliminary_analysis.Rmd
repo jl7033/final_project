@@ -101,7 +101,10 @@ batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
          name = str_replace_all(name, "[*#\\.]", ""),
          name = stringi::stri_trans_general(name,id = "Latin-ASCII"))
 
-merged_batting <- inner_join(salaries, batting, by = "name") |>
+merged_batting <- salaries |>
+  mutate(simple_position = str_split_i(position, "-", 1)) |>
+  filter(!simple_position %in% c("rhp","lhp")) |>
+  inner_join(batting, by = "name") |>
   filter(pa >= 100)
 
 salary_not_in_batting <- anti_join(salaries, batting, by = "name")
