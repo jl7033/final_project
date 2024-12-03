@@ -164,19 +164,70 @@ Note that there are a number of names in `salaries` not found in `batting` or `p
 
 Some Basic EDA for salaries on their own
 
+Service time (i.e. number of years of experience)
+```{r}
+salaries |>
+  count(service_time_floor) |>
+  ggplot(aes(x = service_time_floor, y = n)) + 
+  geom_col() + 
+  labs(x = "Service time")
+```
+This is right skewed, so may need to transform it if used in regression
+
+Salary
+```{r}
+salaries |>
+  ggplot(aes(x = salary_2022)) + 
+  geom_density() + 
+  labs(x = "Salary")
+```
+This is also heavily right skewed, with many players having salary under $1,000,000
+
+Position type table
+```{r}
+merged_batting |>
+  count(simple_position) |> 
+  mutate(simple_position = fct_infreq(simple_position,w = n)) |>
+  ggplot(aes(x = simple_position, y = n)) +
+  geom_col()
+```
+
 ### Salaries by Position Boxplots
 
 ```{r}
-salaries %>% 
-  ggplot(aes(x=simple_position,y=salary_2022)) +
+salaries %>%
+  ggplot(aes(x = simple_position, y = salary_2022)) +
   geom_boxplot()
 ```
+
+Infielders vs. outfielders vs. pitchers?
+```{r}
+salaries |>
+  mutate(position_group = case_match(simple_position,
+                                     c("rhp","lhp") ~ "pitcher",
+                                     c("cf","lf","rf","of") ~ "outfield",
+                                     "dh" ~ "dh",
+                                     .default = "infield")) |>
+  ggplot(aes(x = position_group, y = salary_2022)) +
+  geom_boxplot()
+```
+
 
 ### Salaries by Experience
 ```{r}
 salaries %>%
-  ggplot(aes(x=floor(service_time_yrs),y=salary_2022)) +
+  ggplot(aes(x = factor(service_time_floor), y = salary_2022)) +
+  geom_boxplot() 
+
+salaries %>%
+  group_by(service_time_floor) %>%
+  summarize(avg_salary = mean(salary_2022, na.rm = TRUE)) %>%
+  ggplot(aes(x = service_time_floor, y = avg_salary)) +
   geom_col() 
+
+salaries |>
+  ggplot(aes(x = service_time_floor, y = salary_2022)) + 
+  geom_point(alpha = 0.5) 
 ```
 
 ### Positions by Experience
@@ -185,6 +236,12 @@ salaries %>%
 salaries %>%
   ggplot(aes(x=floor(service_time_yrs),fill = simple_position)) +
   geom_bar(position = "fill") 
+
+salaries |>
+  ggplot(aes(x = service_time_floor, 
+             y = simple_position, 
+             fill = simple_position)) + 
+  ggridges::geom_density_ridges(alpha = 0.5) 
 ```
 
 ### Salary Distribution by Experience
@@ -198,46 +255,6 @@ salaries %>%
 ## Batting EDA
 
 ### Distributions of variables
-
-Start with some descriptive statistics/plots
-
-Service time (i.e. number of years of experience)
-```{r}
-merged_batting |>
-  ggplot(aes(x = service_time_yrs)) + 
-  geom_density() +
-  labs(x = "Service time")
-```
-This is left skewed, so may need to transform it if used in regression
-
-Salary
-```{r}
-merged_batting |>
-  ggplot(aes(x = salary_2022)) + 
-  geom_density() + 
-  labs(x = "Salary")
-```
-This is also heavily left skewed, with many players having salary under $1,000,000
-
-
-Salary and service time are likely related, since rookies have contract minimums
-```{r}
-merged_batting |>
-  ggplot(aes(x = service_time_yrs, y = salary_2022)) + 
-  geom_point(alpha = 0.5) 
-```
-
-Position type 
-```{r}
-merged_batting |>
-  mutate(positions = str_split_i(position, "-",1))  |>
-  count(positions) |> 
-  arrange(-n) |>
-  knitr::kable()
-```
-
-Since we filtered on plate appearances, most players in the batting dataset are position players (i.e., not pitchers). If we use this in regression analysis, we may want to filter out pitchers entirely.
-
 
 Looking at some hitting statistics
 ```{r}
