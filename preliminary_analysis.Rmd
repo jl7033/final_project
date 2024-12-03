@@ -65,6 +65,14 @@ salaries = read_excel(
          name = if_else(junior == TRUE, str_c(name, " Jr"), name),
          name = stringi::stri_trans_general(name,id = "Latin-ASCII")) |>
   select(-junior)
+
+salaries_position_split = salaries %>%
+  mutate(simple_position = str_split_i(position, "-", 1)) %>%
+  mutate(simple_position = as.factor(simple_position)) %>%
+  mutate(simple_position = fct_relevel(simple_position,
+                                       c("c", "1b", "2b", "3b", "ss",
+                                         "lf", "cf", "rf", "inf", "of",
+                                         "dh", "rhp", "lhp")))
 ```
 
 #### Batting and Pitching Datasets
@@ -440,7 +448,12 @@ Some Basic EDA for salaries on their own
 ```{r}
 
 salaries_position_split = salaries %>%
-  mutate(simple_position = str_split_i(position, "-", 1))
+  mutate(simple_position = str_split_i(position, "-", 1)) %>%
+  mutate(simple_position = as.factor(simple_position)) %>%
+  mutate(simple_position = fct_relevel(simple_position,
+                                       c("c", "1b", "2b", "3b", "ss",
+                                         "lf", "cf", "rf", "inf", "of",
+                                         "dh", "rhp", "lhp")))
 
 # Salaries by Position Boxplots
 
