@@ -281,6 +281,119 @@ merged_batting |>
 Some of these potential predictors are fairly strongly correlated (like RBI and HR, or BA and OPS), so it's important not to include to many collinear variables in a potential linear model.
 
 ## Pitching EDA
+
+## Pitching EDA
+
+In order to eliminate pitchers with very few appearances or position players (catchers, first basemen, etc.) who came in to pitch in blowouts, I filtered only for pitchers with at least 10 innings pitches.
+
+### Distribution of Innings Pitched
+
+```{r}
+
+merged_pitching |> 
+  ggplot(aes(x = ip_total)) + 
+  geom_histogram(binwidth = 2, fill = "lightblue", col = "black")
+
+```
+
+### Distribution of ERA+
+
+```{r}
+
+merged_pitching |>
+  ggplot(aes(x = era_2)) + 
+  geom_histogram(fill = "lightblue", col = "black")
+
+```
+
+### IP vs. Salary Plot
+
+```{r}
+
+merged_pitching |> 
+  ggplot(aes(x = ip_total, y = salary_2022)) + 
+  geom_point() + 
+  scale_x_continuous(lim = c(0, 400))
+
+```
+
+### ERA+ vs. Salary Plot
+
+```{r}
+
+merged_pitching |> 
+  ggplot(aes(x = era_2, y = salary_2022)) + 
+  geom_point() +
+  scale_x_continuous(lim = c(0, 400))
+
+```
+
+### IP vs. Log Salary Plot
+
+```{r}
+
+merged_pitching |> 
+  ggplot(aes(x = ip_total, y = log(salary_2022))) + 
+  geom_point() + 
+  scale_x_continuous(lim = c(0, 400))
+
+```
+
+### ERA+ vs. Log Salary Plot
+
+```{r}
+
+merged_pitching |> 
+  ggplot(aes(x = era_2, y = log(salary_2022))) + 
+  geom_point() + 
+  scale_x_continuous(lim = c(0, 400))
+
+```
+
+### LMs
+
+```{r}
+
+lm_ip = lm(salary_2022 ~ ip_total, data = merged_pitching)
+summary(lm_ip)
+
+lm_ip_data = tibble(fitted.values(lm_ip), residuals(lm_ip))
+
+names(lm_ip_data) = c("fitted", "resid")
+
+lm_ip_data |>
+  ggplot(aes(x = fitted, y = resid)) +
+  geom_point()
+
+view(lm_ip_data)
+
+```
+
+```{r}
+
+lm_era_2 = lm(salary_2022 ~ era_2, data = merged_pitching)
+summary(lm_era_2)
+
+lm_era_2_data = tibble(fitted.values(lm_era_2), residuals(lm_era_2))
+
+names(lm_era_2_data) = c("fitted", "resid")
+
+lm_era_2_data |>
+  ggplot(aes(x = fitted, y = resid)) +
+  geom_point()
+
+view(lm_era_2_data)
+
+```
+
+### Log-Transformed LMs
+
+```{r}
+
+lm_ip_log = lm(log(salary_2022) ~ ip_total, data = merged_pitching)
+
+```
+
 ## Salaries EDA
 
 Some Basic EDA for salaries on their own
