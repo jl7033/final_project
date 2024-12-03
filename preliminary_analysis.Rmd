@@ -65,6 +65,14 @@ salaries = read_excel(
          name = if_else(junior == TRUE, str_c(name, " Jr"), name),
          name = stringi::stri_trans_general(name,id = "Latin-ASCII")) |>
   select(-junior)
+
+salaries_position_split = salaries %>%
+  mutate(simple_position = str_split_i(position, "-", 1)) %>%
+  mutate(simple_position = as.factor(simple_position)) %>%
+  mutate(simple_position = fct_relevel(simple_position,
+                                       c("c", "1b", "2b", "3b", "ss",
+                                         "lf", "cf", "rf", "inf", "of",
+                                         "dh", "rhp", "lhp")))
 ```
 
 #### Batting and Pitching Datasets
@@ -135,19 +143,21 @@ pitching = read_delim("data/2022 MLB Player Stats - Pitching.csv", delim = ";",
          name = stringi::stri_trans_general(name,id = "Latin-ASCII"))
 
 merged_pitching <- inner_join(salaries, pitching, by = "name") |>
-  filter(ip >= 10) |>
+  filter(ip >= 20) |>
   separate(ip, into = c("ip", "ip_dec"), remove = FALSE, convert = TRUE) |>
   mutate(ip_dec_333 = ifelse(is.na(ip_dec), 0, ip_dec * 333)  ,
          ip_total = paste(ip, ip_dec_333, sep = "."),
          ip_total = as.numeric(ip_total)) |>
-  select(-ip, -ip_dec, -ip_dec_333)
+  select(-ip, -ip_dec, -ip_dec_333) |>
+  separate(position, into = c("hand", "pitcher_type")) |>
+  mutate(pitcher_type = ifelse(is.na(pitcher_type), "r", pitcher_type)) |>
+  filter(hand == "lhp" | hand == "rhp")
 
 salary_not_in_pitching <- anti_join(salaries, pitching, by = "name")
 pitching_not_in_salary <- anti_join(pitching, salaries, by = "name")
 ```
 
 Note that there are a number of names in `salaries` not found in `batting` or `pitching`, and vice versa. Some of this may be genuine missingness (e.g. salaries has fewer rows than pitching and batting combined), but some is also due to alternative spellings of names in the datasets. Possibly could be fixed using other matching methods, but the analysis pipeline will still work from here.
-
 
 ## Batting EDA
 
@@ -180,8 +190,6 @@ merged_batting |>
   ggplot(aes(x = service_time_yrs, y = salary_2022)) + 
   geom_point(alpha = 0.5) 
 ```
-
-
 
 Position type 
 ```{r}
@@ -437,13 +445,30 @@ lm_era_2_data_log |>
 
 ```
 
+### Final Pitching LM
+
+```{r}
+
+lm_pitching = lm(salary_2022 ~ hand + pitcher_type + ip_total + era_2,
+                 data = merged_pitching)
+
+summary(lm_pitching)
+
+```
+
+
 ## Salaries EDA
 
 Some Basic EDA for salaries on their own
 ```{r}
 
 salaries_position_split = salaries %>%
-  mutate(simple_position = str_split_i(position, "-", 1))
+  mutate(simple_position = str_split_i(position, "-", 1)) %>%
+  mutate(simple_position = as.factor(simple_position)) %>%
+  mutate(simple_position = fct_relevel(simple_position,
+                                       c("c", "1b", "2b", "3b", "ss",
+                                         "lf", "cf", "rf", "inf", "of",
+                                         "dh", "rhp", "lhp")))
 
 # Salaries by Position Boxplots
 
