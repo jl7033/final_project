@@ -125,21 +125,13 @@ pitching = read_delim("data/2022 MLB Player Stats - Pitching.csv", delim = ";",
          name = str_replace_all(name, "[*#\\.]", ""),
          name = stringi::stri_trans_general(name,id = "Latin-ASCII"))
 
-merged_pitching <- inner_join(salaries, pitching, by = "name") |>
-  filter(ip >= 10) |>
-  separate(ip, into = c("ip", "ip_dec"), remove = FALSE, convert = TRUE) |>
-  mutate(ip_dec_333 = ifelse(is.na(ip_dec), 0, ip_dec * 333)  ,
-         ip_total = paste(ip, ip_dec_333, sep = "."),
-         ip_total = as.numeric(ip_total)) |>
-  select(-ip, -ip_dec, -ip_dec_333)
-  
+merged_pitching <- inner_join(salaries, pitching, by = "name")
+
 salary_not_in_pitching <- anti_join(salaries, pitching, by = "name")
 pitching_not_in_salary <- anti_join(pitching, salaries, by = "name")
 ```
 
 Note that there are a number of names in `salaries` not found in `batting` or `pitching`, and vice versa. Some of this may be genuine missingness (e.g. salaries has fewer rows than pitching and batting combined), but some is also due to alternative spellings of names in the datasets. Possibly could be fixed using other matching methods, but the analysis pipeline will still work from here.
-
-In MLB, the decimal after innings pitched represents the number of thirds of an inning pitched rather than the proportion of innings pitched. For instance, a pitcher with 138.2 innings pitched has actually thrown 138 and 2/3 innings. We corrected for that in the code above.
 
 
 ## Batting EDA
@@ -225,115 +217,39 @@ merged_batting |>
   geom_point()
 ```
 
+
 ## Pitching EDA
+## Salaries EDA
 
-In order to eliminate pitchers with very few appearances or position players (catchers, first basemen, etc.) who came in to pitch in blowouts, I filtered only for pitchers with at least 10 innings pitches.
-
-### Distribution of Innings Pitched
-
+Some Basic EDA for salaries on their own
 ```{r}
 
-merged_pitching |> 
-  ggplot(aes(x = ip_total)) + 
-  geom_histogram(binwidth = 2, fill = "lightblue", col = "black")
+salaries_position_split = salaries %>%
+  mutate(simple_position = str_split_i(position, "-", 1))
 
-```
+# Salaries by Position Boxplots
 
-### Distribution of ERA+
+salaries_position_split %>% 
+  ggplot(aes(x=simple_position,y=salary_2022)) +
+  geom_boxplot()
 
-```{r}
+# Salaries by Experience 
 
-merged_pitching |>
-  ggplot(aes(x = era_2)) + 
-  geom_histogram(fill = "lightblue", col = "black")
+salaries_position_split %>%
+  ggplot(aes(x=floor(service_time_yrs),y=salary_2022)) +
+  geom_col() 
 
-```
+# Positions by Experience
 
-### IP vs. Salary Plot
+salaries_position_split %>%
+  ggplot(aes(x=floor(service_time_yrs),fill = simple_position)) +
+  geom_bar(position = "fill") 
 
-```{r}
+# Salary Distribution by Experience
 
-merged_pitching |> 
-  ggplot(aes(x = ip_total, y = salary_2022)) + 
-  geom_point() + 
-  scale_x_continuous(lim = c(0, 400))
-
-```
-
-### ERA+ vs. Salary Plot
-
-```{r}
-
-merged_pitching |> 
-  ggplot(aes(x = era_2, y = salary_2022)) + 
-  geom_point() +
-  scale_x_continuous(lim = c(0, 400))
-
-```
-
-### IP vs. Log Salary Plot
-
-```{r}
-
-merged_pitching |> 
-  ggplot(aes(x = ip_total, y = log(salary_2022))) + 
-  geom_point() + 
-  scale_x_continuous(lim = c(0, 400))
-
-```
-
-### ERA+ vs. Log Salary Plot
-
-```{r}
-
-merged_pitching |> 
-  ggplot(aes(x = era_2, y = log(salary_2022))) + 
-  geom_point() + 
-  scale_x_continuous(lim = c(0, 400))
-
-```
-
-### LMs
-
-```{r}
-
-lm_ip = lm(salary_2022 ~ ip_total, data = merged_pitching)
-summary(lm_ip)
-
-lm_ip_data = tibble(fitted.values(lm_ip), residuals(lm_ip))
-
-names(lm_ip_data) = c("fitted", "resid")
-
-lm_ip_data |>
-  ggplot(aes(x = fitted, y = resid)) +
-  geom_point()
-
-view(lm_ip_data)
-
-```
-
-```{r}
-
-lm_era_2 = lm(salary_2022 ~ era_2, data = merged_pitching)
-summary(lm_era_2)
-
-lm_era_2_data = tibble(fitted.values(lm_era_2), residuals(lm_era_2))
-
-names(lm_era_2_data) = c("fitted", "resid")
-
-lm_era_2_data |>
-  ggplot(aes(x = fitted, y = resid)) +
-  geom_point()
-
-view(lm_era_2_data)
-
-```
-
-### Log-Transformed LMs
-
-```{r}
-
-lm_ip_log = lm(log(salary_2022) ~ ip_total, data = merged_pitching)
+salaries_position_split %>%
+  ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
+  geom_boxplot()
 
 ```
 
