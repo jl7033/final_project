@@ -139,6 +139,8 @@ Note that there are a number of names in `salaries` not found in `batting` or `p
 
 ## Batting EDA
 
+### Distributions of variables
+
 Start with some descriptive statistics/plots
 
 Service time (i.e. number of years of experience)
@@ -220,6 +222,18 @@ merged_batting |>
 
 One idea might be to compare OPS or OPS+ to more traditional statistics, like RBIs, HRs, or batting averages to OPS or OPS+ as single predictors of salary.
 
+One other factor to consider is the correlation between some of these variables
+```{r}
+merged_batting |>
+  select(hr, rbi, pa, ba, ops) |>
+  GGally::ggpairs()
+```
+
+Some of these potential predictors are fairly strongly correlated (like RBI and HR, or BA and OPS), so it's important not to include to many collinear variables in a potential linear model.
+
+
+### Relationship to salary
+
 Looking at some relationships to salary
 
 Position vs. salary
@@ -271,16 +285,7 @@ merged_batting |>
   geom_point()
 ```
 
-One other factor to consider is the correlation between some of these variables
-```{r}
-merged_batting |>
-  select(hr, rbi, pa, ba, ops) |>
-  GGally::ggpairs()
-```
-
-Some of these potential predictors are fairly strongly correlated (like RBI and HR, or BA and OPS), so it's important not to include to many collinear variables in a potential linear model.
-
-## Pitching EDA
+### Regression models
 
 ## Pitching EDA
 
