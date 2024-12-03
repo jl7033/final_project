@@ -128,7 +128,13 @@ pitching = read_delim("data/2022 MLB Player Stats - Pitching.csv", delim = ";",
          name = str_replace_all(name, "[*#\\.]", ""),
          name = stringi::stri_trans_general(name,id = "Latin-ASCII"))
 
-merged_pitching <- inner_join(salaries, pitching, by = "name")
+merged_pitching <- inner_join(salaries, pitching, by = "name") |>
+  filter(ip >= 10) |>
+  separate(ip, into = c("ip", "ip_dec"), remove = FALSE, convert = TRUE) |>
+  mutate(ip_dec_333 = ifelse(is.na(ip_dec), 0, ip_dec * 333)  ,
+         ip_total = paste(ip, ip_dec_333, sep = "."),
+         ip_total = as.numeric(ip_total)) |>
+  select(-ip, -ip_dec, -ip_dec_333)
 
 salary_not_in_pitching <- anti_join(salaries, pitching, by = "name")
 pitching_not_in_salary <- anti_join(pitching, salaries, by = "name")
