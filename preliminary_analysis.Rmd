@@ -225,8 +225,7 @@ merged_batting |>
   geom_col() +
   labs(title = "Players per Position",
        x = "",
-       y = "Number of Players"
-  ) +
+       y = "Number of Players") +
   scale_x_discrete(guide = guide_axis(angle = 75), 
                   labels = c("1b" = "1st Base",
                     "2b" = "2nd Base",
@@ -371,12 +370,25 @@ Looking at some hitting statistics
 merged_batting |> 
   ggplot(aes(x = hr)) + 
   geom_histogram() +
-  labs(x = "Number of home runs (HRs)")
+  labs(title = "Distribution of Home Runs",
+    x = "Home Run Total",
+    y = "Players")
 
 merged_batting |> 
   ggplot(aes(x = rbi)) + 
   geom_histogram() +
   labs(x = "Runs batted in (RBI)")
+
+merged_batting %>%
+  ggplot(aes(x = ab,y= hr)) +
+  geom_point(aes(color = ops)) +
+  geom_smooth(method = lm, se = FALSE, color = "firebrick") +
+  labs(title = "Who is the most 'effective' at the plate?",
+       x = "Chances at Bat",
+       y = "Number of Home Runs") +
+  scale_color_continuous("OPS") +
+  theme_bw()
+  
 ```
 
 These are also left skewed so will need to normalize for any linear model.
@@ -412,7 +424,7 @@ merged_batting |>
   GGally::ggpairs()
 ```
 
-Some of these potential predictors are fairly strongly correlated (like RBI and HR, or BA and OPS), so it's important not to include to many collinear variables in a potential linear model.
+Some of these potential predictors are fairly strongly correlated (like RBI and HR, or BA and OPS), so it's important not to include too many collinear variables in a potential linear model.
 
 
 ### Relationship to salary
@@ -466,6 +478,19 @@ OPS+ vs salary
 merged_batting |>
   ggplot(aes(x = ops_2, y = salary_2022)) + 
   geom_point()
+```
+
+Some further ideas
+```{r}
+merged_batting %>%
+  ggplot(aes(x = salary_2022, y = hr)) +
+  geom_point(data=transform(merged_batting, simple_position=NULL),
+             color = "lightgrey") +
+  geom_point(color = "firebrick") +
+  facet_wrap(vars(simple_position)) +
+  theme_bw()
+
+
 ```
 
 Since salary (and other variables) are very skewed, we may want to transform these data using a log transformation.
