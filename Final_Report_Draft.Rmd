@@ -34,3 +34,5 @@ If you undertake formal statistical analyses, describe these in detail
 # Discussion
 
 What were your findings? Are they what you expect? What insights into the data can you make?
+
+Checking to see if committing works.
