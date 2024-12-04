@@ -485,11 +485,12 @@ Some further ideas
 merged_batting %>%
   ggplot(aes(x = salary_2022, y = hr)) +
   geom_point(data=transform(merged_batting, simple_position=NULL),
-             color = "lightgrey") +
+             color = "grey", alpha = .5) +
   geom_point(color = "firebrick") +
   facet_wrap(vars(simple_position)) +
   theme_bw()
 
+# could be interesting, not sure if worth pursuing
 
 ```
 
@@ -562,7 +563,11 @@ In order to eliminate pitchers with very few appearances or position players (ca
 
 merged_pitching |> 
   ggplot(aes(x = ip_total)) + 
-  geom_histogram(binwidth = 2, fill = "lightblue", col = "black")
+  geom_histogram(binwidth = 2, fill = "lightblue", col = "black") +
+  labs(title = "Pitching Distribution",
+       x = "Innings Pitched",
+       y = "Pitcher Count") +
+  theme_bw()
 
 ```
 
@@ -572,7 +577,11 @@ merged_pitching |>
 
 merged_pitching |>
   ggplot(aes(x = era_2)) + 
-  geom_histogram(fill = "lightblue", col = "black")
+  geom_histogram(fill = "lightblue", col = "black") +
+    labs(title = "ERA Distribution",
+       x = "ERA",
+       y = "") +
+  theme_bw()
 
 ```
 
@@ -583,7 +592,12 @@ merged_pitching |>
 merged_pitching |> 
   ggplot(aes(x = ip_total, y = salary_2022)) + 
   geom_point() + 
-  scale_x_continuous(lim = c(0, 400))
+  scale_x_continuous(lim = c(0, 250)) +
+  scale_y_continuous(labels = label_comma()) +
+  labs(title = "Innings Pitched by 2022 Salary",
+       x = "Innings Pitched",
+       y = "") +
+  theme_bw()
 
 ```
 
