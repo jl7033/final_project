@@ -190,7 +190,7 @@ salaries |>
   geom_density() + 
   labs(title = "2022 Salary Distribution",
        x = "2022 Salary",
-       y = "Density") +
+       y = "") +
   scale_x_continuous(labels = label_comma()) +
   theme_bw()
 
@@ -204,7 +204,7 @@ salaries |>
   geom_density() +
   labs(title = "Salary by Position Group",
        x = "2022 Salary",
-       y = "Density") +
+       y = "") +
   scale_x_continuous(labels = label_comma()) +
   scale_color_discrete(name = "Position Group",
                        labels = c("Designated Hitter",
@@ -222,7 +222,26 @@ merged_batting |>
   count(simple_position) |> 
   mutate(simple_position = fct_infreq(simple_position,w = n)) |>
   ggplot(aes(x = simple_position, y = n)) +
-  geom_col()
+  geom_col() +
+  labs(title = "Players per Position",
+       x = "",
+       y = "Number of Players"
+  ) +
+  scale_x_discrete(guide = guide_axis(angle = 75), 
+                  labels = c("1b" = "1st Base",
+                    "2b" = "2nd Base",
+                    "3b" = "3rd Base",
+                    "inf" = "Infield",
+                    "c" = "Catcher",
+                    "rf" = "Right Field",
+                    "lf" = "Left Field",
+                    "cf" = "Center Field",
+                    "of" = "Outfield",
+                    "lhp" = "Left Hand Pitcher",
+                    "rhp" = "Right Hand Pitcher",
+                    "dh" = "Designated Hitter",
+                    "ss" = "Shortstop")) +
+  theme_bw()
 
 ```
 
@@ -231,7 +250,26 @@ merged_batting |>
 ```{r}
 salaries %>%
   ggplot(aes(x = simple_position, y = salary_2022)) +
-  geom_boxplot()
+  geom_boxplot() +
+  labs(title = "Distribution of Salary by Position",
+       x = "",
+       y = "") +
+  scale_x_discrete(guide = guide_axis(angle = 75), 
+                  labels = c("1b" = "1st Base",
+                    "2b" = "2nd Base",
+                    "3b" = "3rd Base",
+                    "inf" = "Infield",
+                    "c" = "Catcher",
+                    "rf" = "Right Field",
+                    "lf" = "Left Field",
+                    "cf" = "Center Field",
+                    "of" = "Outfield",
+                    "lhp" = "Left Hand Pitcher",
+                    "rhp" = "Right Hand Pitcher",
+                    "dh" = "Designated Hitter",
+                    "ss" = "Shortstop")) +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
 ```
 
 Infielders vs. outfielders vs. pitchers?
@@ -275,7 +313,40 @@ salaries |>
   ggplot(aes(x = service_time_floor, 
              y = simple_position, 
              fill = simple_position)) + 
-  ggridges::geom_density_ridges(alpha = 0.5) 
+  ggridges::geom_density_ridges(alpha = 0.5) +
+  labs(title = "Experience by Position",
+       x = "Years of Experience",
+       y = "") +
+  xlim(0,25) +
+  scale_y_discrete(labels = c("1b" = "1st Base",
+                    "2b" = "2nd Base",
+                    "3b" = "3rd Base",
+                    "inf" = "Infield",
+                    "c" = "Catcher",
+                    "rf" = "Right Field",
+                    "lf" = "Left Field",
+                    "cf" = "Center Field",
+                    "of" = "Outfield",
+                    "lhp" = "Left Hand Pitcher",
+                    "rhp" = "Right Hand Pitcher",
+                    "dh" = "Designated Hitter",
+                    "ss" = "Shortstop")) +
+  scale_fill_discrete(name = "Position",
+                      labels = c("1b" = "1st Base",
+                    "2b" = "2nd Base",
+                    "3b" = "3rd Base",
+                    "inf" = "Infield",
+                    "c" = "Catcher",
+                    "rf" = "Right Field",
+                    "lf" = "Left Field",
+                    "cf" = "Center Field",
+                    "of" = "Outfield",
+                    "lhp" = "Left Hand Pitcher",
+                    "rhp" = "Right Hand Pitcher",
+                    "dh" = "Designated Hitter",
+                    "ss" = "Shortstop")) +
+  theme_bw()
+  
 ```
 
 ### Salary Distribution by Experience
@@ -283,7 +354,12 @@ salaries |>
 ```{r}
 salaries %>%
   ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
-  geom_boxplot()
+  geom_boxplot() +
+  labs(title = "Salary Distribution for Years of Experience",
+       x = "Years of Experience",
+       y = "") +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
 ```
 
 ## Batting EDA
