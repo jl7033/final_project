@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(rvest)
 library(readxl)
+library(scales)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -170,7 +171,12 @@ salaries |>
   count(service_time_floor) |>
   ggplot(aes(x = service_time_floor, y = n)) + 
   geom_col() + 
-  labs(x = "Service time")
+  labs(title = "Number of Players per Year of Experience",
+       x = "Years in the MLB",
+       y = "Number of Players") +
+  scale_x_continuous(breaks = seq(0,21,by=1)) +
+  theme_bw()
+
 ```
 This is right skewed, so may need to transform it if used in regression
 
@@ -179,7 +185,31 @@ Salary
 salaries |>
   ggplot(aes(x = salary_2022)) + 
   geom_density() + 
-  labs(x = "Salary")
+  labs(title = "2022 Salary Distribution",
+       x = "2022 Salary",
+       y = "Density") +
+  scale_x_continuous(labels = label_comma()) +
+  theme_bw()
+
+salaries |>
+  mutate(position_group = case_match(simple_position,
+                                     c("rhp","lhp") ~ "pitcher",
+                                     c("cf","lf","rf","of") ~ "outfield",
+                                     "dh" ~ "dh",
+                                     .default = "infield")) |>
+  ggplot(aes(x = salary_2022, color = position_group)) +
+  geom_density() +
+  labs(title = "Salary by Position Group",
+       x = "2022 Salary",
+       y = "Density") +
+  scale_x_continuous(labels = label_comma()) +
+  scale_color_discrete(name = "Position Group",
+                       labels = c("Designated Hitter",
+                                "Infield",
+                                "Outfield",
+                                "Pitcher")) +
+  theme_bw()
+
 ```
 This is also heavily right skewed, with many players having salary under $1,000,000
 
@@ -190,6 +220,7 @@ merged_batting |>
   mutate(simple_position = fct_infreq(simple_position,w = n)) |>
   ggplot(aes(x = simple_position, y = n)) +
   geom_col()
+
 ```
 
 ### Salaries by Position Boxplots
