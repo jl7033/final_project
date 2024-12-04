@@ -541,5 +541,3 @@ summary(lm_pitching)
 ```
 
 From our model, we can see that relief pitchers have significantly lower salaries than closing pitchers, which makes sense, since closing pitchers have very strong reputations as some of the most effective pitchers in the game and therefore will draw high salaries. Additionally, the `era_2` predictor, even when accounting for pitcher handedness, pitcher type, and the number of innings pitched, has an insignificant $P$-value, implying that there is no significant association between one of the most highly regarded summative statistics for pitching effectiveness and pitcher salary.
-
-
