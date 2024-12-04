@@ -12,7 +12,7 @@ MLB player salaries are growing faster than ever. In 2001, former Seattle Marine
 The primary goal of our project is to determine whether baseball players -- both batters and pitchers -- are worth their salaries, and whether teams should focus primarily on signing big-money free agents or taking a more egalitarian and young player-heavy approach. More specifically, are advanced statistics such as OPS+ (for hitters) and ERA+ (for pitchers) significantly associated with player salary? Our conclusions could give MLB teams insight into how they can build their rosters to optimize their chances of making the postseason and ultimately winning the World Series.
 
 # Related work 
-Anything that inspired you, such as a paper, a web site, or something we discussed in class.
+There has been a heated debate over the use of statistics and analytics in the evaluation of player performances and whether the decision to pay players can be aided by these methods. Sabermetrics (add hyperlink in website) is one of the more popular ways of applying statistics to baseball to be an addition to traditional evaluations. The famous movie Moneyball (add hyperlink in website) tells the story of the Oakland Athletic's, an underdog using statistics over traditional evaluations to gain an edge. One of the hopes of our project is to approach some of these same problems from our own perspective.  
 
 # Initial questions 
 What questions are you trying to answer? How did these questions evolve over the course of the project? What new questions did you consider in the course of your analysis?
