@@ -389,7 +389,48 @@ merged_batting |>
   geom_point()
 ```
 
+Since salary (and other variables) are very skewed, we may want to transform these data using a log transformation.
+
 ### Regression models
+
+Home runs
+```{r}
+hr_fit <- lm(log(salary_2022,10) ~ hr,
+             data = merged_batting)
+
+hr_fit |>
+  broom::tidy()
+```
+
+
+OPS+
+```{r}
+ops_fit <- lm(log(salary_2022,10) ~ ops_2,
+             data = merged_batting)
+
+ops_fit |>
+  broom::tidy()
+```
+
+Would also want to account for years of experience in predicting salary
+
+```{r}
+experience_fit <- lm(log(salary_2022,10) ~ service_time_floor,
+                     data = merged_batting)
+
+experience_fit |>
+  broom::tidy()
+```
+
+A multivariable model including all of these
+```{r}
+multivar_fit <- lm(log(salary_2022,10) ~ hr + ops_2 + service_time_floor,
+                   data = merged_batting)
+
+multivar_fit |>
+  broom::tidy()
+```
+
 
 ## Pitching EDA
 
