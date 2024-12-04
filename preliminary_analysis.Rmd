@@ -398,7 +398,7 @@ Since salary (and other variables) are very skewed, we may want to transform the
 
 Home runs
 ```{r}
-hr_fit <- lm(log(salary_2022,10) ~ hr,
+hr_fit <- lm(log10(salary_2022) ~ hr,
              data = merged_batting)
 
 hr_fit |>
@@ -408,7 +408,7 @@ hr_fit |>
 
 OPS+
 ```{r}
-ops_fit <- lm(log(salary_2022,10) ~ ops_2,
+ops_fit <- lm(log10(salary_2022) ~ ops_2,
              data = merged_batting)
 
 ops_fit |>
@@ -418,22 +418,38 @@ ops_fit |>
 Would also want to account for years of experience in predicting salary
 
 ```{r}
-experience_fit <- lm(log(salary_2022,10) ~ service_time_floor,
+experience_fit <- lm(log10(salary_2022) ~ service_time_floor,
                      data = merged_batting)
 
 experience_fit |>
   broom::tidy()
 ```
 
-A multivariable model including all of these
+An interesting question might be: is OPS+ (an "all-in-one" statistic) a better predictor of salary than traditional statistics, adjusting for service time?
+
 ```{r}
-multivar_fit <- lm(log(salary_2022,10) ~ hr + ops_2 + service_time_floor,
+hr_service_fit <- lm(log10(salary_2022) ~ hr + service_time_floor,
                    data = merged_batting)
 
-multivar_fit |>
+hr_service_fit |>
   broom::tidy()
+
+hr_service_fit |>
+  broom::glance()
 ```
 
+```{r}
+ops_service_fit <- lm(log10(salary_2022) ~ ops_2 + service_time_floor,
+                   data = merged_batting)
+
+ops_service_fit |>
+  broom::tidy()
+
+ops_service_fit |>
+  broom::glance()
+```
+
+Based on these statistics, the model with home runs is a better predictor of salary than OPS+ (i.e. the HR model has higher r squared and lowed AIC).
 
 ## Pitching EDA
 
