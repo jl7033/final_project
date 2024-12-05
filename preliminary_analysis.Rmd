@@ -601,6 +601,9 @@ hr_ba_fit |>
 
 hr_ba_fit |>
   broom::glance()
+
+plot(hr_ba_fit, which = 1)
+plot(hr_ba_fit, which = 2)
 ```
 
 ```{r}
@@ -613,6 +616,9 @@ ops_fit |>
 
 ops_fit |>
   broom::glance()
+
+plot(ops_fit, which = 1)
+plot(ops_fit, which = 2)
 ```
 
 
