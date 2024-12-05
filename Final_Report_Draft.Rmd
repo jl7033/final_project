@@ -42,7 +42,6 @@ library(tidyverse)
 library(rvest)
 library(readxl)
 library(scales)
-library(cowplot)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -174,81 +173,7 @@ Our exploratory data analysis can be grouped into three categories: salary, batt
 
 Player salaries were highly right-skewed. This was expected, as many players make the league minimum salary of 700,000. The one position group not so heavily right skewed are the Designated Hitters. Similarly, the Designated Hitters had a higher average years of experience. Intuitively this makes sense as teams will want to select the better players for the position. Overall, most players were in their first year of the MLB with 68.2% having 5 or less years of experience. Players with more years of experience seem to get higher salaries, increasing as their years of experience.
 
-Many of the counting statistics for batting are right skewed, as most players are not hitting multiple home runs in the season. Some of the advanced statistics such as OPS are more normally distributed. An important idea to keep in mind is that many of these collected statistics are strongly correlated with each other as the advanced statistics are often a formula taking input from the counting statistics. Looking at the relation with salary, it seems that there may be an association between salary and home runs, RBIs, as well as OPS+. 
-
-
-## Pitching EDA
-
-```{r}
-
-ip_plot = merged_pitching |> 
-  ggplot(aes(x = ip_total)) + 
-  geom_histogram(binwidth = 5, fill = "red", col = "black") +
-  labs(title = "Distribution of IP, MLB Pitchers, 2022",
-       x = "Innings Pitched",
-       y = "Pitcher Count") +
-  theme_bw()
-
-era_plot = merged_pitching |>
-  ggplot(aes(x = era_2)) + 
-  geom_histogram(fill = "lightblue", col = "black") +
-    labs(title = "Distribution of ERA+, MLB Pitchers, 2022",
-       x = "ERA+",
-       y = "Pitcher Count") +
-  theme_bw()
-
-bb_plot = merged_pitching |>
-  ggplot(aes(x = bb9)) + 
-  geom_histogram(fill = "darkgreen", col = "black") +
-    labs(title = "Distribution of BB/9, MLB Pitchers, 2022",
-       x = "BB/9",
-       y = "Pitcher Count") +
-  theme_bw()
-
-so_plot = merged_pitching |>
-  ggplot(aes(x = so9)) + 
-  geom_histogram(fill = "orange", col = "black") +
-    labs(title = "Distribution of SO/9, MLB Pitchers, 2022",
-       x = "SO/9",
-       y = "Pitcher Count") +
-  theme_bw()
-
-plot_grid(ip_plot, era_plot, bb_plot, so_plot)
-
-```
-
-The distribution of innings pitched is quite right-skewed, with a peak around 70 innings pitched. The distribution of ERA+ is right-skewed as well, with a peak around 100 (the league average) and a small number of pitchers with an ERA+ above 200. The distributions of BB/9 and SO/9 are mostly symmetric, with peaks around 3 and 9, respectively.
-
-```{r}
-
-ip_sal = merged_pitching |> 
-  ggplot(aes(x = ip_total, y = salary_2022)) + 
-  geom_point() + 
-  scale_x_continuous(lim = c(0, 250)) +
-  scale_y_continuous(labels = label_comma()) +
-  labs(title = "Innings Pitched by 2022 Salary",
-       x = "Innings Pitched",
-       y = "") +
-  theme_bw()
-
-era_sal = merged_pitching |> 
-  ggplot(aes(x = era_2, y = salary_2022)) + 
-  geom_point() +
-  scale_x_continuous(lim = c(0, 400))
-
-bb_sal = merged_pitching |> 
-  ggplot(aes(x = bb9, y = salary_2022)) + 
-  geom_point() +
-  scale_x_continuous(lim = c(0, 400))
-
-era_sal = merged_pitching |> 
-  ggplot(aes(x = so9, y = salary_2022)) + 
-  geom_point() +
-  scale_x_continuous(lim = c(0, 400))
-
-plot_grid(ip_sal, era_sal)
-
-```
+Many of the counting statistics for batting are right skewed, as most players are not hitting multiple home runs in the season. Some of the advanced statistics such as OPS+ are more normally distributed. An important idea to keep in mind is that many of these collected statistics are strongly correlated with each other as the advanced statistics are often a formula taking input from the counting statistics. Looking at the relation with salary, it seems that there may be an association between salary and home runs as well as OPS+. 
 
 
 
@@ -283,8 +208,10 @@ From our model, we can see that relief pitchers have significantly lower salarie
 
 The residuals vs. fitted values plot shows that residuals are slightly more likely to be positive when salary is low; this is likely because of the large number of MLB players who are still on their rookie contracts, and therefore make somewhere between \$700,000 and \$1,000,000 per year. The Normal Q-Q plot shows only minor deviations of the model's residuals from Normal behavior; the deviations between theoretical quantities of -1 and 0.5 can also be explained by the players on their rookie contracts.
 
+
+
 # Discussion
 
 What were your findings? Are they what you expect? What insights into the data can you make?
 
-
+Checking to see if committing works.
