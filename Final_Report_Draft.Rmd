@@ -1,8 +1,10 @@
 ---
-title: "Final_Report_Draft"
-author: "Cameron Chesbrough"
-date: "2024-11-07"
-output: html_document
+title: "Final Report"
+output:   
+  html_document: 
+    code_folding: hide
+    toc: true
+    toc_float: true
 ---
 
 # Motivation
