@@ -175,7 +175,93 @@ Player salaries were highly right-skewed. This was expected, as many players mak
 
 Many of the counting statistics for batting are right skewed, as most players are not hitting multiple home runs in the season. Some of the advanced statistics such as OPS+ are more normally distributed. An important idea to keep in mind is that many of these collected statistics are strongly correlated with each other as the advanced statistics are often a formula taking input from the counting statistics. Looking at the relation with salary, it seems that there may be an association between salary and home runs as well as OPS+. 
 
+## Pitching EDA
 
+```{r}
+
+ip_plot = merged_pitching |> 
+  ggplot(aes(x = ip_total)) + 
+  geom_histogram(binwidth = 5, fill = "red", col = "black") +
+  labs(
+       x = "Innings Pitched",
+       y = "Pitcher Count") +
+  theme_bw()
+
+era_plot = merged_pitching |>
+  ggplot(aes(x = era_2)) + 
+  geom_histogram(fill = "lightblue", col = "black") +
+    labs(
+       x = "ERA+",
+       y = "Pitcher Count") +
+  theme_bw()
+
+bb_plot = merged_pitching |>
+  ggplot(aes(x = bb9)) + 
+  geom_histogram(fill = "darkgreen", col = "black") +
+    labs(
+       x = "Walks per 9 Innings (BB/9)",
+       y = "Pitcher Count") +
+  theme_bw()
+
+so_plot = merged_pitching |>
+  ggplot(aes(x = so9)) + 
+  geom_histogram(fill = "orange", col = "black") +
+    labs(
+       x = "Strikeouts per 9 Innings (SO/9)",
+       y = "Pitcher Count") +
+  theme_bw()
+
+hist_pitch = (ip_plot + era_plot) / (bb_plot + so_plot)
+hist_pitch + plot_annotation(title = "Histograms of Pitching Statistics")
+
+```
+
+The distribution of innings pitched is quite right-skewed, with a peak around 70 innings pitched. The distribution of ERA+ is right-skewed as well, with a peak around 100 (the league average) and a small number of pitchers with an ERA+ above 200. The distributions of BB/9 and SO/9 are mostly symmetric, with peaks around 3 and 9, respectively.
+
+```{r}
+
+ip_sal = merged_pitching |> 
+  ggplot(aes(x = ip_total, y = salary_2022)) + 
+  geom_point(col = "red") + 
+  scale_x_continuous(lim = c(0, 250)) +
+  scale_y_continuous(labels = label_comma()) +
+  labs(x = "Innings Pitched",
+       y = "2022 Salary") +
+  theme_bw()
+
+era_sal = merged_pitching |> 
+  ggplot(aes(x = era_2, y = salary_2022)) + 
+  geom_point(col = "lightblue") +
+  scale_x_continuous(lim = c(0, 400)) + 
+  scale_y_continuous(labels = label_comma()) +
+  labs(x = "ERA+",
+       y = "2022 Salary") +
+  theme_bw()
+
+bb_sal = merged_pitching |> 
+  ggplot(aes(x = bb9, y = salary_2022)) + 
+  geom_point(col = "darkgreen") +
+  scale_x_continuous(lim = c(0, 10)) + 
+  scale_y_continuous(labels = label_comma()) +
+   labs(x = "Walks per 9 Innings (BB/9)",
+       y = "2022 Salary") +
+  theme_bw()
+
+so_sal = merged_pitching |> 
+  ggplot(aes(x = so9, y = salary_2022)) + 
+  geom_point(col = "orange") +
+  scale_x_continuous(lim = c(0, 20)) + 
+  scale_y_continuous(labels = label_comma()) +
+   labs(x = "Strikeouts Per 9 Innings (SO/9)",
+       y = "2022 Salary") +
+  theme_bw()
+
+scatt_pitch = (ip_sal + era_sal) / (bb_sal + so_sal)
+scatt_pitch + plot_annotation(title = "Scatterplots of Pitching Statistics vs. Salary")
+
+```
+
+Interestingly, the pitchers with the highest ERA+ often had considerably lower salaries. 
 
 # Additional analysis
 
