@@ -574,7 +574,7 @@ salaries %&gt;%
        y = &quot;&quot;) +
   scale_y_continuous(labels = label_comma()) +
   theme_bw()</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-4-2.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
 <pre class="r"><code># Experience by Position
 salaries |&gt;
   ggplot(aes(x = service_time_floor, 
@@ -613,7 +613,7 @@ salaries |&gt;
                     &quot;dh&quot; = &quot;Designated Hitter&quot;,
                     &quot;ss&quot; = &quot;Shortstop&quot;)) +
   theme_bw()</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-4-3.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
 <p>Many of the counting statistics for batting are right skewed, as most
 players are not hitting multiple home runs in the season. Some of the
 advanced statistics such as OPS+ are more normally distributed. An
@@ -632,12 +632,12 @@ merged_batting %&gt;%
        y = &quot;Number of Home Runs&quot;) +
   scale_color_continuous(&quot;OPS&quot;) +
   theme_bw()</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 <pre class="r"><code># Corrs for Batting Data
 merged_batting |&gt;
   select(hr, ba, ops) |&gt;
   GGally::ggpairs()</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-5-2.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
 <pre class="r"><code># Scatter for Used Statistics
 yrs = merged_batting |&gt;
   ggplot(aes(x = service_time_floor, y = salary_2022)) + 
@@ -667,7 +667,7 @@ ops = merged_batting |&gt;
 scatter_patch = (yrs+hrs)/(bas+ops)
 
 scatter_patch + plot_annotation(title = &quot;Scatterplot of Batting Statistics and Salary&quot;)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-5-3.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
 <pre class="r"><code># Distributions for Used Statistics
 yrsCol = merged_batting |&gt;
   count(service_time_floor) |&gt;
@@ -694,7 +694,7 @@ opsHist = merged_batting |&gt;
 dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
 
 dist_patch + plot_annotation(title = &quot;Distribution of Important Batting Statistics&quot;)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-5-4.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
 <div id="pitching-eda" class="section level2">
 <h2>Pitching EDA</h2>
 <pre class="r"><code>ip_plot = merged_pitching |&gt; 
@@ -731,7 +731,7 @@ so_plot = merged_pitching |&gt;
 
 hist_pitch = (ip_plot + era_plot) / (bb_plot + so_plot)
 hist_pitch + plot_annotation(title = &quot;Histograms of Pitching Statistics&quot;)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
 <p>The distribution of innings pitched is quite right-skewed, with a
 peak around 70 innings pitched. The distribution of ERA+ is right-skewed
 as well, with a peak around 100 (the league average) and a small number
@@ -775,7 +775,7 @@ so_sal = merged_pitching |&gt;
 
 scatt_pitch = (ip_sal + era_sal) / (bb_sal + so_sal)
 scatt_pitch + plot_annotation(title = &quot;Scatterplots of Pitching Statistics vs. Salary&quot;)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
 <p>Interestingly, the pitchers with the highest ERA+ often had
 considerably lower salaries.</p>
 </div>
@@ -810,9 +810,9 @@ summary(lm_batting)</code></pre>
 ## Multiple R-squared:  0.5973, Adjusted R-squared:  0.595 
 ## F-statistic: 260.3 on 2 and 351 DF,  p-value: &lt; 2.2e-16</code></pre>
 <pre class="r"><code>plot(lm_batting, which = 1)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-13-1.png" width="90%" /></p>
 <pre class="r"><code>plot(lm_batting, which = 2)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-8-2.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-13-2.png" width="90%" /></p>
 <p>We decided to log-transform the salary variable because it is heavily
 right-skewed, and decided to use <span
 class="math inline">\(log_{10}\)</span> instead of <span
@@ -834,14 +834,77 @@ than predicted based on their performance.</p>
   select(name, salary_2022, service_time_floor, ops_2, pred, resid ) |&gt;
   mutate(expected_salary = 10^pred) |&gt;
   slice(1:5)</code></pre>
-<pre><code>## # A tibble: 5 × 7
-##   name         salary_2022 service_time_floor ops_2  pred  resid expected_salary
-##   &lt;chr&gt;              &lt;dbl&gt;              &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;           &lt;dbl&gt;
-## 1 Albert Pujo…     2500000                 21   151  8.61 -2.22       410735252.
-## 2 Jed Lowrie        850000                 13    50  7.25 -1.32        17780138.
-## 3 Kurt Suzuki      1750000                 14    59  7.40 -1.16        25346063.
-## 4 Alcides Esc…     1000000                 10    58  6.95 -0.947        8853328.
-## 5 Robinson Ch…      900000                  9    60  6.84 -0.889        6968403.</code></pre>
+<div class="kable-table">
+<table>
+<colgroup>
+<col width="19%" />
+<col width="13%" />
+<col width="20%" />
+<col width="6%" />
+<col width="9%" />
+<col width="12%" />
+<col width="17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="right">salary_2022</th>
+<th align="right">service_time_floor</th>
+<th align="right">ops_2</th>
+<th align="right">pred</th>
+<th align="right">resid</th>
+<th align="right">expected_salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Albert Pujols</td>
+<td align="right">2500000</td>
+<td align="right">21</td>
+<td align="right">151</td>
+<td align="right">8.613562</td>
+<td align="right">-2.2156220</td>
+<td align="right">410735252</td>
+</tr>
+<tr class="even">
+<td align="left">Jed Lowrie</td>
+<td align="right">850000</td>
+<td align="right">13</td>
+<td align="right">50</td>
+<td align="right">7.249935</td>
+<td align="right">-1.3205162</td>
+<td align="right">17780138</td>
+</tr>
+<tr class="odd">
+<td align="left">Kurt Suzuki</td>
+<td align="right">1750000</td>
+<td align="right">14</td>
+<td align="right">59</td>
+<td align="right">7.403911</td>
+<td align="right">-1.1608725</td>
+<td align="right">25346063</td>
+</tr>
+<tr class="even">
+<td align="left">Alcides Escobar</td>
+<td align="right">1000000</td>
+<td align="right">10</td>
+<td align="right">58</td>
+<td align="right">6.947107</td>
+<td align="right">-0.9471065</td>
+<td align="right">8853328</td>
+</tr>
+<tr class="odd">
+<td align="left">Robinson Chirinos</td>
+<td align="right">900000</td>
+<td align="right">9</td>
+<td align="right">60</td>
+<td align="right">6.843133</td>
+<td align="right">-0.8888907</td>
+<td align="right">6968403</td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>It looks like in 2022, the most cost-effective player was Albert
 Pujols, who made $2.5 million in his 21st season with an OPS+ of
 151.</p>
@@ -883,11 +946,11 @@ summary(lm_pitching)</code></pre>
 <pre class="r"><code>plot(residuals(lm_pitching) ~ fitted.values(lm_pitching),
      main = &quot;Residuals vs. Fitted Values Plot for Pitching Model&quot;)
 abline(0,0)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-15-1.png" width="90%" /></p>
 <pre class="r"><code>qqnorm(residuals(lm_pitching),
        main = &quot;Normal Q-Q Plot for Pitching Model&quot;)
 qqline(residuals(lm_pitching))</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-10-2.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-15-2.png" width="90%" /></p>
 <p>We decided to log-transform the salary variable because it is heavily
 right-skewed, and decided to use <span
 class="math inline">\(log_{10}\)</span> instead of <span

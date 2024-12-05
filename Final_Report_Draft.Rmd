@@ -5,6 +5,8 @@ output:
     code_folding: hide
     toc: true
     toc_float: true
+    df_print: kable
+
 ---
 
 # Motivation
@@ -196,7 +198,9 @@ salaries |>
                                 "Outfield",
                                 "Pitcher")) +
   theme_bw()
+```
 
+```{r}
 # Salary by Experience
 salaries %>%
   ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
@@ -206,7 +210,9 @@ salaries %>%
        y = "") +
   scale_y_continuous(labels = label_comma()) +
   theme_bw()
+```
 
+```{r}
 # Experience by Position
 salaries |>
   ggplot(aes(x = service_time_floor, 
@@ -260,12 +266,16 @@ merged_batting %>%
        y = "Number of Home Runs") +
   scale_color_continuous("OPS") +
   theme_bw()
+```
 
+```{r}
 # Corrs for Batting Data
 merged_batting |>
   select(hr, ba, ops) |>
   GGally::ggpairs()
+```
 
+```{r}
 # Scatter for Used Statistics
 yrs = merged_batting |>
   ggplot(aes(x = service_time_floor, y = salary_2022)) + 
@@ -295,7 +305,9 @@ ops = merged_batting |>
 scatter_patch = (yrs+hrs)/(bas+ops)
 
 scatter_patch + plot_annotation(title = "Scatterplot of Batting Statistics and Salary")
+```
 
+```{r}
 # Distributions for Used Statistics
 yrsCol = merged_batting |>
   count(service_time_floor) |>

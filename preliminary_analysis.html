@@ -510,39 +510,20 @@ here.</p>
        y = &quot;Number of Players&quot;) +
   scale_x_continuous(breaks = seq(0,21,by=1)) +
   theme_bw()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
-<pre class="r"><code>salaries %&gt;%
-  group_by(service_time_floor) %&gt;%
-  filter(service_time_floor &lt; 4)</code></pre>
-<pre><code>## # A tibble: 866 × 6
-## # Groups:   service_time_floor [4]
-##    name                 position service_time_yrs salary_2022 simple_position
-##    &lt;chr&gt;                &lt;chr&gt;               &lt;dbl&gt;       &lt;dbl&gt; &lt;fct&gt;          
-##  1 Juan Soto            lf                   3.13    17100000 lf             
-##  2 Yusei Kikuchi        lhp-s                3       16000000 lhp            
-##  3 Ronald Acuna         lf                   3.16    15000000 lf             
-##  4 Ke&#39;Bryan Hayes       3b                   1.08    10000000 3b             
-##  5 Seiya Suzuki         of                   0        8000000 of             
-##  6 Vladimir Guerrero Jr 3b                   2.16     7900000 3b             
-##  7 Pete Alonso          1b                   3        7400000 1b             
-##  8 Eloy Jimenez         rf                   3        7333333 rf             
-##  9 Walker Buehler       rhp                  3.17     7250000 rhp            
-## 10 Max Fried            lhp-s                3.15     6850000 lhp            
-## # ℹ 856 more rows
-## # ℹ 1 more variable: service_time_floor &lt;dbl&gt;</code></pre>
-<p>This is right skewed, so may need to transform it if used in
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-4-1.png" width="90%" />
+This is right skewed, so may need to transform it if used in
 regression</p>
 <p>Salary</p>
-<pre class="r"><code>salaries |&gt;
+<pre class="r"><code>salary_dist &lt;- salaries |&gt;
   ggplot(aes(x = salary_2022)) + 
   geom_density() + 
   labs(title = &quot;2022 Salary Distribution&quot;,
        x = &quot;2022 Salary&quot;,
        y = &quot;&quot;) +
   scale_x_continuous(labels = label_comma()) +
-  theme_bw()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
-<pre class="r"><code>salaries |&gt;
+  theme_bw()
+
+salary_position_dist &lt;- salaries |&gt;
   mutate(position_group = case_match(simple_position,
                                      c(&quot;rhp&quot;,&quot;lhp&quot;) ~ &quot;pitcher&quot;,
                                      c(&quot;cf&quot;,&quot;lf&quot;,&quot;rf&quot;,&quot;of&quot;) ~ &quot;outfield&quot;,
@@ -559,11 +540,13 @@ regression</p>
                                 &quot;Infield&quot;,
                                 &quot;Outfield&quot;,
                                 &quot;Pitcher&quot;)) +
-  theme_bw()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-5-2.png" width="90%" />
+  theme_bw()
+
+salary_dist / salary_position_dist</code></pre>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-5-1.png" width="90%" />
 This is also heavily right skewed, with many players having salary under
 $1,000,000</p>
-<p>Position type table</p>
+<p>Position type count</p>
 <pre class="r"><code>merged_batting |&gt;
   count(simple_position) |&gt; 
   mutate(simple_position = fct_infreq(simple_position,w = n)) |&gt;
@@ -588,24 +571,7 @@ $1,000,000</p>
                     &quot;ss&quot; = &quot;Shortstop&quot;)) +
   theme_bw()</code></pre>
 <p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
-<pre class="r"><code>salaries %&gt;%
-  mutate(position_group = case_match(simple_position,
-                                     c(&quot;rhp&quot;,&quot;lhp&quot;) ~ &quot;pitcher&quot;,
-                                     c(&quot;cf&quot;,&quot;lf&quot;,&quot;rf&quot;,&quot;of&quot;) ~ &quot;outfield&quot;,
-                                     &quot;dh&quot; ~ &quot;dh&quot;,
-                                     .default = &quot;infield&quot;)) %&gt;%
-  ggplot(aes(x=position_group, y=service_time_floor)) +
-  geom_boxplot()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-6-2.png" width="90%" /></p>
-<pre class="r"><code>salaries %&gt;%
-  mutate(position_group = case_match(simple_position,
-                                     c(&quot;rhp&quot;,&quot;lhp&quot;) ~ &quot;pitcher&quot;,
-                                     c(&quot;cf&quot;,&quot;lf&quot;,&quot;rf&quot;,&quot;of&quot;) ~ &quot;outfield&quot;,
-                                     &quot;dh&quot; ~ &quot;dh&quot;,
-                                     .default = &quot;infield&quot;)) %&gt;%
-  ggplot(aes(x=position_group, y=salary_2022)) +
-  geom_boxplot()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-6-3.png" width="90%" /></p>
+<p>salary vs experience, by position group</p>
 <pre class="r"><code>salaries %&gt;%
   mutate(position_group = case_match(simple_position,
                                      c(&quot;rhp&quot;,&quot;lhp&quot;) ~ &quot;pitcher&quot;,
@@ -615,9 +581,9 @@ $1,000,000</p>
   filter(service_time_floor&lt;=10) %&gt;%
   ggplot(aes(x=as.factor(service_time_floor),
              y=salary_2022, color=position_group)) +
-  geom_point()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-6-4.png" width="90%" /></p>
-<pre class="r"><code># playing a round with some idea, don&#39;t know if some of these are gonna be worth keeping</code></pre>
+  geom_point() + 
+  facet_wrap(~position_group, nrow = 2) </code></pre>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 <div id="salaries-by-position-boxplots" class="section level3">
 <h3>Salaries by Position Boxplots</h3>
 <pre class="r"><code>salaries %&gt;%
@@ -642,7 +608,8 @@ $1,000,000</p>
                     &quot;ss&quot; = &quot;Shortstop&quot;)) +
   scale_y_continuous(labels = label_comma()) +
   theme_bw()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
+<p>Experience by position</p>
 <pre class="r"><code>salaries %&gt;%
   ggplot(aes(x = simple_position, y = service_time_floor)) +
   geom_boxplot() +
@@ -665,41 +632,22 @@ $1,000,000</p>
                     &quot;ss&quot; = &quot;Shortstop&quot;)) +
   scale_y_continuous(labels = label_comma()) +
   theme_bw()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-7-2.png" width="90%" /></p>
-<p>Infielders vs. outfielders vs. pitchers?</p>
-<pre class="r"><code>salaries |&gt;
-  mutate(position_group = case_match(simple_position,
-                                     c(&quot;rhp&quot;,&quot;lhp&quot;) ~ &quot;pitcher&quot;,
-                                     c(&quot;cf&quot;,&quot;lf&quot;,&quot;rf&quot;,&quot;of&quot;) ~ &quot;outfield&quot;,
-                                     &quot;dh&quot; ~ &quot;dh&quot;,
-                                     .default = &quot;infield&quot;)) |&gt;
-  ggplot(aes(x = position_group, y = salary_2022)) +
-  geom_boxplot()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
-</div>
-<div id="salaries-by-experience" class="section level3">
-<h3>Salaries by Experience</h3>
-<pre class="r"><code>salaries %&gt;%
-  ggplot(aes(x = factor(service_time_floor), y = salary_2022)) +
-  geom_boxplot() </code></pre>
 <p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
+</div>
+<div id="salary-distribution-by-experience" class="section level3">
+<h3>Salary Distribution by Experience</h3>
 <pre class="r"><code>salaries %&gt;%
-  group_by(service_time_floor) %&gt;%
-  summarize(avg_salary = mean(salary_2022, na.rm = TRUE)) %&gt;%
-  ggplot(aes(x = service_time_floor, y = avg_salary)) +
-  geom_col() </code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-9-2.png" width="90%" /></p>
-<pre class="r"><code>salaries |&gt;
-  ggplot(aes(x = service_time_floor, y = salary_2022)) + 
-  geom_point(alpha = 0.5) </code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-9-3.png" width="90%" /></p>
+  ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
+  geom_boxplot() +
+  labs(title = &quot;Salary Distribution for Years of Experience&quot;,
+       x = &quot;Years of Experience&quot;,
+       y = &quot;&quot;) +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()</code></pre>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
 </div>
 <div id="positions-by-experience" class="section level3">
 <h3>Positions by Experience</h3>
-<pre class="r"><code>salaries %&gt;%
-  ggplot(aes(x=floor(service_time_yrs),fill = simple_position)) +
-  geom_bar(position = &quot;fill&quot;) </code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
 <pre class="r"><code>salaries |&gt;
   ggplot(aes(x = service_time_floor, 
              y = simple_position, 
@@ -737,18 +685,6 @@ $1,000,000</p>
                     &quot;dh&quot; = &quot;Designated Hitter&quot;,
                     &quot;ss&quot; = &quot;Shortstop&quot;)) +
   theme_bw()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-10-2.png" width="90%" /></p>
-</div>
-<div id="salary-distribution-by-experience" class="section level3">
-<h3>Salary Distribution by Experience</h3>
-<pre class="r"><code>salaries %&gt;%
-  ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
-  geom_boxplot() +
-  labs(title = &quot;Salary Distribution for Years of Experience&quot;,
-       x = &quot;Years of Experience&quot;,
-       y = &quot;&quot;) +
-  scale_y_continuous(labels = label_comma()) +
-  theme_bw()</code></pre>
 <p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
 </div>
 </div>
@@ -768,7 +704,7 @@ $1,000,000</p>
   ggplot(aes(x = rbi)) + 
   geom_histogram() +
   labs(x = &quot;Runs batted in (RBI)&quot;)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-12-2.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-13-1.png" width="90%" /></p>
 <pre class="r"><code>merged_batting %&gt;%
   ggplot(aes(x = ab,y= hr)) +
   geom_point(aes(color = ops)) +
@@ -778,9 +714,7 @@ $1,000,000</p>
        y = &quot;Number of Home Runs&quot;) +
   scale_color_continuous(&quot;OPS&quot;) +
   theme_bw()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-12-3.png" width="90%" /></p>
-<p>These are also right skewed so will need to normalize for any linear
-model.</p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-14-1.png" width="90%" /></p>
 <p>OPS is an “all in one” statistic combining on-base percentage (OBP)
 and slugging (SLG).</p>
 <p>OBP is calculated as <span class="math inline">\(\frac{Hits (H) +
@@ -795,12 +729,12 @@ averages.</p>
   ggplot(aes(x = ops)) + 
   geom_histogram() +
   labs(x = &quot;OPS&quot;)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-13-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-15-1.png" width="90%" /></p>
 <pre class="r"><code>merged_batting |&gt; 
   ggplot(aes(x = ops_2)) + 
   geom_histogram() +
   labs(x = &quot;OPS+&quot;)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-13-2.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-15-2.png" width="90%" /></p>
 <p>One idea might be to compare OPS or OPS+ to more traditional
 statistics, like RBIs, HRs, or batting averages to OPS or OPS+ as single
 predictors of salary.</p>
@@ -809,7 +743,7 @@ variables</p>
 <pre class="r"><code>merged_batting |&gt;
   select(hr, rbi, pa, ba, ops) |&gt;
   GGally::ggpairs()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-14-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-16-1.png" width="90%" /></p>
 <p>Some of these potential predictors are fairly strongly correlated
 (like RBI and HR, or BA and OPS), so it’s important not to include too
 many collinear variables in a potential linear model.</p>
@@ -822,51 +756,80 @@ many collinear variables in a potential linear model.</p>
   mutate(positions = str_split_i(position, &quot;-&quot;,1))  |&gt;
   ggplot(aes(x = positions,y= salary_2022)) +
   geom_boxplot()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-15-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-17-1.png" width="90%" /></p>
 <pre class="r"><code>merged_batting |&gt;
   mutate(positions = str_split_i(position, &quot;-&quot;,1))  |&gt;
   group_by(positions) |&gt;
   summarize(avg_salary = mean(salary_2022, na.rm = TRUE),
             median_salary = median(salary_2022, na.rm = TRUE))</code></pre>
-<pre><code>## # A tibble: 11 × 3
-##    positions avg_salary median_salary
-##    &lt;chr&gt;          &lt;dbl&gt;         &lt;dbl&gt;
-##  1 1b          8845755.       6225000
-##  2 2b          5010094.       2550000
-##  3 3b          8302384.       3375000
-##  4 c           3669983.       1750000
-##  5 cf          8145270.       5500000
-##  6 dh         11857143.      12000000
-##  7 inf         1312500        1312500
-##  8 lf          6971404.       6125000
-##  9 of          2211196.        746100
-## 10 rf          7833411.       4875000
-## 11 ss          7266837        4000000</code></pre>
-<p>HR vs. salary</p>
-<pre class="r"><code>merged_batting |&gt;
-  ggplot(aes(x = hr, y = salary_2022)) + 
-  geom_point()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-16-1.png" width="90%" /></p>
-<p>RBI vs. salary</p>
-<pre class="r"><code>merged_batting |&gt;
-  ggplot(aes(x = rbi, y = salary_2022)) + 
-  geom_point()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-17-1.png" width="90%" /></p>
-<p>BA vs. salary</p>
-<pre class="r"><code>merged_batting |&gt;
-  ggplot(aes(x = ba, y = salary_2022)) + 
-  geom_point()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-18-1.png" width="90%" /></p>
-<p>Plate appearances vs. salary</p>
-<pre class="r"><code>merged_batting |&gt;
-  ggplot(aes(x = pa, y = salary_2022)) + 
-  geom_point()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-19-1.png" width="90%" /></p>
-<p>OPS+ vs salary</p>
-<pre class="r"><code>merged_batting |&gt;
-  ggplot(aes(x = ops_2, y = salary_2022)) + 
-  geom_point()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-20-1.png" width="90%" /></p>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">positions</th>
+<th align="right">avg_salary</th>
+<th align="right">median_salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1b</td>
+<td align="right">8845755</td>
+<td align="right">6225000</td>
+</tr>
+<tr class="even">
+<td align="left">2b</td>
+<td align="right">5010094</td>
+<td align="right">2550000</td>
+</tr>
+<tr class="odd">
+<td align="left">3b</td>
+<td align="right">8302384</td>
+<td align="right">3375000</td>
+</tr>
+<tr class="even">
+<td align="left">c</td>
+<td align="right">3669983</td>
+<td align="right">1750000</td>
+</tr>
+<tr class="odd">
+<td align="left">cf</td>
+<td align="right">8145270</td>
+<td align="right">5500000</td>
+</tr>
+<tr class="even">
+<td align="left">dh</td>
+<td align="right">11857143</td>
+<td align="right">12000000</td>
+</tr>
+<tr class="odd">
+<td align="left">inf</td>
+<td align="right">1312500</td>
+<td align="right">1312500</td>
+</tr>
+<tr class="even">
+<td align="left">lf</td>
+<td align="right">6971404</td>
+<td align="right">6125000</td>
+</tr>
+<tr class="odd">
+<td align="left">of</td>
+<td align="right">2211196</td>
+<td align="right">746100</td>
+</tr>
+<tr class="even">
+<td align="left">rf</td>
+<td align="right">7833411</td>
+<td align="right">4875000</td>
+</tr>
+<tr class="odd">
+<td align="left">ss</td>
+<td align="right">7266837</td>
+<td align="right">4000000</td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>Some further ideas</p>
 <pre class="r"><code>merged_batting %&gt;%
   ggplot(aes(x = salary_2022, y = hr)) +
@@ -875,10 +838,8 @@ many collinear variables in a potential linear model.</p>
   geom_point(color = &quot;firebrick&quot;) +
   facet_wrap(vars(simple_position)) +
   theme_bw()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-21-1.png" width="90%" /></p>
-<pre class="r"><code># could be interesting, not sure if worth pursuing
-
-yrs = merged_batting |&gt;
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-19-1.png" width="90%" /></p>
+<pre class="r"><code>yrs = merged_batting |&gt;
   ggplot(aes(x = service_time_floor, y = salary_2022)) + 
   geom_point() +
   labs(x=&quot;Years of Experience&quot;,y=&quot;&quot;) +
@@ -906,7 +867,7 @@ ops = merged_batting |&gt;
 scatter_patch = (yrs+hrs)/(bas+ops)
 
 scatter_patch + plot_annotation(title = &quot;Scatterplot of Batting Statistics and Salary&quot;)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-21-2.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-20-1.png" width="90%" /></p>
 <pre class="r"><code>yrsCol = merged_batting |&gt;
   count(service_time_floor) |&gt;
   ggplot(aes(x = service_time_floor, y=n)) + 
@@ -931,7 +892,7 @@ opsHist = merged_batting |&gt;
 
 dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
 dist_patch + plot_annotation(title = &quot;Distribution of Important Batting Statistics&quot;)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-21-3.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-21-1.png" width="90%" /></p>
 <p>Since salary (and other variables) are very skewed, we may want to
 transform these data using a log transformation.</p>
 </div>
@@ -943,22 +904,70 @@ transform these data using a log transformation.</p>
 
 hr_fit |&gt;
   broom::tidy()</code></pre>
-<pre><code>## # A tibble: 2 × 5
-##   term        estimate std.error statistic   p.value
-##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-## 1 (Intercept)   6.22     0.0445     140.   2.09e-310
-## 2 hr            0.0206   0.00291      7.08 7.87e- 12</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">6.2215877</td>
+<td align="right">0.0445269</td>
+<td align="right">139.726422</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">hr</td>
+<td align="right">0.0206018</td>
+<td align="right">0.0029099</td>
+<td align="right">7.079971</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>OPS+</p>
 <pre class="r"><code>ops_fit &lt;- lm(log10(salary_2022) ~ ops_2,
              data = merged_batting)
 
 ops_fit |&gt;
   broom::tidy()</code></pre>
-<pre><code>## # A tibble: 2 × 5
-##   term        estimate std.error statistic   p.value
-##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-## 1 (Intercept)  5.96      0.100       59.4  1.38e-185
-## 2 ops_2        0.00531   0.00100      5.28 2.22e-  7</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">5.9600670</td>
+<td align="right">0.1002941</td>
+<td align="right">59.425870</td>
+<td align="right">0e+00</td>
+</tr>
+<tr class="even">
+<td align="left">ops_2</td>
+<td align="right">0.0053059</td>
+<td align="right">0.0010041</td>
+<td align="right">5.284194</td>
+<td align="right">2e-07</td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>Would also want to account for years of experience in predicting
 salary</p>
 <pre class="r"><code>experience_fit &lt;- lm(log10(salary_2022) ~ service_time_floor,
@@ -966,11 +975,35 @@ salary</p>
 
 experience_fit |&gt;
   broom::tidy()</code></pre>
-<pre><code>## # A tibble: 2 × 5
-##   term               estimate std.error statistic  p.value
-##   &lt;chr&gt;                 &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-## 1 (Intercept)           5.98    0.0312      192.  0       
-## 2 service_time_floor    0.115   0.00562      20.5 6.59e-62</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">5.9798211</td>
+<td align="right">0.0311537</td>
+<td align="right">191.94559</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">service_time_floor</td>
+<td align="right">0.1150063</td>
+<td align="right">0.0056177</td>
+<td align="right">20.47218</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>An interesting question might be: is OPS+ (an “all-in-one” statistic)
 a better predictor of salary than traditional statistics?</p>
 <p>To do this, I’m going to account for batting average, home runs per
@@ -983,20 +1016,101 @@ models, since that is strongly correlated with salary.</p>
 
 hr_ba_fit |&gt;
   broom::tidy()</code></pre>
-<pre><code>## # A tibble: 4 × 5
-##   term               estimate std.error statistic   p.value
-##   &lt;chr&gt;                 &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-## 1 (Intercept)           5.33    0.134       39.9  2.22e-132
-## 2 ba                    2.20    0.551        4.00 7.75e-  5
-## 3 hr_per_pa             4.77    1.28         3.72 2.31e-  4
-## 4 service_time_floor    0.113   0.00540     20.8  2.57e- 63</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">5.3347131</td>
+<td align="right">0.1336008</td>
+<td align="right">39.930243</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">ba</td>
+<td align="right">2.2023276</td>
+<td align="right">0.5506452</td>
+<td align="right">3.999540</td>
+<td align="right">0.0000775</td>
+</tr>
+<tr class="odd">
+<td align="left">hr_per_pa</td>
+<td align="right">4.7739282</td>
+<td align="right">1.2830941</td>
+<td align="right">3.720638</td>
+<td align="right">0.0002314</td>
+</tr>
+<tr class="even">
+<td align="left">service_time_floor</td>
+<td align="right">0.1125695</td>
+<td align="right">0.0054001</td>
+<td align="right">20.845740</td>
+<td align="right">0.0000000</td>
+</tr>
+</tbody>
+</table>
+</div>
 <pre class="r"><code>hr_ba_fit |&gt;
   broom::glance()</code></pre>
-<pre><code>## # A tibble: 1 × 12
-##   r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC
-##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1     0.585         0.581 0.361      164. 1.64e-66     3  -139.  288.  308.
-## # ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+<div class="kable-table">
+<table>
+<colgroup>
+<col width="9%" />
+<col width="12%" />
+<col width="9%" />
+<col width="9%" />
+<col width="7%" />
+<col width="2%" />
+<col width="9%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="11%" />
+<col width="4%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">r.squared</th>
+<th align="right">adj.r.squared</th>
+<th align="right">sigma</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+<th align="right">df</th>
+<th align="right">logLik</th>
+<th align="right">AIC</th>
+<th align="right">BIC</th>
+<th align="right">deviance</th>
+<th align="right">df.residual</th>
+<th align="right">nobs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.5850133</td>
+<td align="right">0.5814563</td>
+<td align="right">0.3605588</td>
+<td align="right">164.4669</td>
+<td align="right">0</td>
+<td align="right">3</td>
+<td align="right">-139.1773</td>
+<td align="right">288.3547</td>
+<td align="right">307.7011</td>
+<td align="right">45.50091</td>
+<td align="right">350</td>
+<td align="right">354</td>
+</tr>
+</tbody>
+</table>
+</div>
 <pre class="r"><code>plot(hr_ba_fit, which = 1)</code></pre>
 <p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-25-1.png" width="90%" /></p>
 <pre class="r"><code>plot(hr_ba_fit, which = 2)</code></pre>
@@ -1007,19 +1121,94 @@ hr_ba_fit |&gt;
 
 ops_fit |&gt;
   broom::tidy()</code></pre>
-<pre><code>## # A tibble: 3 × 5
-##   term               estimate std.error statistic   p.value
-##   &lt;chr&gt;                 &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
-## 1 (Intercept)         5.55     0.0689       80.6  1.69e-228
-## 2 ops_2               0.00455  0.000664      6.85 3.38e- 11
-## 3 service_time_floor  0.113    0.00529      21.4  1.75e- 65</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">5.5528133</td>
+<td align="right">0.0689038</td>
+<td align="right">80.587926</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">ops_2</td>
+<td align="right">0.0045456</td>
+<td align="right">0.0006639</td>
+<td align="right">6.847173</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">service_time_floor</td>
+<td align="right">0.1130646</td>
+<td align="right">0.0052915</td>
+<td align="right">21.367378</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+</div>
 <pre class="r"><code>ops_fit |&gt;
   broom::glance()</code></pre>
-<pre><code>## # A tibble: 1 × 12
-##   r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC
-##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1     0.597         0.595 0.355      260. 4.72e-70     2  -134.  276.  291.
-## # ℹ 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;</code></pre>
+<div class="kable-table">
+<table>
+<colgroup>
+<col width="9%" />
+<col width="12%" />
+<col width="9%" />
+<col width="9%" />
+<col width="7%" />
+<col width="2%" />
+<col width="9%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="11%" />
+<col width="4%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">r.squared</th>
+<th align="right">adj.r.squared</th>
+<th align="right">sigma</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+<th align="right">df</th>
+<th align="right">logLik</th>
+<th align="right">AIC</th>
+<th align="right">BIC</th>
+<th align="right">deviance</th>
+<th align="right">df.residual</th>
+<th align="right">nobs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.5973042</td>
+<td align="right">0.5950096</td>
+<td align="right">0.3546729</td>
+<td align="right">260.3128</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">-133.8558</td>
+<td align="right">275.7117</td>
+<td align="right">291.1889</td>
+<td align="right">44.1533</td>
+<td align="right">351</td>
+<td align="right">354</td>
+</tr>
+</tbody>
+</table>
+</div>
 <pre class="r"><code>plot(ops_fit, which = 1)</code></pre>
 <p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-26-1.png" width="90%" /></p>
 <pre class="r"><code>plot(ops_fit, which = 2)</code></pre>
@@ -1035,19 +1224,122 @@ sense since OPS+ is internally accounting for more other factors.</p>
   select(name, salary_2022, service_time_floor, ops_2, pred, resid ) |&gt;
   mutate(expected_salary = 10^pred) |&gt;
   slice(1:10)</code></pre>
-<pre><code>## # A tibble: 10 × 7
-##    name        salary_2022 service_time_floor ops_2  pred  resid expected_salary
-##    &lt;chr&gt;             &lt;dbl&gt;              &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;           &lt;dbl&gt;
-##  1 Albert Puj…     2500000                 21   151  8.61 -2.22       410735252.
-##  2 Jed Lowrie       850000                 13    50  7.25 -1.32        17780138.
-##  3 Kurt Suzuki     1750000                 14    59  7.40 -1.16        25346063.
-##  4 Alcides Es…     1000000                 10    58  6.95 -0.947        8853328.
-##  5 Robinson C…      900000                  9    60  6.84 -0.889        6968403.
-##  6 Marwin Gon…     1100000                  9    64  6.86 -0.820        7266342.
-##  7 Stephen Vo…      850000                  8    64  6.75 -0.819        5600815.
-##  8 Yordan Alv…      764600                  2   188  6.63 -0.750        4300548.
-##  9 Brandon Dr…      900000                  5   122  6.67 -0.718        4706575.
-## 10 Yadier Mol…    10000000                 17    52  7.71 -0.711       51438079.</code></pre>
+<div class="kable-table">
+<table>
+<colgroup>
+<col width="19%" />
+<col width="13%" />
+<col width="20%" />
+<col width="6%" />
+<col width="9%" />
+<col width="12%" />
+<col width="17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="right">salary_2022</th>
+<th align="right">service_time_floor</th>
+<th align="right">ops_2</th>
+<th align="right">pred</th>
+<th align="right">resid</th>
+<th align="right">expected_salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Albert Pujols</td>
+<td align="right">2500000</td>
+<td align="right">21</td>
+<td align="right">151</td>
+<td align="right">8.613562</td>
+<td align="right">-2.2156220</td>
+<td align="right">410735252</td>
+</tr>
+<tr class="even">
+<td align="left">Jed Lowrie</td>
+<td align="right">850000</td>
+<td align="right">13</td>
+<td align="right">50</td>
+<td align="right">7.249935</td>
+<td align="right">-1.3205162</td>
+<td align="right">17780138</td>
+</tr>
+<tr class="odd">
+<td align="left">Kurt Suzuki</td>
+<td align="right">1750000</td>
+<td align="right">14</td>
+<td align="right">59</td>
+<td align="right">7.403911</td>
+<td align="right">-1.1608725</td>
+<td align="right">25346063</td>
+</tr>
+<tr class="even">
+<td align="left">Alcides Escobar</td>
+<td align="right">1000000</td>
+<td align="right">10</td>
+<td align="right">58</td>
+<td align="right">6.947107</td>
+<td align="right">-0.9471065</td>
+<td align="right">8853328</td>
+</tr>
+<tr class="odd">
+<td align="left">Robinson Chirinos</td>
+<td align="right">900000</td>
+<td align="right">9</td>
+<td align="right">60</td>
+<td align="right">6.843133</td>
+<td align="right">-0.8888907</td>
+<td align="right">6968403</td>
+</tr>
+<tr class="even">
+<td align="left">Marwin Gonzalez</td>
+<td align="right">1100000</td>
+<td align="right">9</td>
+<td align="right">64</td>
+<td align="right">6.861316</td>
+<td align="right">-0.8199231</td>
+<td align="right">7266342</td>
+</tr>
+<tr class="odd">
+<td align="left">Stephen Vogt</td>
+<td align="right">850000</td>
+<td align="right">8</td>
+<td align="right">64</td>
+<td align="right">6.748251</td>
+<td align="right">-0.8188323</td>
+<td align="right">5600815</td>
+</tr>
+<tr class="even">
+<td align="left">Yordan Alvarez</td>
+<td align="right">764600</td>
+<td align="right">2</td>
+<td align="right">188</td>
+<td align="right">6.633524</td>
+<td align="right">-0.7500895</td>
+<td align="right">4300548</td>
+</tr>
+<tr class="odd">
+<td align="left">Brandon Drury</td>
+<td align="right">900000</td>
+<td align="right">5</td>
+<td align="right">122</td>
+<td align="right">6.672705</td>
+<td align="right">-0.7184624</td>
+<td align="right">4706575</td>
+</tr>
+<tr class="even">
+<td align="left">Yadier Molina</td>
+<td align="right">10000000</td>
+<td align="right">17</td>
+<td align="right">52</td>
+<td align="right">7.711285</td>
+<td align="right">-0.7112847</td>
+<td align="right">51438079</td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>The most cost-effective players were those who</p>
 <ul>
 <li><p>Played well (high OPS+) but had low salaries.</p></li>

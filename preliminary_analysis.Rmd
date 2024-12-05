@@ -5,6 +5,7 @@ output:
     code_folding: hide
     toc: true
     toc_float: true
+    df_print: kable
 ---
 
 ```{r setup, include=FALSE}
@@ -180,18 +181,12 @@ salaries |>
        y = "Number of Players") +
   scale_x_continuous(breaks = seq(0,21,by=1)) +
   theme_bw()
-
-salaries %>%
-  group_by(service_time_floor) %>%
-  filter(service_time_floor < 4)
-
-
 ```
 This is right skewed, so may need to transform it if used in regression
 
 Salary
 ```{r}
-salaries |>
+salary_dist <- salaries |>
   ggplot(aes(x = salary_2022)) + 
   geom_density() + 
   labs(title = "2022 Salary Distribution",
@@ -200,7 +195,7 @@ salaries |>
   scale_x_continuous(labels = label_comma()) +
   theme_bw()
 
-salaries |>
+salary_position_dist <- salaries |>
   mutate(position_group = case_match(simple_position,
                                      c("rhp","lhp") ~ "pitcher",
                                      c("cf","lf","rf","of") ~ "outfield",
@@ -219,10 +214,11 @@ salaries |>
                                 "Pitcher")) +
   theme_bw()
 
+salary_dist / salary_position_dist
 ```
 This is also heavily right skewed, with many players having salary under $1,000,000
 
-Position type table
+Position type count
 ```{r}
 merged_batting |>
   count(simple_position) |> 
@@ -247,24 +243,10 @@ merged_batting |>
                     "dh" = "Designated Hitter",
                     "ss" = "Shortstop")) +
   theme_bw()
+```
 
-salaries %>%
-  mutate(position_group = case_match(simple_position,
-                                     c("rhp","lhp") ~ "pitcher",
-                                     c("cf","lf","rf","of") ~ "outfield",
-                                     "dh" ~ "dh",
-                                     .default = "infield")) %>%
-  ggplot(aes(x=position_group, y=service_time_floor)) +
-  geom_boxplot()
-salaries %>%
-  mutate(position_group = case_match(simple_position,
-                                     c("rhp","lhp") ~ "pitcher",
-                                     c("cf","lf","rf","of") ~ "outfield",
-                                     "dh" ~ "dh",
-                                     .default = "infield")) %>%
-  ggplot(aes(x=position_group, y=salary_2022)) +
-  geom_boxplot()
-
+salary vs experience, by position group
+```{r}
 salaries %>%
   mutate(position_group = case_match(simple_position,
                                      c("rhp","lhp") ~ "pitcher",
@@ -274,9 +256,8 @@ salaries %>%
   filter(service_time_floor<=10) %>%
   ggplot(aes(x=as.factor(service_time_floor),
              y=salary_2022, color=position_group)) +
-  geom_point()
-
-# playing a round with some idea, don't know if some of these are gonna be worth keeping
+  geom_point() + 
+  facet_wrap(~position_group, nrow = 2) 
 
 ```
 
@@ -305,7 +286,10 @@ salaries %>%
                     "ss" = "Shortstop")) +
   scale_y_continuous(labels = label_comma()) +
   theme_bw()
+```
 
+Experience by position
+```{r}
 salaries %>%
   ggplot(aes(x = simple_position, y = service_time_floor)) +
   geom_boxplot() +
@@ -331,43 +315,22 @@ salaries %>%
 
 ```
 
-Infielders vs. outfielders vs. pitchers?
-```{r}
-salaries |>
-  mutate(position_group = case_match(simple_position,
-                                     c("rhp","lhp") ~ "pitcher",
-                                     c("cf","lf","rf","of") ~ "outfield",
-                                     "dh" ~ "dh",
-                                     .default = "infield")) |>
-  ggplot(aes(x = position_group, y = salary_2022)) +
-  geom_boxplot()
-```
+### Salary Distribution by Experience
 
-
-### Salaries by Experience
 ```{r}
 salaries %>%
-  ggplot(aes(x = factor(service_time_floor), y = salary_2022)) +
-  geom_boxplot() 
-
-salaries %>%
-  group_by(service_time_floor) %>%
-  summarize(avg_salary = mean(salary_2022, na.rm = TRUE)) %>%
-  ggplot(aes(x = service_time_floor, y = avg_salary)) +
-  geom_col() 
-
-salaries |>
-  ggplot(aes(x = service_time_floor, y = salary_2022)) + 
-  geom_point(alpha = 0.5) 
+  ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
+  geom_boxplot() +
+  labs(title = "Salary Distribution for Years of Experience",
+       x = "Years of Experience",
+       y = "") +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
 ```
 
 ### Positions by Experience
 
 ```{r}
-salaries %>%
-  ggplot(aes(x=floor(service_time_yrs),fill = simple_position)) +
-  geom_bar(position = "fill") 
-
 salaries |>
   ggplot(aes(x = service_time_floor, 
              y = simple_position, 
@@ -408,18 +371,7 @@ salaries |>
   
 ```
 
-### Salary Distribution by Experience
 
-```{r}
-salaries %>%
-  ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
-  geom_boxplot() +
-  labs(title = "Salary Distribution for Years of Experience",
-       x = "Years of Experience",
-       y = "") +
-  scale_y_continuous(labels = label_comma()) +
-  theme_bw()
-```
 
 ## Batting EDA
 
@@ -433,12 +385,16 @@ merged_batting |>
   labs(title = "Distribution of Home Runs",
     x = "Home Run Total",
     y = "Players")
+```
 
+```{r}
 merged_batting |> 
   ggplot(aes(x = rbi)) + 
   geom_histogram() +
   labs(x = "Runs batted in (RBI)")
+```
 
+```{r}
 merged_batting %>%
   ggplot(aes(x = ab,y= hr)) +
   geom_point(aes(color = ops)) +
@@ -451,7 +407,6 @@ merged_batting %>%
   
 ```
 
-These are also right skewed so will need to normalize for any linear model.
 
 OPS is an "all in one" statistic combining on-base percentage (OBP) and slugging (SLG).
 
@@ -497,47 +452,14 @@ merged_batting |>
   mutate(positions = str_split_i(position, "-",1))  |>
   ggplot(aes(x = positions,y= salary_2022)) +
   geom_boxplot()
+```
 
+```{r}
 merged_batting |>
   mutate(positions = str_split_i(position, "-",1))  |>
   group_by(positions) |>
   summarize(avg_salary = mean(salary_2022, na.rm = TRUE),
             median_salary = median(salary_2022, na.rm = TRUE))
-```
-
-HR vs. salary
-```{r}
-merged_batting |>
-  ggplot(aes(x = hr, y = salary_2022)) + 
-  geom_point()
-```
-
-RBI vs. salary
-```{r}
-merged_batting |>
-  ggplot(aes(x = rbi, y = salary_2022)) + 
-  geom_point()
-```
-
-BA vs. salary 
-```{r}
-merged_batting |>
-  ggplot(aes(x = ba, y = salary_2022)) + 
-  geom_point()
-```
-
-Plate appearances vs. salary
-```{r}
-merged_batting |>
-  ggplot(aes(x = pa, y = salary_2022)) + 
-  geom_point()
-```
-
-OPS+ vs salary
-```{r}
-merged_batting |>
-  ggplot(aes(x = ops_2, y = salary_2022)) + 
-  geom_point()
 ```
 
 Some further ideas
@@ -549,9 +471,9 @@ merged_batting %>%
   geom_point(color = "firebrick") +
   facet_wrap(vars(simple_position)) +
   theme_bw()
+```
 
-# could be interesting, not sure if worth pursuing
-
+```{r}
 yrs = merged_batting |>
   ggplot(aes(x = service_time_floor, y = salary_2022)) + 
   geom_point() +
@@ -580,8 +502,9 @@ ops = merged_batting |>
 scatter_patch = (yrs+hrs)/(bas+ops)
 
 scatter_patch + plot_annotation(title = "Scatterplot of Batting Statistics and Salary")
+```
 
-
+```{r}
 yrsCol = merged_batting |>
   count(service_time_floor) |>
   ggplot(aes(x = service_time_floor, y=n)) + 
