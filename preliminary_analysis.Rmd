@@ -680,6 +680,23 @@ plot(ops_fit, which = 2)
 
 Based on these statistics, the model with than OPS+ is a better predictor than the one with home runs and batting average, which makes sense since OPS+ is internally accounting for more other factors.
 
+Which players provided the best value for money?
+```{r}
+merged_batting |>
+  modelr::add_predictions(ops_fit) |>
+  modelr::add_residuals(ops_fit) |>
+  arrange(resid) |>
+  select(name, salary_2022, service_time_floor, ops_2, pred, resid ) |>
+  mutate(expected_salary = 10^pred) |>
+  slice(1:10)
+```
+
+The most cost-effective players were those who
+
+-   Played well (high OPS+) but had low salaries.
+
+-   Played poorly and had a lot of experience, but had low salaries.
+
 ## Pitching EDA
 
 In order to eliminate pitchers with very few appearances or position players (catchers, first basemen, etc.) who came in to pitch in blowouts, I filtered only for pitchers with at least 10 innings pitches.
