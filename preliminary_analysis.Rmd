@@ -690,8 +690,8 @@ In order to eliminate pitchers with very few appearances or position players (ca
 
 merged_pitching |> 
   ggplot(aes(x = ip_total)) + 
-  geom_histogram(binwidth = 2, fill = "lightblue", col = "black") +
-  labs(title = "Pitching Distribution",
+  geom_histogram(binwidth = 5, fill = "red", col = "black") +
+  labs(title = "Distribution of Innings Pitched, MLB Pitchers, 2022",
        x = "Innings Pitched",
        y = "Pitcher Count") +
   theme_bw()
@@ -705,8 +705,8 @@ merged_pitching |>
 merged_pitching |>
   ggplot(aes(x = era_2)) + 
   geom_histogram(fill = "lightblue", col = "black") +
-    labs(title = "ERA Distribution",
-       x = "ERA",
+    labs(title = "Distribution of ERA+, MLB Pitchers, 2022",
+       x = "ERA+",
        y = "") +
   theme_bw()
 
