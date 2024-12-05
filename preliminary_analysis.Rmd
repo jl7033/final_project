@@ -450,7 +450,7 @@ merged_batting %>%
   
 ```
 
-These are also left skewed so will need to normalize for any linear model.
+These are also right skewed so will need to normalize for any linear model.
 
 OPS is an "all in one" statistic combining on-base percentage (OBP) and slugging (SLG).
 
