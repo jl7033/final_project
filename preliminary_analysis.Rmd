@@ -180,6 +180,11 @@ salaries |>
   scale_x_continuous(breaks = seq(0,21,by=1)) +
   theme_bw()
 
+salaries %>%
+  group_by(service_time_floor) %>%
+  filter(service_time_floor < 4)
+
+
 ```
 This is right skewed, so may need to transform it if used in regression
 

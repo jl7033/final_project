@@ -11,13 +11,24 @@ MLB player salaries are growing faster than ever. In 2001, former Seattle Marine
 
 The primary goal of our project is to determine whether baseball players -- both batters and pitchers -- are worth their salaries, and whether teams should focus primarily on signing big-money free agents or taking a more egalitarian and young player-heavy approach. More specifically, are advanced statistics such as OPS+ (for hitters) and ERA+ (for pitchers) significantly associated with player salary? Our conclusions could give MLB teams insight into how they can build their rosters to optimize their chances of making the postseason and ultimately winning the World Series.
 
+
 # Related work
 
 There has been a heated debate over the use of statistics and analytics in the evaluation of player performances and whether the decision to pay players can be aided by these methods. Sabermetrics (add hyperlink in website) is one of the more popular ways of applying statistics to baseball to be an addition to traditional evaluations. The famous movie Moneyball (add hyperlink in website) tells the story of the Oakland Athletic's, an underdog using statistics over traditional evaluations to gain an edge. One of the hopes of our project is to approach some of these same problems from our own perspective.
 
+
 # Initial questions
 
-What questions are you trying to answer? How did these questions evolve over the course of the project? What new questions did you consider in the course of your analysis?
+Before beginning the project, we set out to potentially answer three primary questions:
+
+1) What collected statistics are most correlated with salary? Are advanced statistics such as ERA closer than simple counts such as strikeouts?
+
+2) Are GMs good at deciding who to give contracts? That is, do the players with the highest salaries have the best performance metrics?
+
+3) Can we predict the salary of a player with a model built from their 2022 statistics?
+
+After conducting an exploratory data analysis, we adjusted our questions into:
+
 
 # Data
 
@@ -25,7 +36,9 @@ Source, scraping method, cleaning, etc.
 
 # Exploratory analysis 
 
-Visualizations, summaries, and exploratory statistical analyses. Justify the steps you took, and show any major changes to your ideas.
+Our exploratory data analysis can be grouped into three categories: salary, batting, and pitching. 
+
+Player salaries were highly right-skewed. This was expected, as many players make the league minimum salary of 700,000. Similarly, most players were in their first year of the MLB with 68.2% having 5 or less years of experience. 
 
 # Additional analysis
 
