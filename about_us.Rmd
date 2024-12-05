@@ -1,0 +1,60 @@
+---
+title: "About the Group"
+output: 
+  html_document:
+    toc: false
+---
+
+<p class="alignleft">
+  <img src="./pics/Cameron.jpg" alt="graduate" style="width:50%; float: left; margin-right: 20px;" />
+</p>
+<style>
+.alignleft {
+    text-align: left; 
+}
+</style>
+\
+\
+\
+<p class="alignleft">
+  <img src="./pics/Ravi.jpg" alt="graduate" style="width:50%; float: left; margin-right: 20px;" />
+</p>
+<style>
+.alignleft {
+    text-align: left; 
+}
+</style>
+\
+\
+\
+\
+<p class="alignleft">
+  <img src="./pics/Joseph.jpg" alt="graduate" style="width:50%; float: left; margin-right: 20px;" />
+</p>
+<style>
+.alignleft {
+    text-align: left; 
+}
+</style>
+\
+\
+\
+<p class="alignleft">
+  <img src="./pics/Mengyao.jpg" alt="graduate" style="width:50%; float: left; margin-right: 20px;" />
+</p>
+<style>
+.alignleft {
+    text-align: left; 
+}
+</style>
+\
+\
+\
+<p class="alignleft">
+  <img src="./pics/Cheng.jpg" alt="graduate" style="width:50%; float: left; margin-right: 20px;" />
+</p>
+<style>
+.alignleft {
+    text-align: left; 
+}
+</style>

@@ -38,6 +38,7 @@ After conducting an exploratory data analysis, we adjusted our questions into:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(patchwork)
 library(tidyverse)
 library(rvest)
 library(readxl)

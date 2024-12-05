@@ -1,0 +1,22 @@
+name: "Cheng Rao"
+output_dir: "."
+navbar:
+  title: "Home"
+  right:
+    - text: "Report"
+      href: Final_Report_Draft.html
+    - text: "EDA"
+      href: preliminary_analysis.html
+    - text: "Conclusion"
+      href: conclusion.html
+    - text: "About the Group"
+      href: about_us.html
+    - icon: fa-github fa-lg
+      href: https://github.com/jl7033/
+output:
+  html_document:
+    toc : TRUE
+    toc_float: TRUE
+    hide_code : TRUE
+    theme: cerulean
+    css: styles.css

@@ -66,10 +66,9 @@ salary.
 
 ## Coding challenges:
 
-- Merging the two datasets
-
-- Checking data quality (players with few at bats, those listed for
-  multiple teams)
+- Merging the player stats and salary datasets
+- Checking data quality (players with few at-bats, players listed for
+  multiple teams within the same season)
 
 # Planned timeline
 

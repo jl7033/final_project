@@ -1,0 +1,39 @@
+---
+title: "Dollars for Hits: Assessing the Link Between MLB Salaries and Player Performance"
+output:
+  html_document:
+    toc: false
+---
+\
+\
+In recent years, Major League Baseball (MLB) player salaries have been rising at an unprecedented rate. In 2001, Alex Rodriguez made headlines by signing a 10-year, $252 million contract that broke the record for the most lucrative deal in professional sports. Fast forward to today, the expected deal for superstar Juan Soto is projected to be even more staggering: at least 12 years and $600 million. Salaries across the board have been rising as well, with the average player salary doubling since 2003, from $2.37 million to $4.98 million in the 2024 season. This surge in compensation raises an important question: are MLB players truly worth their salaries?
+\
+\
+\
+<p class="aligncenter">
+  <img src="./pics/pic2.jpg" alt="graduate" style = "width:60%" />
+  </p>
+  <style>
+.aligncenter {
+    text-align: center;
+}
+</style>
+<center><b> Major League Baseball (MLB) </b></center>
+\
+\
+\
+Our project aims to analyze whether the increasing salaries of baseball players—both hitters and pitchers—are justified by their performance on the field. Specifically, we focus on whether advanced metrics, such as OPS+ (for hitters) and ERA+ (for pitchers), are significantly associated with player salaries. We hope to uncover whether MLB teams should prioritize high-priced superstar acquisitions or consider a more balanced approach that emphasizes young talent and egalitarian roster-building. Ultimately, our findings may provide insights into how MLB teams can optimize their roster decisions to improve their chances of reaching the postseason and winning the World Series.
+\
+\
+\
+<p class="aligncenter">
+  <img src="./pics/pic1.jpg" alt=" me " style = "width:60%" />
+  </p>
+  <style>
+.aligncenter {
+    text-align: center;
+}
+</style>
+<center><b> Salary  vs  Performance </b></center>
+\
+\
