@@ -415,6 +415,36 @@ Interestingly, the pitchers with the highest ERA+ often had considerably lower s
 
 ## Batting Model
 
+```{r}
+lm_batting = lm(log10(salary_2022) ~ ops_2 + service_time_floor,
+                 data = merged_batting)
+
+summary(lm_batting)
+
+plot(lm_batting, which = 1)
+plot(lm_batting, which = 2)
+
+```
+
+We decided to log-transform the salary variable because it is heavily right-skewed, and decided to use $log_{10}$ instead of $ln$ for the sake of interpretability. We included OPS+, the "all-in-one" measure of hitter performance as well as their number of years of experience.
+
+
+From our model, we can see that batters with more experience have higher salaries, even adjusting for performance. At the same time, adjusting for service time, batters with higher OPS+ (that is, batters who perform better) have significantly higher salaries.
+
+Based on this model, which player provided the best value for money? Who was most cost effective? That would be the player with a high  OPS+ and the lowest residual, indicating that their actual salary was lower than predicted based on their performance.
+
+```{r}
+merged_batting |>
+  modelr::add_predictions(lm_batting) |>
+  modelr::add_residuals(lm_batting) |>
+  arrange(resid) |>
+  select(name, salary_2022, service_time_floor, ops_2, pred, resid ) |>
+  mutate(expected_salary = 10^pred) |>
+  slice(1:5)
+```
+
+It looks like in 2022, the most cost-effective player was Albert Pujols, who made $2.5 million in his 21st season with an OPS+ of 151.
+
 ## Pitching Model
 
 ```{r}

@@ -773,6 +773,67 @@ considerably lower salaries.</p>
 <h1>Additional analysis</h1>
 <div id="batting-model" class="section level2">
 <h2>Batting Model</h2>
+<pre class="r"><code>lm_batting = lm(log10(salary_2022) ~ ops_2 + service_time_floor,
+                 data = merged_batting)
+
+summary(lm_batting)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log10(salary_2022) ~ ops_2 + service_time_floor, 
+##     data = merged_batting)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -2.21562 -0.25145 -0.01364  0.25646  0.93865 
+## 
+## Coefficients:
+##                     Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)        5.5528133  0.0689038  80.588  &lt; 2e-16 ***
+## ops_2              0.0045456  0.0006639   6.847 3.38e-11 ***
+## service_time_floor 0.1130646  0.0052915  21.367  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.3547 on 351 degrees of freedom
+##   (44 observations deleted due to missingness)
+## Multiple R-squared:  0.5973, Adjusted R-squared:  0.595 
+## F-statistic: 260.3 on 2 and 351 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="r"><code>plot(lm_batting, which = 1)</code></pre>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
+<pre class="r"><code>plot(lm_batting, which = 2)</code></pre>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-8-2.png" width="90%" /></p>
+<p>We decided to log-transform the salary variable because it is heavily
+right-skewed, and decided to use <span
+class="math inline">\(log_{10}\)</span> instead of <span
+class="math inline">\(ln\)</span> for the sake of interpretability. We
+included OPS+, the “all-in-one” measure of hitter performance as well as
+their number of years of experience.</p>
+<p>From our model, we can see that batters with more experience have
+higher salaries, even adjusting for performance. At the same time,
+adjusting for service time, batters with higher OPS+ (that is, batters
+who perform better) have significantly higher salaries.</p>
+<p>Based on this model, which player provided the best value for money?
+Who was most cost effective? That would be the player with a high OPS+
+and the lowest residual, indicating that their actual salary was lower
+than predicted based on their performance.</p>
+<pre class="r"><code>merged_batting |&gt;
+  modelr::add_predictions(lm_batting) |&gt;
+  modelr::add_residuals(lm_batting) |&gt;
+  arrange(resid) |&gt;
+  select(name, salary_2022, service_time_floor, ops_2, pred, resid ) |&gt;
+  mutate(expected_salary = 10^pred) |&gt;
+  slice(1:5)</code></pre>
+<pre><code>## # A tibble: 5 × 7
+##   name         salary_2022 service_time_floor ops_2  pred  resid expected_salary
+##   &lt;chr&gt;              &lt;dbl&gt;              &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;           &lt;dbl&gt;
+## 1 Albert Pujo…     2500000                 21   151  8.61 -2.22       410735252.
+## 2 Jed Lowrie        850000                 13    50  7.25 -1.32        17780138.
+## 3 Kurt Suzuki      1750000                 14    59  7.40 -1.16        25346063.
+## 4 Alcides Esc…     1000000                 10    58  6.95 -0.947        8853328.
+## 5 Robinson Ch…      900000                  9    60  6.84 -0.889        6968403.</code></pre>
+<p>It looks like in 2022, the most cost-effective player was Albert
+Pujols, who made $2.5 million in his 21st season with an OPS+ of
+151.</p>
 </div>
 <div id="pitching-model" class="section level2">
 <h2>Pitching Model</h2>
@@ -811,11 +872,11 @@ summary(lm_pitching)</code></pre>
 <pre class="r"><code>plot(residuals(lm_pitching) ~ fitted.values(lm_pitching),
      main = &quot;Residuals vs. Fitted Values Plot for Pitching Model&quot;)
 abline(0,0)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
 <pre class="r"><code>qqnorm(residuals(lm_pitching),
        main = &quot;Normal Q-Q Plot for Pitching Model&quot;)
 qqline(residuals(lm_pitching))</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-8-2.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-10-2.png" width="90%" /></p>
 <p>We decided to log-transform the salary variable because it is heavily
 right-skewed, and decided to use <span
 class="math inline">\(log_{10}\)</span> instead of <span
