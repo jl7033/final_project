@@ -173,7 +173,154 @@ Our exploratory data analysis can be grouped into three categories: salary, batt
 
 Player salaries were highly right-skewed. This was expected, as many players make the league minimum salary of 700,000. The one position group not so heavily right skewed are the Designated Hitters. Similarly, the Designated Hitters had a higher average years of experience. Intuitively this makes sense as teams will want to select the better players for the position. Overall, most players were in their first year of the MLB with 68.2% having 5 or less years of experience. Players with more years of experience seem to get higher salaries, increasing as their years of experience.
 
+```{r}
+# Salary by Posiition Group
+salaries |>
+  mutate(position_group = case_match(simple_position,
+                                     c("rhp","lhp") ~ "pitcher",
+                                     c("cf","lf","rf","of") ~ "outfield",
+                                     "dh" ~ "dh",
+                                     .default = "infield")) |>
+  ggplot(aes(x = salary_2022, color = position_group)) +
+  geom_density() +
+  labs(title = "Salary by Position Group",
+       x = "2022 Salary",
+       y = "") +
+  scale_x_continuous(labels = label_comma()) +
+  scale_color_discrete(name = "Position Group",
+                       labels = c("Designated Hitter",
+                                "Infield",
+                                "Outfield",
+                                "Pitcher")) +
+  theme_bw()
+
+# Salary by Experience
+salaries %>%
+  ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
+  geom_boxplot() +
+  labs(title = "Salary Distribution for Years of Experience",
+       x = "Years of Experience",
+       y = "") +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
+
+# Experience by Position
+salaries |>
+  ggplot(aes(x = service_time_floor, 
+             y = simple_position, 
+             fill = simple_position)) + 
+  ggridges::geom_density_ridges(alpha = 0.5) +
+  labs(title = "Experience by Position",
+       x = "Years of Experience",
+       y = "") +
+  xlim(0,25) +
+  scale_y_discrete(labels = c("1b" = "1st Base",
+                    "2b" = "2nd Base",
+                    "3b" = "3rd Base",
+                    "inf" = "Infield",
+                    "c" = "Catcher",
+                    "rf" = "Right Field",
+                    "lf" = "Left Field",
+                    "cf" = "Center Field",
+                    "of" = "Outfield",
+                    "lhp" = "Left Hand Pitcher",
+                    "rhp" = "Right Hand Pitcher",
+                    "dh" = "Designated Hitter",
+                    "ss" = "Shortstop")) +
+  scale_fill_discrete(name = "Position",
+                      labels = c("1b" = "1st Base",
+                    "2b" = "2nd Base",
+                    "3b" = "3rd Base",
+                    "inf" = "Infield",
+                    "c" = "Catcher",
+                    "rf" = "Right Field",
+                    "lf" = "Left Field",
+                    "cf" = "Center Field",
+                    "of" = "Outfield",
+                    "lhp" = "Left Hand Pitcher",
+                    "rhp" = "Right Hand Pitcher",
+                    "dh" = "Designated Hitter",
+                    "ss" = "Shortstop")) +
+  theme_bw()
+```
+
 Many of the counting statistics for batting are right skewed, as most players are not hitting multiple home runs in the season. Some of the advanced statistics such as OPS+ are more normally distributed. An important idea to keep in mind is that many of these collected statistics are strongly correlated with each other as the advanced statistics are often a formula taking input from the counting statistics. Looking at the relation with salary, it seems that there may be an association between salary and home runs as well as OPS+. 
+
+```{r}
+# Chances at Bat by Home Runs
+merged_batting %>%
+  ggplot(aes(x = ab,y= hr)) +
+  geom_point(aes(color = ops)) +
+  geom_smooth(method = lm, se = FALSE, color = "firebrick") +
+  labs(title = "Who is the most 'effective' at the plate?",
+       x = "Chances at Bat",
+       y = "Number of Home Runs") +
+  scale_color_continuous("OPS") +
+  theme_bw()
+
+# Corrs for Batting Data
+merged_batting |>
+  select(hr, ba, ops) |>
+  GGally::ggpairs()
+
+# Scatter for Used Statistics
+yrs = merged_batting |>
+  ggplot(aes(x = service_time_floor, y = salary_2022)) + 
+  geom_point() +
+  labs(x="Years of Experience",y="") +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
+hrs = merged_batting |>
+  ggplot(aes(x = hr, y = salary_2022)) + 
+  geom_point() +
+  guides(y="none") +
+  labs(x="Home Runs",y="") +
+  theme_bw()
+bas = merged_batting |>
+  ggplot(aes(x = ba, y = salary_2022)) + 
+  geom_point() +
+  labs(x="Batting Averages",y="") +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
+ops = merged_batting |>
+  ggplot(aes(x = ops_2, y = salary_2022)) + 
+  geom_point() +
+  guides(y="none") +
+  labs(x="OPS+",y="") +
+  theme_bw()
+
+scatter_patch = (yrs+hrs)/(bas+ops)
+
+scatter_patch + plot_annotation(title = "Scatterplot of Batting Statistics and Salary")
+
+# Distributions for Used Statistics
+yrsCol = merged_batting |>
+  count(service_time_floor) |>
+  ggplot(aes(x = service_time_floor, y=n)) + 
+  geom_col() +
+  labs(x="Years of Experience",y="") +
+  theme_bw()
+hrsHist = merged_batting |>
+  ggplot(aes(x = hr)) + 
+  geom_histogram() +
+  labs(x="Home Runs",y="") +
+  theme_bw()
+basHist = merged_batting |>
+  ggplot(aes(x = ba)) + 
+  geom_histogram() +
+  labs(x="Batting Averages",y="") +
+  theme_bw()
+opsHist = merged_batting |>
+  ggplot(aes(x = ops_2)) + 
+  geom_histogram() +
+  labs(x="OPS+",y="") +
+  theme_bw()
+
+dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
+
+dist_patch + plot_annotation(title = "Distribution of Important Batting Statistics")
+```
+
 
 ## Pitching EDA
 
