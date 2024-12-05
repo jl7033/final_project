@@ -586,31 +586,37 @@ experience_fit |>
   broom::tidy()
 ```
 
-An interesting question might be: is OPS+ (an "all-in-one" statistic) a better predictor of salary than traditional statistics, adjusting for service time?
+An interesting question might be: is OPS+ (an "all-in-one" statistic) a better predictor of salary than traditional statistics?
+
+To do this, I'm going to account for batting average, home runs per plate appearance. I'm also going to adjust for service time for both models, since that is strongly correlated with salary.
 
 ```{r}
-hr_service_fit <- lm(log10(salary_2022) ~ hr + service_time_floor,
-                   data = merged_batting)
+hr_ba_fit <- merged_batting |>
+  mutate(hr_per_pa = hr / pa) |>
+  lm(log10(salary_2022) ~ ba + hr_per_pa + service_time_floor,
+                   data = _)
 
-hr_service_fit |>
+hr_ba_fit |>
   broom::tidy()
 
-hr_service_fit |>
+hr_ba_fit |>
   broom::glance()
 ```
 
 ```{r}
-ops_service_fit <- lm(log10(salary_2022) ~ ops_2 + service_time_floor,
-                   data = merged_batting)
+ops_fit <- merged_batting |>
+  lm(log10(salary_2022) ~ ops_2 + service_time_floor,
+                   data = _)
 
-ops_service_fit |>
+ops_fit |>
   broom::tidy()
 
-ops_service_fit |>
+ops_fit |>
   broom::glance()
 ```
 
-Based on these statistics, the model with home runs is a better predictor of salary than OPS+ (i.e. the HR model has higher r squared and lowed AIC).
+
+Based on these statistics, the model with than OPS+ is a better predictor than the one with home runs and batting average, which makes sense since OPS+ is internally accounting for more other factors.
 
 ## Pitching EDA
 
@@ -767,14 +773,10 @@ lm_era_2_data_log |>
 
 ```{r}
 
-lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9,
+lm_pitching = lm(salary_2022 ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2,
                  data = merged_pitching)
 
 summary(lm_pitching)
-
-plot(residuals(lm_pitching) ~ fitted.values(lm_pitching))
-qqnorm(residuals(lm_pitching))
-qqline(residuals(lm_pitching))
 
 ```
 
