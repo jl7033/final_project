@@ -13,6 +13,7 @@ library(tidyverse)
 library(rvest)
 library(readxl)
 library(scales)
+library(patchwork)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -550,6 +551,61 @@ merged_batting %>%
   theme_bw()
 
 # could be interesting, not sure if worth pursuing
+
+yrs = merged_batting |>
+  ggplot(aes(x = service_time_floor, y = salary_2022)) + 
+  geom_point() +
+  labs(x="Years of Experience",y="") +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
+hrs = merged_batting |>
+  ggplot(aes(x = hr, y = salary_2022)) + 
+  geom_point() +
+  guides(y="none") +
+  labs(x="Home Runs",y="") +
+  theme_bw()
+bas = merged_batting |>
+  ggplot(aes(x = ba, y = salary_2022)) + 
+  geom_point() +
+  labs(x="Batting Averages",y="") +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
+ops = merged_batting |>
+  ggplot(aes(x = ops_2, y = salary_2022)) + 
+  geom_point() +
+  guides(y="none") +
+  labs(x="OPS+",y="") +
+  theme_bw()
+
+scatter_patch = (yrs+hrs)/(bas+ops)
+
+scatter_patch + plot_annotation(title = "Scatterplot of Batting Statistics and Salary")
+
+
+yrsCol = merged_batting |>
+  count(service_time_floor) |>
+  ggplot(aes(x = service_time_floor, y=n)) + 
+  geom_col() +
+  labs(x="Years of Experience",y="") +
+  theme_bw()
+hrsHist = merged_batting |>
+  ggplot(aes(x = hr)) + 
+  geom_histogram() +
+  labs(x="Home Runs",y="") +
+  theme_bw()
+basHist = merged_batting |>
+  ggplot(aes(x = ba)) + 
+  geom_histogram() +
+  labs(x="Batting Averages",y="") +
+  theme_bw()
+opsHist = merged_batting |>
+  ggplot(aes(x = ops_2)) + 
+  geom_histogram() +
+  labs(x="OPS+",y="") +
+  theme_bw()
+
+dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
+dist_patch + plot_annotation(title = "Distribution of Important Batting Statistics")
 
 ```
 
