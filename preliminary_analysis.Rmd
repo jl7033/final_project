@@ -767,10 +767,14 @@ lm_era_2_data_log |>
 
 ```{r}
 
-lm_pitching = lm(salary_2022 ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2,
+lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9,
                  data = merged_pitching)
 
 summary(lm_pitching)
+
+plot(residuals(lm_pitching) ~ fitted.values(lm_pitching))
+qqnorm(residuals(lm_pitching))
+qqline(residuals(lm_pitching))
 
 ```
 
