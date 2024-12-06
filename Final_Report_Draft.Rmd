@@ -67,7 +67,9 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ### Salary Data
-The salaries data is cleaned and processed by renaming columns for clarity (e.g., position, salary_2022, service_time_yrs, name). The name column is split, reversed, and rejoined to standardize the name format, handling "Jr" formatting and removing special characters. Non-ASCII characters are converted to Latin equivalents using stri_trans_general(). The primary position is extracted from the position column, and the positions are reordered using fct_relevel() to create a new simple_position column. Additionally, a service_time_floor column is created by rounding service_time_yrs to the nearest whole number using floor(). The final dataset contains cleaned player names, positions, salary information, and service time.
+The salary data was downloaded from a [google sheets file](https://docs.google.com/spreadsheets/d/12XSXOQpjDJDCJKsA4xC1e_9FlS11aeioZy_p1nqpclg/edit?gid=1811400237#gid=1811400237) compiled by the website [Cot's Contracts](https://legacy.baseballprospectus.com/compensation/cots/).
+
+The salaries data is cleaned and processed by renaming columns for clarity (e.g., position, salary_2022, service_time_yrs, name). The name column is split, reversed, and rejoined to standardize the name format, handling "Jr" formatting and removing special characters. Non-ASCII characters are converted to Latin equivalents using stri_trans_general(). The primary position is extracted from the position column, and the positions are reordered using fct_relevel() to create a new simple_position column. Additionally, a service_time_floor column is created by rounding service_time_yrs to the nearest whole number using floor(), and we also created an experience_group variable for players early in their career (0-2 years) vs. later in their career (3+ years). The final dataset contains cleaned player names, positions, salary information, and service time.
 
 ```{r}
 salaries = read_excel(
@@ -100,8 +102,9 @@ salaries = read_excel(
 ```
 
 ### Batting Data
-A merged dataset of player batting statistics and salary information, focusing on players with at least 100 plate appearances.
-Two datasets identifying discrepancies: one where salary data is missing in the batting dataset and one where batting data is missing in the salary dataset.
+The batting and pitching data both come from a dataset on [kaggle](https://www.kaggle.com/datasets/vivovinco/2022-mlb-player-stats/data).
+
+To create a merged dataset of player batting statistics and salary information, several transformations were needed. First, because players could be listed with multiple teams due to trades, we filtered based on unique name and league memebership. We merged the batting data with the salary data by player name, focusing on players with at least 100 plate appearances, to create the merged_batting dataset. We also created two datasets identifying discrepancies: one where salary data is missing in the batting dataset and one where batting data is missing in the salary dataset.
 ```{r}
 batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
@@ -135,9 +138,7 @@ batting_not_in_salary <- anti_join(batting, salaries, by = "name")
 ```
 
 ### Pitching Data
-Merged player salary and pitching statistics for players who pitched at least 20 innings.
-Processed pitching data, including total innings pitched (ip_total), pitcher hand, and pitcher type.
-Missing player data in either the salaries or pitching dataset is identified.
+To create a merged dataset of player pitching statistics and salary information, we performed similar transofrmations to the batting data above. Then wee merged the pitching data with the salary data by player name, focusing on players with at least 20 innings pitched, to create the merged_pitching dataset. We then processed that pitching data, including total innings pitched (ip_total), pitcher hand, and pitcher type. Missing player data in either the salaries or pitching dataset is also identified.
 ```{r}
 pitching = read_delim("data/2022 MLB Player Stats - Pitching.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
@@ -441,8 +442,9 @@ Interestingly, the pitchers with the highest ERA+ often had considerably lower s
 lm_batting = lm(log10(salary_2022) ~ ops_2 + experience_group,
                  data = merged_batting)
 
-summary(lm_batting)
+broom::tidy(lm_batting)
 
+broom::glance(lm_batting)
 ```
 
 ```{r}
@@ -504,8 +506,9 @@ It looks like in 2022, the most cost-effective player was Albert Pujols, who mad
 lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9 + experience_group,
                  data = merged_pitching)
 
-summary(lm_pitching)
+broom::tidy(lm_pitching)
 
+broom::glance(lm_pitching)
 ```
 
 ```{r}

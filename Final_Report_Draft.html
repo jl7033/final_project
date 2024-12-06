@@ -436,6 +436,11 @@ on the ‘worst’ contract?</p></li>
 <h1>Data</h1>
 <div id="salary-data" class="section level3">
 <h3>Salary Data</h3>
+<p>The salary data was downloaded from a <a
+href="https://docs.google.com/spreadsheets/d/12XSXOQpjDJDCJKsA4xC1e_9FlS11aeioZy_p1nqpclg/edit?gid=1811400237#gid=1811400237">google
+sheets file</a> compiled by the website <a
+href="https://legacy.baseballprospectus.com/compensation/cots/">Cot’s
+Contracts</a>.</p>
 <p>The salaries data is cleaned and processed by renaming columns for
 clarity (e.g., position, salary_2022, service_time_yrs, name). The name
 column is split, reversed, and rejoined to standardize the name format,
@@ -445,8 +450,10 @@ stri_trans_general(). The primary position is extracted from the
 position column, and the positions are reordered using fct_relevel() to
 create a new simple_position column. Additionally, a service_time_floor
 column is created by rounding service_time_yrs to the nearest whole
-number using floor(). The final dataset contains cleaned player names,
-positions, salary information, and service time.</p>
+number using floor(), and we also created an experience_group variable
+for players early in their career (0-2 years) vs. later in their career
+(3+ years). The final dataset contains cleaned player names, positions,
+salary information, and service time.</p>
 <pre class="r"><code>salaries = read_excel(
   &quot;data/MLB-Salaries 2000-24.xlsx&quot;, 
   sheet = &quot;2022.xls&quot;,
@@ -477,10 +484,16 @@ positions, salary information, and service time.</p>
 </div>
 <div id="batting-data" class="section level3">
 <h3>Batting Data</h3>
-<p>A merged dataset of player batting statistics and salary information,
-focusing on players with at least 100 plate appearances. Two datasets
-identifying discrepancies: one where salary data is missing in the
-batting dataset and one where batting data is missing in the salary
+<p>The batting and pitching data both come from a dataset on <a
+href="https://www.kaggle.com/datasets/vivovinco/2022-mlb-player-stats/data">kaggle</a>.</p>
+<p>To create a merged dataset of player batting statistics and salary
+information, several transformations were needed. First, because players
+could be listed with multiple teams due to trades, we filtered based on
+unique name and league memebership. We merged the batting data with the
+salary data by player name, focusing on players with at least 100 plate
+appearances, to create the merged_batting dataset. We also created two
+datasets identifying discrepancies: one where salary data is missing in
+the batting dataset and one where batting data is missing in the salary
 dataset.</p>
 <pre class="r"><code>batting = read_delim(&quot;data/2022 MLB Player Stats - Batting.csv&quot;, delim = &quot;;&quot;,
                      locale = locale(encoding = &quot;latin1&quot;)) |&gt;
@@ -514,10 +527,14 @@ batting_not_in_salary &lt;- anti_join(batting, salaries, by = &quot;name&quot;)<
 </div>
 <div id="pitching-data" class="section level3">
 <h3>Pitching Data</h3>
-<p>Merged player salary and pitching statistics for players who pitched
-at least 20 innings. Processed pitching data, including total innings
-pitched (ip_total), pitcher hand, and pitcher type. Missing player data
-in either the salaries or pitching dataset is identified.</p>
+<p>To create a merged dataset of player pitching statistics and salary
+information, we performed similar transofrmations to the batting data
+above. Then wee merged the pitching data with the salary data by player
+name, focusing on players with at least 20 innings pitched, to create
+the merged_pitching dataset. We then processed that pitching data,
+including total innings pitched (ip_total), pitcher hand, and pitcher
+type. Missing player data in either the salaries or pitching dataset is
+also identified.</p>
 <pre class="r"><code>pitching = read_delim(&quot;data/2022 MLB Player Stats - Pitching.csv&quot;, delim = &quot;;&quot;,
                      locale = locale(encoding = &quot;latin1&quot;)) |&gt;
   janitor::clean_names() %&gt;%
@@ -815,27 +832,94 @@ considerably lower salaries.</p>
 <pre class="r"><code>lm_batting = lm(log10(salary_2022) ~ ops_2 + experience_group,
                  data = merged_batting)
 
-summary(lm_batting)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = log10(salary_2022) ~ ops_2 + experience_group, data = merged_batting)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -0.95350 -0.18334 -0.02296  0.21119  1.09670 
-## 
-## Coefficients:
-##                           Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)              5.5217232  0.0669508  82.474  &lt; 2e-16 ***
-## ops_2                    0.0043860  0.0006429   6.823 3.93e-11 ***
-## experience_group3+ years 0.8509329  0.0376350  22.610  &lt; 2e-16 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.3432 on 351 degrees of freedom
-##   (44 observations deleted due to missingness)
-## Multiple R-squared:  0.6228, Adjusted R-squared:  0.6207 
-## F-statistic: 289.8 on 2 and 351 DF,  p-value: &lt; 2.2e-16</code></pre>
+broom::tidy(lm_batting)</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">5.5217232</td>
+<td align="right">0.0669508</td>
+<td align="right">82.474364</td>
+<td align="right">0</td>
+</tr>
+<tr class="even">
+<td align="left">ops_2</td>
+<td align="right">0.0043860</td>
+<td align="right">0.0006429</td>
+<td align="right">6.822667</td>
+<td align="right">0</td>
+</tr>
+<tr class="odd">
+<td align="left">experience_group3+ years</td>
+<td align="right">0.8509329</td>
+<td align="right">0.0376350</td>
+<td align="right">22.610119</td>
+<td align="right">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>broom::glance(lm_batting)</code></pre>
+<div class="kable-table">
+<table>
+<colgroup>
+<col width="9%" />
+<col width="12%" />
+<col width="9%" />
+<col width="9%" />
+<col width="7%" />
+<col width="2%" />
+<col width="9%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="11%" />
+<col width="4%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">r.squared</th>
+<th align="right">adj.r.squared</th>
+<th align="right">sigma</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+<th align="right">df</th>
+<th align="right">logLik</th>
+<th align="right">AIC</th>
+<th align="right">BIC</th>
+<th align="right">deviance</th>
+<th align="right">df.residual</th>
+<th align="right">nobs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.6228295</td>
+<td align="right">0.6206804</td>
+<td align="right">0.3432482</td>
+<td align="right">289.8068</td>
+<td align="right">0</td>
+<td align="right">2</td>
+<td align="right">-122.2651</td>
+<td align="right">252.5303</td>
+<td align="right">268.0075</td>
+<td align="right">41.35459</td>
+<td align="right">351</td>
+<td align="right">354</td>
+</tr>
+</tbody>
+</table>
+</div>
 <pre class="r"><code>plot(residuals(lm_batting) ~ fitted.values(lm_batting), 
      main = &quot;Residuals vs. Fitted Values Plot for Batting Model&quot;,
      xlab = &quot;Fitted Values&quot;,
@@ -891,37 +975,150 @@ Pujols, who made $2.5 million in his 21st season with an OPS+ of
 <pre class="r"><code>lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9 + experience_group,
                  data = merged_pitching)
 
-summary(lm_pitching)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = log10(salary_2022) ~ hand + pitcher_type + hand * 
-##     pitcher_type + ip_total + era_2 + bb9 + so9 + experience_group, 
-##     data = merged_pitching)
-## 
-## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -0.7256 -0.1353  0.0000  0.1118  0.9380 
-## 
-## Coefficients:
-##                            Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)               6.5815420  0.3024707  21.759  &lt; 2e-16 ***
-## handrhp                  -0.4242111  0.3054319  -1.389 0.165624    
-## pitcher_typer            -0.8528043  0.2839805  -3.003 0.002838 ** 
-## pitcher_types            -0.5941512  0.2867592  -2.072 0.038898 *  
-## ip_total                  0.0014225  0.0003437   4.139 4.24e-05 ***
-## era_2                    -0.0004776  0.0002877  -1.660 0.097707 .  
-## bb9                      -0.0377370  0.0128069  -2.947 0.003397 ** 
-## so9                       0.0247501  0.0072925   3.394 0.000756 ***
-## experience_group3+ years  0.6080049  0.0299496  20.301  &lt; 2e-16 ***
-## handrhp:pitcher_typer     0.4144199  0.3072509   1.349 0.178149    
-## handrhp:pitcher_types     0.3405457  0.3101460   1.098 0.272844    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 0.2786 on 408 degrees of freedom
-##   (50 observations deleted due to missingness)
-## Multiple R-squared:  0.677,  Adjusted R-squared:  0.6691 
-## F-statistic: 85.52 on 10 and 408 DF,  p-value: &lt; 2.2e-16</code></pre>
+broom::tidy(lm_pitching)</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">6.5815420</td>
+<td align="right">0.3024707</td>
+<td align="right">21.759271</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">handrhp</td>
+<td align="right">-0.4242111</td>
+<td align="right">0.3054319</td>
+<td align="right">-1.388890</td>
+<td align="right">0.1656240</td>
+</tr>
+<tr class="odd">
+<td align="left">pitcher_typer</td>
+<td align="right">-0.8528043</td>
+<td align="right">0.2839805</td>
+<td align="right">-3.003038</td>
+<td align="right">0.0028375</td>
+</tr>
+<tr class="even">
+<td align="left">pitcher_types</td>
+<td align="right">-0.5941512</td>
+<td align="right">0.2867592</td>
+<td align="right">-2.071952</td>
+<td align="right">0.0388977</td>
+</tr>
+<tr class="odd">
+<td align="left">ip_total</td>
+<td align="right">0.0014225</td>
+<td align="right">0.0003437</td>
+<td align="right">4.138882</td>
+<td align="right">0.0000424</td>
+</tr>
+<tr class="even">
+<td align="left">era_2</td>
+<td align="right">-0.0004776</td>
+<td align="right">0.0002877</td>
+<td align="right">-1.659882</td>
+<td align="right">0.0977066</td>
+</tr>
+<tr class="odd">
+<td align="left">bb9</td>
+<td align="right">-0.0377370</td>
+<td align="right">0.0128069</td>
+<td align="right">-2.946623</td>
+<td align="right">0.0033969</td>
+</tr>
+<tr class="even">
+<td align="left">so9</td>
+<td align="right">0.0247501</td>
+<td align="right">0.0072925</td>
+<td align="right">3.393930</td>
+<td align="right">0.0007564</td>
+</tr>
+<tr class="odd">
+<td align="left">experience_group3+ years</td>
+<td align="right">0.6080049</td>
+<td align="right">0.0299496</td>
+<td align="right">20.300925</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">handrhp:pitcher_typer</td>
+<td align="right">0.4144199</td>
+<td align="right">0.3072509</td>
+<td align="right">1.348800</td>
+<td align="right">0.1781494</td>
+</tr>
+<tr class="odd">
+<td align="left">handrhp:pitcher_types</td>
+<td align="right">0.3405457</td>
+<td align="right">0.3101460</td>
+<td align="right">1.098017</td>
+<td align="right">0.2728445</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>broom::glance(lm_pitching)</code></pre>
+<div class="kable-table">
+<table>
+<colgroup>
+<col width="9%" />
+<col width="12%" />
+<col width="9%" />
+<col width="9%" />
+<col width="7%" />
+<col width="2%" />
+<col width="9%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="11%" />
+<col width="4%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">r.squared</th>
+<th align="right">adj.r.squared</th>
+<th align="right">sigma</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+<th align="right">df</th>
+<th align="right">logLik</th>
+<th align="right">AIC</th>
+<th align="right">BIC</th>
+<th align="right">deviance</th>
+<th align="right">df.residual</th>
+<th align="right">nobs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.6770215</td>
+<td align="right">0.6691053</td>
+<td align="right">0.2785755</td>
+<td align="right">85.52419</td>
+<td align="right">0</td>
+<td align="right">10</td>
+<td align="right">-53.45206</td>
+<td align="right">130.9041</td>
+<td align="right">179.3586</td>
+<td align="right">31.66256</td>
+<td align="right">408</td>
+<td align="right">419</td>
+</tr>
+</tbody>
+</table>
+</div>
 <pre class="r"><code>plot(residuals(lm_pitching) ~ fitted.values(lm_pitching),
      main = &quot;Residuals vs. Fitted Values Plot for Pitching Model&quot;,
      xlab = &quot;Fitted Values&quot;,
