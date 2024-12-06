@@ -7,3 +7,4 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+As MLB salaries continue to rise at exponential rates, it is important to assess whether the league's biggest contracts are worth it. We sought to use advanced baseball statistics for the 2022 season, specifically OPS+ for batters and ERA+ for pitchers, in order to explore whether players with top salaries are truly earning them. The top five batters and top five pitchers, by salary below expected, came from similar demographics: veterans on cheap deals. While these veterans weren't necessarily among the league leaders in OPS+ or ERA+, they provided value that far exceeded their salary. Finally, while most of the top-paid MLB players enjoyed good if not great seasons, their performance was still not quite strong enough to justify their pay.

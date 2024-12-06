@@ -478,7 +478,8 @@ merged_batting |>
   arrange(resid) |>
   select(name, salary_2022, service_time_floor, experience_group, ops_2, pred, resid ) |>
   mutate(expected_salary = 10^pred) |>
-  slice(1:5)
+  slice(1:5) |>
+  view()
 ```
 
 ### Top 10 Batters by Salary
@@ -490,7 +491,8 @@ merged_batting |>
   arrange(desc(salary_2022)) |>
   select(name, salary_2022, service_time_floor,experience_group, ops_2, pred, resid ) |>
   mutate(expected_salary = 10^pred) |>
-  slice(1:10)
+  slice(1:10) |>
+  view()
 ```
 
 It looks like in 2022, the most cost-effective player was Albert Pujols, who made $2.5 million in his 21st season with an OPS+ of 151.
@@ -542,7 +544,8 @@ merged_pitching |>
   arrange(resid) |>
   select(name, salary_2022, service_time_floor, experience_group, era_2, pred, resid ) |>
   mutate(expected_salary = 10^pred) |>
-  slice(1:5)
+  slice(1:5) |>
+  view()
 
 ```
 
@@ -556,7 +559,8 @@ merged_pitching |>
   arrange(desc(salary_2022)) |>
   select(name, salary_2022, service_time_floor, experience_group, era_2, pred, resid ) |>
   mutate(expected_salary = 10^pred) |>
-  slice(1:10)
+  slice(1:10) |>
+  view()
 
 ```
 
@@ -566,10 +570,8 @@ As MLB salaries continue to rise at exponential rates, it is important to assess
 
 We sought to use these advanced statistics in order to explore whether players with top salaries are truly earning them. We found that while OPS+ had a significant positive association with salary for hitters, ERA+ had no significant association with salary for pitchers, implying that other indicators -- specifically service time, innings pitched, walk rate, and strikeout rate -- were stronger predictors of a player's salary. The team-building implications of these results are fascinating, especially with respect to pitchers. If there is little to no association between a pitcher's ability to limit runs and their salary, which kinds of pitchers should teams sign in order to maximize the value of their contracts?
 
-The top five batters and top five pitchers, by salary below expected, came from similar demographics: veterans on cheap deals. All ten of these players had at least nine years' worth of service time, and only Albert Pujols, in his 22nd and final season, made more than half of the average MLB salary in 2022. The implications for team-building based on these results are clear: instead of spending large amounts on a select few players, give deals to veterans who may be undervalued by the market, as they are more likely to produce value than the most expensive players. The Tampa Bay Rays, a team known for their reluctance to spend as much as their success, have utilized this strategy quite well, riding a combination of young players on rookie contracts and veterans let go by other teams -- such as Yandy Diaz, Manuel Margot, Ji-Man Choi, Corey Kluber, and Jeffrey Springs -- to the fifth-highest winning percentage in MLB (out of 30 teams) over the last 10 seasons.
+Our pitching model was more sophisticated than our batting model for two main reasons: first, there was more available data on pitcher handedness and pitcher type that we felt was necessary to adjust for in the model, and second, a pitching model based only on ERA+ and service time did not properly satisfy the assumptions of linear regression (namely, the fitted values had a sharply bimodal, non-Normal distrbution). In addition, we first tried treating service time as a quantitative variable, but we found that our models overvalued veteran players to the point where their predicted salaries were high regardless of their underlying statistics. Therefore, we created a binary `experience_group` variable, which separated players who were on their rookie contracts (i.e. 0-2 years of experience) from players who had reached salary arbitration (i.e. 3+ years of experience).
 
-So, what does this mean for the players who earn top-dollar contracts? On the pitching side, eight of the top 10 pitchers by salary recorded an ERA+ above 110, meaning that they were a good deal more effective at getting outs than the average pitcher. And yet, only one of them (Justin Verlander, who won the AL Cy Young Award as the AL's top pitcher in 2022) had an expected salary that was higher than their actual salary. In other words, even though many of these pitchers enjoyed good if not great seasons, their performance was still not quite strong enough to justify their salaries.
+The top five batters and top five pitchers, by salary below expected, came from similar demographics: veterans on cheap deals. Interestingly, only two of the top five batters and one of the top five pitchers had an above-average OPS+ and ERA+, respectively. However, this doesn't mean that these players didn't carry a good deal of value for their teams, as even a league-average player on a far below-average salary gives teams more payroll flexibility without sacrificing too much production. The implications for team-building based on these results are clear: instead of spending large amounts on a select few players, give deals to veterans who may be undervalued by the market, as they are more likely to produce value than the most expensive players. The Tampa Bay Rays, a team known for their reluctance to spend as much as their success, have utilized this strategy quite well, riding a combination of young players on rookie contracts and veterans let go by other teams -- such as Yandy Diaz, Manuel Margot, Ji-Man Choi, Corey Kluber, and Jeffrey Springs -- to the fifth-highest winning percentage in MLB (out of 30 teams) over the last 10 seasons.
 
-However, these results should be interpreted with some caution, given the importance of service time with respect to our model's predicted salary. For example, since the `service_time` coefficient of our pitching model is about 0.091, ten years' worth of service time would result in an $0.91$-unit increase in the log of salary, or a $10^{0.91} = 8.13$-fold increase in salary. Therefore, veteran pitchers such as Verlander, are much more likely to be given higher expected salaries by our model than young pitchers, even if their statistics are strong.
-
-There is an inherent trade-off between including an excluding service time from our models. For example, the pitching model has an adjusted $R^2$ of 0.687 with the service time parameter and 0.337 without it, meaning that adding service time to the model more than doubles the portion of the variance in salary that can be explained by the model. However, including service time potentially undervalues the contributions of young players, almost all of whom are on cheap contracts, that significantly outperform their salary. 
+So, what does this mean for the players who earn top-dollar contracts? Eight of the top 10 batters and eight of the top 10 pitchers by salary recorded an OPS+ or ERA+ above 110, meaning that the hitters and pitchers were well above average at creating runs and recording outs, respectively. And yet, none of them, (even Mike Trout, a perennial MVP candidate, and Justin Verlander, who won the AL Cy Young Award as the AL's top pitcher in 2022) had an expected salary that was higher than their actual salary. In fact, despite recording an excellent 169 ERA+, three-time Cy Young winner Max Scherzer was ranked among the top five *least* cost-effective pitchers in the league by our model. The primary reason: at \$43.3 million, he was the highest-compensated hitter or pitcher in the entire league. Even though most of the top-paid MLB players enjoyed good if not great seasons, their performance was still not quite strong enough to justify their salaries.
