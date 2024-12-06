@@ -379,9 +379,8 @@ expected to sign within the next week, which is projected to go for at
 least 12 years and $600 million. The skyrocketing salaries don’t just
 apply to the game’s most marquee names; since 2003, the average player
 salary has more than doubled, from $2.37 million to $4.98 million for
-the 2024 season (source: <a
-href="https://www.statista.com/statistics/236213/mean-salaray-of-players-in-majpr-league-baseball/"
-class="uri">https://www.statista.com/statistics/236213/mean-salaray-of-players-in-majpr-league-baseball/</a>).
+the 2024 season (<a
+href="https://www.statista.com/statistics/236213/mean-salaray-of-players-in-majpr-league-baseball/">source</a>).
 As players become more and more expensive and teams face increasingly
 harsh luxury tax penalties for exceeding certain payroll thresholds, MLB
 teams face important decisions on which, if any, free agents to sign to
@@ -400,13 +399,14 @@ ultimately winning the World Series.</p>
 <h1>Related work</h1>
 <p>There has been a heated debate over the use of statistics and
 analytics in the evaluation of player performances and whether the
-decision to pay players can be aided by these methods. Sabermetrics (add
-hyperlink in website) is one of the more popular ways of applying
-statistics to baseball to be an addition to traditional evaluations. The
-famous movie Moneyball (add hyperlink in website) tells the story of the
-Oakland Athletic’s, an underdog using statistics over traditional
-evaluations to gain an edge. One of the hopes of our project is to
-approach some of these same problems from our own perspective.</p>
+decision to pay players can be aided by these methods. <a
+href="https://sabr.org/sabermetrics">Sabermetrics</a> is one of the more
+popular ways of applying statistics to baseball to be an addition to
+traditional evaluations. The famous movie <a
+href="https://www.imdb.com/title/tt1210166/">Moneyball</a> tells the
+story of the Oakland Athletic’s, an underdog using statistics over
+traditional evaluations to gain an edge. One of the hopes of our project
+is to approach some of these same problems from our own perspective.</p>
 </div>
 <div id="initial-questions" class="section level1">
 <h1>Initial questions</h1>
@@ -424,14 +424,16 @@ their 2022 statistics?</p></li>
 </ol>
 <p>After conducting an exploratory data analysis, we adjusted our
 questions into:</p>
+<ol style="list-style-type: decimal">
+<li><p>Can we construct a model from both counting and advanced
+statistics that predicts the salary of a baseball player?</p></li>
+<li><p>What player is on the ‘best’ contract? That is, who is the best
+player in the MLB in terms outperforming their contract? What player is
+on the ‘worst’ contract?</p></li>
+</ol>
 </div>
 <div id="data" class="section level1">
 <h1>Data</h1>
-<div id="data-cleaning-code" class="section level2">
-<h2>Data Cleaning Code</h2>
-<div id="setup" class="section level3">
-<h3>Setup</h3>
-</div>
 <div id="salary-data" class="section level3">
 <h3>Salary Data</h3>
 <pre class="r"><code>salaries = read_excel(
@@ -494,7 +496,6 @@ batting_not_in_salary &lt;- anti_join(batting, salaries, by = &quot;name&quot;)<
 </div>
 <div id="pitching-data" class="section level3">
 <h3>Pitching Data</h3>
-<p>(same data cleaning process as above)</p>
 <pre class="r"><code>pitching = read_delim(&quot;data/2022 MLB Player Stats - Pitching.csv&quot;, delim = &quot;;&quot;,
                      locale = locale(encoding = &quot;latin1&quot;)) |&gt;
   janitor::clean_names() %&gt;%
@@ -531,11 +532,12 @@ salary_not_in_pitching &lt;- anti_join(salaries, pitching, by = &quot;name&quot;
 pitching_not_in_salary &lt;- anti_join(pitching, salaries, by = &quot;name&quot;)</code></pre>
 </div>
 </div>
-</div>
 <div id="exploratory-analysis" class="section level1">
 <h1>Exploratory analysis</h1>
 <p>Our exploratory data analysis can be grouped into three categories:
 salary, batting, and pitching.</p>
+<div id="salary-eda" class="section level3">
+<h3>Salary EDA</h3>
 <p>Player salaries were highly right-skewed. This was expected, as many
 players make the league minimum salary of 700,000. The one position
 group not so heavily right skewed are the Designated Hitters. Similarly,
@@ -614,6 +616,9 @@ salaries |&gt;
                     &quot;ss&quot; = &quot;Shortstop&quot;)) +
   theme_bw()</code></pre>
 <p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+</div>
+<div id="batting-eda" class="section level3">
+<h3>Batting EDA</h3>
 <p>Many of the counting statistics for batting are right skewed, as most
 players are not hitting multiple home runs in the season. Some of the
 advanced statistics such as OPS+ are more normally distributed. An
@@ -638,28 +643,55 @@ merged_batting |&gt;
   select(hr, ba, ops) |&gt;
   GGally::ggpairs()</code></pre>
 <p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
+<pre class="r"><code># Distributions for Used Statistics
+yrsCol = merged_batting |&gt;
+  count(service_time_floor) |&gt;
+  ggplot(aes(x = service_time_floor, y=n)) + 
+  geom_col(fill = &#39;blue&#39;, col = &#39;black&#39;) +
+  labs(x=&quot;Years of Experience&quot;,y=&quot;&quot;) +
+  theme_bw()
+hrsHist = merged_batting |&gt;
+  ggplot(aes(x = hr)) + 
+  geom_histogram(fill = &#39;purple&#39;, col = &#39;black&#39;) +
+  labs(x=&quot;Home Runs&quot;,y=&quot;&quot;) +
+  theme_bw()
+basHist = merged_batting |&gt;
+  ggplot(aes(x = ba)) + 
+  geom_histogram(fill = &#39;yellow&#39;, col = &#39;black&#39;) +
+  labs(x=&quot;Batting Averages&quot;,y=&quot;&quot;) +
+  theme_bw()
+opsHist = merged_batting |&gt;
+  ggplot(aes(x = ops_2)) + 
+  geom_histogram(fill = &#39;lightgreen&#39;, col = &#39;black&#39;) +
+  labs(x=&quot;OPS+&quot;,y=&quot;&quot;) +
+  theme_bw()
+
+dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
+
+dist_patch + plot_annotation(title = &quot;Distribution of Important Batting Statistics&quot;)</code></pre>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
 <pre class="r"><code># Scatter for Used Statistics
 yrs = merged_batting |&gt;
   ggplot(aes(x = service_time_floor, y = salary_2022)) + 
-  geom_point() +
+  geom_point(col = &#39;blue&#39;) +
   labs(x=&quot;Years of Experience&quot;,y=&quot;&quot;) +
   scale_y_continuous(labels = label_comma()) +
   theme_bw()
 hrs = merged_batting |&gt;
   ggplot(aes(x = hr, y = salary_2022)) + 
-  geom_point() +
+  geom_point(col = &#39;purple&#39;) +
   guides(y=&quot;none&quot;) +
   labs(x=&quot;Home Runs&quot;,y=&quot;&quot;) +
   theme_bw()
 bas = merged_batting |&gt;
   ggplot(aes(x = ba, y = salary_2022)) + 
-  geom_point() +
+  geom_point(col = &#39;yellow&#39;) +
   labs(x=&quot;Batting Averages&quot;,y=&quot;&quot;) +
   scale_y_continuous(labels = label_comma()) +
   theme_bw()
 ops = merged_batting |&gt;
   ggplot(aes(x = ops_2, y = salary_2022)) + 
-  geom_point() +
+  geom_point(col = &#39;lightgreen&#39;) +
   guides(y=&quot;none&quot;) +
   labs(x=&quot;OPS+&quot;,y=&quot;&quot;) +
   theme_bw()
@@ -667,36 +699,10 @@ ops = merged_batting |&gt;
 scatter_patch = (yrs+hrs)/(bas+ops)
 
 scatter_patch + plot_annotation(title = &quot;Scatterplot of Batting Statistics and Salary&quot;)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
-<pre class="r"><code># Distributions for Used Statistics
-yrsCol = merged_batting |&gt;
-  count(service_time_floor) |&gt;
-  ggplot(aes(x = service_time_floor, y=n)) + 
-  geom_col() +
-  labs(x=&quot;Years of Experience&quot;,y=&quot;&quot;) +
-  theme_bw()
-hrsHist = merged_batting |&gt;
-  ggplot(aes(x = hr)) + 
-  geom_histogram() +
-  labs(x=&quot;Home Runs&quot;,y=&quot;&quot;) +
-  theme_bw()
-basHist = merged_batting |&gt;
-  ggplot(aes(x = ba)) + 
-  geom_histogram() +
-  labs(x=&quot;Batting Averages&quot;,y=&quot;&quot;) +
-  theme_bw()
-opsHist = merged_batting |&gt;
-  ggplot(aes(x = ops_2)) + 
-  geom_histogram() +
-  labs(x=&quot;OPS+&quot;,y=&quot;&quot;) +
-  theme_bw()
-
-dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
-
-dist_patch + plot_annotation(title = &quot;Distribution of Important Batting Statistics&quot;)</code></pre>
 <p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
-<div id="pitching-eda" class="section level2">
-<h2>Pitching EDA</h2>
+</div>
+<div id="pitching-eda" class="section level3">
+<h3>Pitching EDA</h3>
 <pre class="r"><code>ip_plot = merged_pitching |&gt; 
   ggplot(aes(x = ip_total)) + 
   geom_histogram(binwidth = 5, fill = &quot;red&quot;, col = &quot;black&quot;) +

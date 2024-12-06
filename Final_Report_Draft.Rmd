@@ -11,13 +11,13 @@ output:
 
 # Motivation
 
-MLB player salaries are growing faster than ever. In 2001, former Seattle Mariners superstar Alex Rodriguez signed a 10-year, \$252 million deal that broke the record for the most lucrative contract in professional sports history. And yet, Rodriguez's deal pales in comparison to the monster contract that current superstar Juan Soto is expected to sign within the next week, which is projected to go for at least 12 years and \$600 million. The skyrocketing salaries don't just apply to the game's most marquee names; since 2003, the average player salary has more than doubled, from \$2.37 million to \$4.98 million for the 2024 season (source: <https://www.statista.com/statistics/236213/mean-salaray-of-players-in-majpr-league-baseball/>). As players become more and more expensive and teams face increasingly harsh luxury tax penalties for exceeding certain payroll thresholds, MLB teams face important decisions on which, if any, free agents to sign to long-term, expensive contracts.
+MLB player salaries are growing faster than ever. In 2001, former Seattle Mariners superstar Alex Rodriguez signed a 10-year, \$252 million deal that broke the record for the most lucrative contract in professional sports history. And yet, Rodriguez's deal pales in comparison to the monster contract that current superstar Juan Soto is expected to sign within the next week, which is projected to go for at least 12 years and \$600 million. The skyrocketing salaries don't just apply to the game's most marquee names; since 2003, the average player salary has more than doubled, from \$2.37 million to \$4.98 million for the 2024 season ([source](https://www.statista.com/statistics/236213/mean-salaray-of-players-in-majpr-league-baseball/)). As players become more and more expensive and teams face increasingly harsh luxury tax penalties for exceeding certain payroll thresholds, MLB teams face important decisions on which, if any, free agents to sign to long-term, expensive contracts.
 
 The primary goal of our project is to determine whether baseball players -- both batters and pitchers -- are worth their salaries, and whether teams should focus primarily on signing big-money free agents or taking a more egalitarian and young player-heavy approach. More specifically, are advanced statistics such as OPS+ (for hitters) and ERA+ (for pitchers) significantly associated with player salary? Our conclusions could give MLB teams insight into how they can build their rosters to optimize their chances of making the postseason and ultimately winning the World Series.
 
 # Related work
 
-There has been a heated debate over the use of statistics and analytics in the evaluation of player performances and whether the decision to pay players can be aided by these methods. Sabermetrics (add hyperlink in website) is one of the more popular ways of applying statistics to baseball to be an addition to traditional evaluations. The famous movie Moneyball (add hyperlink in website) tells the story of the Oakland Athletic's, an underdog using statistics over traditional evaluations to gain an edge. One of the hopes of our project is to approach some of these same problems from our own perspective.
+There has been a heated debate over the use of statistics and analytics in the evaluation of player performances and whether the decision to pay players can be aided by these methods. [Sabermetrics](https://sabr.org/sabermetrics) is one of the more popular ways of applying statistics to baseball to be an addition to traditional evaluations. The famous movie [Moneyball](https://www.imdb.com/title/tt1210166/) tells the story of the Oakland Athletic's, an underdog using statistics over traditional evaluations to gain an edge. One of the hopes of our project is to approach some of these same problems from our own perspective.
 
 # Initial questions
 
@@ -31,12 +31,12 @@ Before beginning the project, we set out to potentially answer three primary que
 
 After conducting an exploratory data analysis, we adjusted our questions into:
 
+1) Can we construct a model from both counting and advanced statistics that predicts the salary of a baseball player?
+
+2) What player is on the 'best' contract? That is, who is the best player in the MLB in terms outperforming their contract? What player is on the 'worst' contract?
+
 
 # Data
-
-## Data Cleaning Code
-
-### Setup
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -132,7 +132,6 @@ batting_not_in_salary <- anti_join(batting, salaries, by = "name")
 
 ### Pitching Data
 
-(same data cleaning process as above)
 ```{r}
 pitching = read_delim("data/2022 MLB Player Stats - Pitching.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
@@ -172,7 +171,9 @@ pitching_not_in_salary <- anti_join(pitching, salaries, by = "name")
 
 # Exploratory analysis 
 
-Our exploratory data analysis can be grouped into three categories: salary, batting, and pitching. 
+Our exploratory data analysis can be grouped into three categories: salary, batting, and pitching.
+
+### Salary EDA
 
 Player salaries were highly right-skewed. This was expected, as many players make the league minimum salary of 700,000. The one position group not so heavily right skewed are the Designated Hitters. Similarly, the Designated Hitters had a higher average years of experience. Intuitively this makes sense as teams will want to select the better players for the position. Overall, most players were in their first year of the MLB with 68.2% having 5 or less years of experience. Players with more years of experience seem to get higher salaries, increasing as their years of experience.
 
@@ -251,6 +252,8 @@ salaries |>
   theme_bw()
 ```
 
+### Batting EDA
+
 Many of the counting statistics for batting are right skewed, as most players are not hitting multiple home runs in the season. Some of the advanced statistics such as OPS+ are more normally distributed. An important idea to keep in mind is that many of these collected statistics are strongly correlated with each other as the advanced statistics are often a formula taking input from the counting statistics. Looking at the relation with salary, it seems that there may be an association between salary and home runs as well as OPS+. 
 
 ```{r}
@@ -274,28 +277,57 @@ merged_batting |>
 ```
 
 ```{r}
+# Distributions for Used Statistics
+yrsCol = merged_batting |>
+  count(service_time_floor) |>
+  ggplot(aes(x = service_time_floor, y=n)) + 
+  geom_col(fill = 'blue', col = 'black') +
+  labs(x="Years of Experience",y="") +
+  theme_bw()
+hrsHist = merged_batting |>
+  ggplot(aes(x = hr)) + 
+  geom_histogram(fill = 'purple', col = 'black') +
+  labs(x="Home Runs",y="") +
+  theme_bw()
+basHist = merged_batting |>
+  ggplot(aes(x = ba)) + 
+  geom_histogram(fill = 'yellow', col = 'black') +
+  labs(x="Batting Averages",y="") +
+  theme_bw()
+opsHist = merged_batting |>
+  ggplot(aes(x = ops_2)) + 
+  geom_histogram(fill = 'lightgreen', col = 'black') +
+  labs(x="OPS+",y="") +
+  theme_bw()
+
+dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
+
+dist_patch + plot_annotation(title = "Distribution of Important Batting Statistics")
+```
+
+```{r}
 # Scatter for Used Statistics
 yrs = merged_batting |>
   ggplot(aes(x = service_time_floor, y = salary_2022)) + 
-  geom_point() +
+  geom_point(col = 'blue') +
   labs(x="Years of Experience",y="") +
   scale_y_continuous(labels = label_comma()) +
   theme_bw()
 hrs = merged_batting |>
   ggplot(aes(x = hr, y = salary_2022)) + 
-  geom_point() +
+  geom_point(col = 'purple') +
   guides(y="none") +
   labs(x="Home Runs",y="") +
   theme_bw()
 bas = merged_batting |>
   ggplot(aes(x = ba, y = salary_2022)) + 
-  geom_point() +
+  geom_point(col = 'yellow') +
   labs(x="Batting Averages",y="") +
   scale_y_continuous(labels = label_comma()) +
   theme_bw()
 ops = merged_batting |>
   ggplot(aes(x = ops_2, y = salary_2022)) + 
-  geom_point() +
+  geom_point(col = 'lightgreen') +
   guides(y="none") +
   labs(x="OPS+",y="") +
   theme_bw()
@@ -305,36 +337,7 @@ scatter_patch = (yrs+hrs)/(bas+ops)
 scatter_patch + plot_annotation(title = "Scatterplot of Batting Statistics and Salary")
 ```
 
-```{r}
-# Distributions for Used Statistics
-yrsCol = merged_batting |>
-  count(service_time_floor) |>
-  ggplot(aes(x = service_time_floor, y=n)) + 
-  geom_col() +
-  labs(x="Years of Experience",y="") +
-  theme_bw()
-hrsHist = merged_batting |>
-  ggplot(aes(x = hr)) + 
-  geom_histogram() +
-  labs(x="Home Runs",y="") +
-  theme_bw()
-basHist = merged_batting |>
-  ggplot(aes(x = ba)) + 
-  geom_histogram() +
-  labs(x="Batting Averages",y="") +
-  theme_bw()
-opsHist = merged_batting |>
-  ggplot(aes(x = ops_2)) + 
-  geom_histogram() +
-  labs(x="OPS+",y="") +
-  theme_bw()
-
-dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
-
-dist_patch + plot_annotation(title = "Distribution of Important Batting Statistics")
-```
-
-## Pitching EDA
+### Pitching EDA
 
 ```{r}
 
