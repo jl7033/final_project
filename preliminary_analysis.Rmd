@@ -439,91 +439,7 @@ merged_batting |>
 
 Some of these potential predictors are fairly strongly correlated (like RBI and HR, or BA and OPS), so it's important not to include too many collinear variables in a potential linear model.
 
-## Pitching EDA
 
-```{r}
-
-ip_plot = merged_pitching |> 
-  ggplot(aes(x = ip_total)) + 
-  geom_histogram(binwidth = 5, fill = "red", col = "black") +
-  labs(
-       x = "Innings Pitched",
-       y = "Pitcher Count") +
-  theme_bw()
-
-era_plot = merged_pitching |>
-  ggplot(aes(x = era_2)) + 
-  geom_histogram(fill = "lightblue", col = "black") +
-    labs(
-       x = "ERA+",
-       y = "Pitcher Count") +
-  theme_bw()
-
-bb_plot = merged_pitching |>
-  ggplot(aes(x = bb9)) + 
-  geom_histogram(fill = "darkgreen", col = "black") +
-    labs(
-       x = "Walks per 9 Innings (BB/9)",
-       y = "Pitcher Count") +
-  theme_bw()
-
-so_plot = merged_pitching |>
-  ggplot(aes(x = so9)) + 
-  geom_histogram(fill = "orange", col = "black") +
-    labs(
-       x = "Strikeouts per 9 Innings (SO/9)",
-       y = "Pitcher Count") +
-  theme_bw()
-
-hist_pitch = (ip_plot + era_plot) / (bb_plot + so_plot)
-hist_pitch + plot_annotation(title = "Histograms of Pitching Statistics")
-
-```
-
-The distribution of innings pitched is quite right-skewed, with a peak around 70 innings pitched. The distribution of ERA+ is right-skewed as well, with a peak around 100 (the league average) and a small number of pitchers with an ERA+ above 200. The distributions of BB/9 and SO/9 are mostly symmetric, with peaks around 3 and 9, respectively.
-
-```{r}
-
-ip_sal = merged_pitching |> 
-  ggplot(aes(x = ip_total, y = salary_2022)) + 
-  geom_point(col = "red") + 
-  scale_x_continuous(lim = c(0, 250)) +
-  scale_y_continuous(labels = label_comma()) +
-  labs(x = "Innings Pitched",
-       y = "2022 Salary") +
-  theme_bw()
-
-era_sal = merged_pitching |> 
-  ggplot(aes(x = era_2, y = salary_2022)) + 
-  geom_point(col = "lightblue") +
-  scale_x_continuous(lim = c(0, 400)) + 
-  scale_y_continuous(labels = label_comma()) +
-  labs(x = "ERA+",
-       y = "2022 Salary") +
-  theme_bw()
-
-bb_sal = merged_pitching |> 
-  ggplot(aes(x = bb9, y = salary_2022)) + 
-  geom_point(col = "darkgreen") +
-  scale_x_continuous(lim = c(0, 10)) + 
-  scale_y_continuous(labels = label_comma()) +
-   labs(x = "Walks per 9 Innings (BB/9)",
-       y = "2022 Salary") +
-  theme_bw()
-
-so_sal = merged_pitching |> 
-  ggplot(aes(x = so9, y = salary_2022)) + 
-  geom_point(col = "orange") +
-  scale_x_continuous(lim = c(0, 20)) + 
-  scale_y_continuous(labels = label_comma()) +
-   labs(x = "Strikeouts Per 9 Innings (SO/9)",
-       y = "2022 Salary") +
-  theme_bw()
-
-scatt_pitch = (ip_sal + era_sal) / (bb_sal + so_sal)
-scatt_pitch + plot_annotation(title = "Scatterplots of Pitching Statistics vs. Salary")
-
-```
 
 ### Relationship to salary
 
@@ -707,60 +623,90 @@ The most cost-effective players were those who
 
 In order to eliminate pitchers with very few appearances or position players (catchers, first basemen, etc.) who came in to pitch in blowouts, I filtered only for pitchers with at least 10 innings pitches.
 
-### Distribution of Innings Pitched
-
 ```{r}
 
-merged_pitching |> 
+ip_plot = merged_pitching |> 
   ggplot(aes(x = ip_total)) + 
   geom_histogram(binwidth = 5, fill = "red", col = "black") +
-  labs(title = "Distribution of Innings Pitched, MLB Pitchers, 2022",
+  labs(
        x = "Innings Pitched",
        y = "Pitcher Count") +
   theme_bw()
 
-```
-
-### Distribution of ERA+
-
-```{r}
-
-merged_pitching |>
+era_plot = merged_pitching |>
   ggplot(aes(x = era_2)) + 
   geom_histogram(fill = "lightblue", col = "black") +
-    labs(title = "Distribution of ERA+, MLB Pitchers, 2022",
+    labs(
        x = "ERA+",
-       y = "") +
+       y = "Pitcher Count") +
   theme_bw()
+
+bb_plot = merged_pitching |>
+  ggplot(aes(x = bb9)) + 
+  geom_histogram(fill = "darkgreen", col = "black") +
+    labs(
+       x = "Walks per 9 Innings (BB/9)",
+       y = "Pitcher Count") +
+  theme_bw()
+
+so_plot = merged_pitching |>
+  ggplot(aes(x = so9)) + 
+  geom_histogram(fill = "orange", col = "black") +
+    labs(
+       x = "Strikeouts per 9 Innings (SO/9)",
+       y = "Pitcher Count") +
+  theme_bw()
+
+hist_pitch = (ip_plot + era_plot) / (bb_plot + so_plot)
+hist_pitch + plot_annotation(title = "Histograms of Pitching Statistics")
 
 ```
 
-### IP vs. Salary Plot
+The distribution of innings pitched is quite right-skewed, with a peak around 70 innings pitched. The distribution of ERA+ is right-skewed as well, with a peak around 100 (the league average) and a small number of pitchers with an ERA+ above 200. The distributions of BB/9 and SO/9 are mostly symmetric, with peaks around 3 and 9, respectively.
 
 ```{r}
 
-merged_pitching |> 
+ip_sal = merged_pitching |> 
   ggplot(aes(x = ip_total, y = salary_2022)) + 
-  geom_point() + 
+  geom_point(col = "red") + 
   scale_x_continuous(lim = c(0, 250)) +
   scale_y_continuous(labels = label_comma()) +
-  labs(title = "Innings Pitched by 2022 Salary",
-       x = "Innings Pitched",
-       y = "") +
+  labs(x = "Innings Pitched",
+       y = "2022 Salary") +
   theme_bw()
 
-```
-
-### ERA+ vs. Salary Plot
-
-```{r}
-
-merged_pitching |> 
+era_sal = merged_pitching |> 
   ggplot(aes(x = era_2, y = salary_2022)) + 
-  geom_point() +
-  scale_x_continuous(lim = c(0, 400))
+  geom_point(col = "lightblue") +
+  scale_x_continuous(lim = c(0, 400)) + 
+  scale_y_continuous(labels = label_comma()) +
+  labs(x = "ERA+",
+       y = "2022 Salary") +
+  theme_bw()
+
+bb_sal = merged_pitching |> 
+  ggplot(aes(x = bb9, y = salary_2022)) + 
+  geom_point(col = "darkgreen") +
+  scale_x_continuous(lim = c(0, 10)) + 
+  scale_y_continuous(labels = label_comma()) +
+   labs(x = "Walks per 9 Innings (BB/9)",
+       y = "2022 Salary") +
+  theme_bw()
+
+so_sal = merged_pitching |> 
+  ggplot(aes(x = so9, y = salary_2022)) + 
+  geom_point(col = "orange") +
+  scale_x_continuous(lim = c(0, 20)) + 
+  scale_y_continuous(labels = label_comma()) +
+   labs(x = "Strikeouts Per 9 Innings (SO/9)",
+       y = "2022 Salary") +
+  theme_bw()
+
+scatt_pitch = (ip_sal + era_sal) / (bb_sal + so_sal)
+scatt_pitch + plot_annotation(title = "Scatterplots of Pitching Statistics vs. Salary")
 
 ```
+
 
 ### IP vs. Log Salary Plot
 

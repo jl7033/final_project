@@ -748,88 +748,6 @@ variables</p>
 (like RBI and HR, or BA and OPS), so it’s important not to include too
 many collinear variables in a potential linear model.</p>
 </div>
-</div>
-<div id="pitching-eda" class="section level2">
-<h2>Pitching EDA</h2>
-<pre class="r"><code>ip_plot = merged_pitching |&gt; 
-  ggplot(aes(x = ip_total)) + 
-  geom_histogram(binwidth = 5, fill = &quot;red&quot;, col = &quot;black&quot;) +
-  labs(
-       x = &quot;Innings Pitched&quot;,
-       y = &quot;Pitcher Count&quot;) +
-  theme_bw()
-
-era_plot = merged_pitching |&gt;
-  ggplot(aes(x = era_2)) + 
-  geom_histogram(fill = &quot;lightblue&quot;, col = &quot;black&quot;) +
-    labs(
-       x = &quot;ERA+&quot;,
-       y = &quot;Pitcher Count&quot;) +
-  theme_bw()
-
-bb_plot = merged_pitching |&gt;
-  ggplot(aes(x = bb9)) + 
-  geom_histogram(fill = &quot;darkgreen&quot;, col = &quot;black&quot;) +
-    labs(
-       x = &quot;Walks per 9 Innings (BB/9)&quot;,
-       y = &quot;Pitcher Count&quot;) +
-  theme_bw()
-
-so_plot = merged_pitching |&gt;
-  ggplot(aes(x = so9)) + 
-  geom_histogram(fill = &quot;orange&quot;, col = &quot;black&quot;) +
-    labs(
-       x = &quot;Strikeouts per 9 Innings (SO/9)&quot;,
-       y = &quot;Pitcher Count&quot;) +
-  theme_bw()
-
-hist_pitch = (ip_plot + era_plot) / (bb_plot + so_plot)
-hist_pitch + plot_annotation(title = &quot;Histograms of Pitching Statistics&quot;)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-17-1.png" width="90%" /></p>
-<p>The distribution of innings pitched is quite right-skewed, with a
-peak around 70 innings pitched. The distribution of ERA+ is right-skewed
-as well, with a peak around 100 (the league average) and a small number
-of pitchers with an ERA+ above 200. The distributions of BB/9 and SO/9
-are mostly symmetric, with peaks around 3 and 9, respectively.</p>
-<pre class="r"><code>ip_sal = merged_pitching |&gt; 
-  ggplot(aes(x = ip_total, y = salary_2022)) + 
-  geom_point(col = &quot;red&quot;) + 
-  scale_x_continuous(lim = c(0, 250)) +
-  scale_y_continuous(labels = label_comma()) +
-  labs(x = &quot;Innings Pitched&quot;,
-       y = &quot;2022 Salary&quot;) +
-  theme_bw()
-
-era_sal = merged_pitching |&gt; 
-  ggplot(aes(x = era_2, y = salary_2022)) + 
-  geom_point(col = &quot;lightblue&quot;) +
-  scale_x_continuous(lim = c(0, 400)) + 
-  scale_y_continuous(labels = label_comma()) +
-  labs(x = &quot;ERA+&quot;,
-       y = &quot;2022 Salary&quot;) +
-  theme_bw()
-
-bb_sal = merged_pitching |&gt; 
-  ggplot(aes(x = bb9, y = salary_2022)) + 
-  geom_point(col = &quot;darkgreen&quot;) +
-  scale_x_continuous(lim = c(0, 10)) + 
-  scale_y_continuous(labels = label_comma()) +
-   labs(x = &quot;Walks per 9 Innings (BB/9)&quot;,
-       y = &quot;2022 Salary&quot;) +
-  theme_bw()
-
-so_sal = merged_pitching |&gt; 
-  ggplot(aes(x = so9, y = salary_2022)) + 
-  geom_point(col = &quot;orange&quot;) +
-  scale_x_continuous(lim = c(0, 20)) + 
-  scale_y_continuous(labels = label_comma()) +
-   labs(x = &quot;Strikeouts Per 9 Innings (SO/9)&quot;,
-       y = &quot;2022 Salary&quot;) +
-  theme_bw()
-
-scatt_pitch = (ip_sal + era_sal) / (bb_sal + so_sal)
-scatt_pitch + plot_annotation(title = &quot;Scatterplots of Pitching Statistics vs. Salary&quot;)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-18-1.png" width="90%" /></p>
 <div id="relationship-to-salary" class="section level3">
 <h3>Relationship to salary</h3>
 <p>Looking at some relationships to salary</p>
@@ -838,7 +756,7 @@ scatt_pitch + plot_annotation(title = &quot;Scatterplots of Pitching Statistics 
   mutate(positions = str_split_i(position, &quot;-&quot;,1))  |&gt;
   ggplot(aes(x = positions,y= salary_2022)) +
   geom_boxplot()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-19-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-17-1.png" width="90%" /></p>
 <pre class="r"><code>merged_batting |&gt;
   mutate(positions = str_split_i(position, &quot;-&quot;,1))  |&gt;
   group_by(positions) |&gt;
@@ -920,7 +838,7 @@ scatt_pitch + plot_annotation(title = &quot;Scatterplots of Pitching Statistics 
   geom_point(color = &quot;firebrick&quot;) +
   facet_wrap(vars(simple_position)) +
   theme_bw()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-21-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-19-1.png" width="90%" /></p>
 <pre class="r"><code>yrs = merged_batting |&gt;
   ggplot(aes(x = service_time_floor, y = salary_2022)) + 
   geom_point() +
@@ -949,7 +867,7 @@ ops = merged_batting |&gt;
 scatter_patch = (yrs+hrs)/(bas+ops)
 
 scatter_patch + plot_annotation(title = &quot;Scatterplot of Batting Statistics and Salary&quot;)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-22-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-20-1.png" width="90%" /></p>
 <pre class="r"><code>yrsCol = merged_batting |&gt;
   count(service_time_floor) |&gt;
   ggplot(aes(x = service_time_floor, y=n)) + 
@@ -974,7 +892,7 @@ opsHist = merged_batting |&gt;
 
 dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
 dist_patch + plot_annotation(title = &quot;Distribution of Important Batting Statistics&quot;)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-23-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-21-1.png" width="90%" /></p>
 <p>Since salary (and other variables) are very skewed, we may want to
 transform these data using a log transformation.</p>
 </div>
@@ -1194,9 +1112,9 @@ hr_ba_fit |&gt;
 </table>
 </div>
 <pre class="r"><code>plot(hr_ba_fit, which = 1)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-27-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-25-1.png" width="90%" /></p>
 <pre class="r"><code>plot(hr_ba_fit, which = 2)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-27-2.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-25-2.png" width="90%" /></p>
 <pre class="r"><code>ops_fit &lt;- merged_batting |&gt;
   lm(log10(salary_2022) ~ ops_2 + service_time_floor,
                    data = _)
@@ -1292,9 +1210,9 @@ ops_fit |&gt;
 </table>
 </div>
 <pre class="r"><code>plot(ops_fit, which = 1)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-28-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-26-1.png" width="90%" /></p>
 <pre class="r"><code>plot(ops_fit, which = 2)</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-28-2.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-26-2.png" width="90%" /></p>
 <p>Based on these statistics, the model with than OPS+ is a better
 predictor than the one with home runs and batting average, which makes
 sense since OPS+ is internally accounting for more other factors.</p>
@@ -1430,62 +1348,98 @@ salaries.</p></li>
 </ul>
 </div>
 </div>
-<div id="pitching-eda-1" class="section level2">
+<div id="pitching-eda" class="section level2">
 <h2>Pitching EDA</h2>
 <p>In order to eliminate pitchers with very few appearances or position
 players (catchers, first basemen, etc.) who came in to pitch in
 blowouts, I filtered only for pitchers with at least 10 innings
 pitches.</p>
-<div id="distribution-of-innings-pitched" class="section level3">
-<h3>Distribution of Innings Pitched</h3>
-<pre class="r"><code>merged_pitching |&gt; 
+<pre class="r"><code>ip_plot = merged_pitching |&gt; 
   ggplot(aes(x = ip_total)) + 
   geom_histogram(binwidth = 5, fill = &quot;red&quot;, col = &quot;black&quot;) +
-  labs(title = &quot;Distribution of Innings Pitched, MLB Pitchers, 2022&quot;,
+  labs(
        x = &quot;Innings Pitched&quot;,
        y = &quot;Pitcher Count&quot;) +
-  theme_bw()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-30-1.png" width="90%" /></p>
-</div>
-<div id="distribution-of-era" class="section level3">
-<h3>Distribution of ERA+</h3>
-<pre class="r"><code>merged_pitching |&gt;
+  theme_bw()
+
+era_plot = merged_pitching |&gt;
   ggplot(aes(x = era_2)) + 
   geom_histogram(fill = &quot;lightblue&quot;, col = &quot;black&quot;) +
-    labs(title = &quot;Distribution of ERA+, MLB Pitchers, 2022&quot;,
+    labs(
        x = &quot;ERA+&quot;,
-       y = &quot;&quot;) +
-  theme_bw()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-31-1.png" width="90%" /></p>
-</div>
-<div id="ip-vs.-salary-plot" class="section level3">
-<h3>IP vs. Salary Plot</h3>
-<pre class="r"><code>merged_pitching |&gt; 
+       y = &quot;Pitcher Count&quot;) +
+  theme_bw()
+
+bb_plot = merged_pitching |&gt;
+  ggplot(aes(x = bb9)) + 
+  geom_histogram(fill = &quot;darkgreen&quot;, col = &quot;black&quot;) +
+    labs(
+       x = &quot;Walks per 9 Innings (BB/9)&quot;,
+       y = &quot;Pitcher Count&quot;) +
+  theme_bw()
+
+so_plot = merged_pitching |&gt;
+  ggplot(aes(x = so9)) + 
+  geom_histogram(fill = &quot;orange&quot;, col = &quot;black&quot;) +
+    labs(
+       x = &quot;Strikeouts per 9 Innings (SO/9)&quot;,
+       y = &quot;Pitcher Count&quot;) +
+  theme_bw()
+
+hist_pitch = (ip_plot + era_plot) / (bb_plot + so_plot)
+hist_pitch + plot_annotation(title = &quot;Histograms of Pitching Statistics&quot;)</code></pre>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-28-1.png" width="90%" /></p>
+<p>The distribution of innings pitched is quite right-skewed, with a
+peak around 70 innings pitched. The distribution of ERA+ is right-skewed
+as well, with a peak around 100 (the league average) and a small number
+of pitchers with an ERA+ above 200. The distributions of BB/9 and SO/9
+are mostly symmetric, with peaks around 3 and 9, respectively.</p>
+<pre class="r"><code>ip_sal = merged_pitching |&gt; 
   ggplot(aes(x = ip_total, y = salary_2022)) + 
-  geom_point() + 
+  geom_point(col = &quot;red&quot;) + 
   scale_x_continuous(lim = c(0, 250)) +
   scale_y_continuous(labels = label_comma()) +
-  labs(title = &quot;Innings Pitched by 2022 Salary&quot;,
-       x = &quot;Innings Pitched&quot;,
-       y = &quot;&quot;) +
-  theme_bw()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-32-1.png" width="90%" /></p>
-</div>
-<div id="era-vs.-salary-plot" class="section level3">
-<h3>ERA+ vs. Salary Plot</h3>
-<pre class="r"><code>merged_pitching |&gt; 
+  labs(x = &quot;Innings Pitched&quot;,
+       y = &quot;2022 Salary&quot;) +
+  theme_bw()
+
+era_sal = merged_pitching |&gt; 
   ggplot(aes(x = era_2, y = salary_2022)) + 
-  geom_point() +
-  scale_x_continuous(lim = c(0, 400))</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-33-1.png" width="90%" /></p>
-</div>
+  geom_point(col = &quot;lightblue&quot;) +
+  scale_x_continuous(lim = c(0, 400)) + 
+  scale_y_continuous(labels = label_comma()) +
+  labs(x = &quot;ERA+&quot;,
+       y = &quot;2022 Salary&quot;) +
+  theme_bw()
+
+bb_sal = merged_pitching |&gt; 
+  ggplot(aes(x = bb9, y = salary_2022)) + 
+  geom_point(col = &quot;darkgreen&quot;) +
+  scale_x_continuous(lim = c(0, 10)) + 
+  scale_y_continuous(labels = label_comma()) +
+   labs(x = &quot;Walks per 9 Innings (BB/9)&quot;,
+       y = &quot;2022 Salary&quot;) +
+  theme_bw()
+
+so_sal = merged_pitching |&gt; 
+  ggplot(aes(x = so9, y = salary_2022)) + 
+  geom_point(col = &quot;orange&quot;) +
+  scale_x_continuous(lim = c(0, 20)) + 
+  scale_y_continuous(labels = label_comma()) +
+   labs(x = &quot;Strikeouts Per 9 Innings (SO/9)&quot;,
+       y = &quot;2022 Salary&quot;) +
+  theme_bw()
+
+scatt_pitch = (ip_sal + era_sal) / (bb_sal + so_sal)
+scatt_pitch + plot_annotation(title = &quot;Scatterplots of Pitching Statistics vs. Salary&quot;)</code></pre>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-29-1.png" width="90%" /></p>
 <div id="ip-vs.-log-salary-plot" class="section level3">
 <h3>IP vs. Log Salary Plot</h3>
 <pre class="r"><code>merged_pitching |&gt; 
   ggplot(aes(x = ip_total, y = log(salary_2022))) + 
   geom_point() + 
   scale_x_continuous(lim = c(0, 400))</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-34-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-30-1.png" width="90%" /></p>
 </div>
 <div id="era-vs.-log-salary-plot" class="section level3">
 <h3>ERA+ vs. Log Salary Plot</h3>
@@ -1493,7 +1447,7 @@ pitches.</p>
   ggplot(aes(x = era_2, y = log(salary_2022))) + 
   geom_point() + 
   scale_x_continuous(lim = c(0, 400))</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-35-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-31-1.png" width="90%" /></p>
 </div>
 <div id="lms" class="section level3">
 <h3>LMs</h3>
@@ -1525,7 +1479,7 @@ names(lm_ip_data) = c(&quot;fitted&quot;, &quot;resid&quot;)
 lm_ip_data |&gt;
   ggplot(aes(x = fitted, y = resid)) +
   geom_point()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-36-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-32-1.png" width="90%" /></p>
 <pre class="r"><code>view(lm_ip_data)</code></pre>
 <pre class="r"><code>lm_era_2 = lm(salary_2022 ~ era_2, data = merged_pitching)
 summary(lm_era_2)</code></pre>
@@ -1555,7 +1509,7 @@ names(lm_era_2_data) = c(&quot;fitted&quot;, &quot;resid&quot;)
 lm_era_2_data |&gt;
   ggplot(aes(x = fitted, y = resid)) +
   geom_point()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-37-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-33-1.png" width="90%" /></p>
 <pre class="r"><code>view(lm_era_2_data)</code></pre>
 </div>
 <div id="log-transformed-lms" class="section level3">
@@ -1588,7 +1542,7 @@ names(lm_ip_log_data) = c(&quot;fitted&quot;, &quot;resid&quot;)
 lm_ip_log_data |&gt;
   ggplot(aes(x = fitted, y = resid)) +
   geom_point()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-38-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-34-1.png" width="90%" /></p>
 <pre class="r"><code>view(lm_ip_log_data)</code></pre>
 <pre class="r"><code>lm_era_2_log = lm(log(salary_2022) ~ era_2, data = merged_pitching)
 summary(lm_era_2_log)</code></pre>
@@ -1618,7 +1572,7 @@ names(lm_era_2_data_log) = c(&quot;fitted&quot;, &quot;resid&quot;)
 lm_era_2_data_log |&gt;
   ggplot(aes(x = fitted, y = resid)) +
   geom_point()</code></pre>
-<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-39-1.png" width="90%" /></p>
+<p><img src="preliminary_analysis_files/figure-html/unnamed-chunk-35-1.png" width="90%" /></p>
 </div>
 <div id="final-pitching-lm" class="section level3">
 <h3>Final Pitching LM</h3>
