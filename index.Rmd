@@ -22,6 +22,16 @@ In recent years, Major League Baseball (MLB) player salaries have been rising at
 \
 \
 \
+<p class="aligncenter">
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/VjzZO-V2kSc?si=HXyaTLDcqwdGPMLV" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+  </p>
+  <style>
+.aligncenter {
+    text-align: center;
+}
+</style>
+\
+\
 Our project aims to analyze whether the increasing salaries of baseball players—both hitters and pitchers—are justified by their performance on the field. Specifically, we focus on whether advanced metrics, such as OPS+ (for hitters) and ERA+ (for pitchers), are significantly associated with player salaries. We hope to uncover whether MLB teams should prioritize high-priced superstar acquisitions or consider a more balanced approach that emphasizes young talent and egalitarian roster-building. Ultimately, our findings may provide insights into how MLB teams can optimize their roster decisions to improve their chances of reaching the postseason and winning the World Series.
 \
 \
