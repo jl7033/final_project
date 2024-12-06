@@ -7,6 +7,14 @@ navbar:
       href: Final_Report_Draft.html
     - text: "EDA"
       href: preliminary_analysis.html
+    - text: "EDA!"
+      menu:
+      - text: "Salary"
+        href: salary_eda.html
+      - text: "Batting"
+        href: batting_eda.html
+      - text: "Pitching"
+        href: pitching_eda.html
     - text: "Conclusion"
       href: conclusion.html
     - text: "About the Group"
