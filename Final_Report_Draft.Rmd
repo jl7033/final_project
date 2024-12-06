@@ -67,6 +67,7 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ### Salary Data
+The salaries data is cleaned and processed by renaming columns for clarity (e.g., position, salary_2022, service_time_yrs, name). The name column is split, reversed, and rejoined to standardize the name format, handling "Jr" formatting and removing special characters. Non-ASCII characters are converted to Latin equivalents using stri_trans_general(). The primary position is extracted from the position column, and the positions are reordered using fct_relevel() to create a new simple_position column. Additionally, a service_time_floor column is created by rounding service_time_yrs to the nearest whole number using floor(). The final dataset contains cleaned player names, positions, salary information, and service time.
 
 ```{r}
 salaries = read_excel(
@@ -99,7 +100,8 @@ salaries = read_excel(
 ```
 
 ### Batting Data
-
+A merged dataset of player batting statistics and salary information, focusing on players with at least 100 plate appearances.
+Two datasets identifying discrepancies: one where salary data is missing in the batting dataset and one where batting data is missing in the salary dataset.
 ```{r}
 batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
@@ -133,7 +135,9 @@ batting_not_in_salary <- anti_join(batting, salaries, by = "name")
 ```
 
 ### Pitching Data
-
+Merged player salary and pitching statistics for players who pitched at least 20 innings.
+Processed pitching data, including total innings pitched (ip_total), pitcher hand, and pitcher type.
+Missing player data in either the salaries or pitching dataset is identified.
 ```{r}
 pitching = read_delim("data/2022 MLB Player Stats - Pitching.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
