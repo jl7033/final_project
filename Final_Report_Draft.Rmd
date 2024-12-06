@@ -15,11 +15,9 @@ MLB player salaries are growing faster than ever. In 2001, former Seattle Marine
 
 The primary goal of our project is to determine whether baseball players -- both batters and pitchers -- are worth their salaries, and whether teams should focus primarily on signing big-money free agents or taking a more egalitarian and young player-heavy approach. More specifically, are advanced statistics such as OPS+ (for hitters) and ERA+ (for pitchers) significantly associated with player salary? Our conclusions could give MLB teams insight into how they can build their rosters to optimize their chances of making the postseason and ultimately winning the World Series.
 
-
 # Related work
 
 There has been a heated debate over the use of statistics and analytics in the evaluation of player performances and whether the decision to pay players can be aided by these methods. Sabermetrics (add hyperlink in website) is one of the more popular ways of applying statistics to baseball to be an addition to traditional evaluations. The famous movie Moneyball (add hyperlink in website) tells the story of the Oakland Athletic's, an underdog using statistics over traditional evaluations to gain an edge. One of the hopes of our project is to approach some of these same problems from our own perspective.
-
 
 # Initial questions
 
@@ -336,7 +334,6 @@ dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
 dist_patch + plot_annotation(title = "Distribution of Important Batting Statistics")
 ```
 
-
 ## Pitching EDA
 
 ```{r}
@@ -442,10 +439,11 @@ plot(lm_batting, which = 2)
 
 We decided to log-transform the salary variable because it is heavily right-skewed, and decided to use $log_{10}$ instead of $ln$ for the sake of interpretability. We included OPS+, the "all-in-one" measure of hitter performance as well as their number of years of experience.
 
-
 From our model, we can see that batters with more experience have higher salaries, even adjusting for performance. At the same time, adjusting for service time, batters with higher OPS+ (that is, batters who perform better) have significantly higher salaries.
 
 Based on this model, which player provided the best value for money? Who was most cost effective? That would be the player with a high  OPS+ and the lowest residual, indicating that their actual salary was lower than predicted based on their performance.
+
+### Top 5 Batters by Value
 
 ```{r}
 merged_batting |>
@@ -457,20 +455,43 @@ merged_batting |>
   slice(1:5)
 ```
 
+### Top 10 Batters by Salary
+
+```{r}
+merged_batting |>
+  modelr::add_predictions(lm_batting) |>
+  modelr::add_residuals(lm_batting) |>
+  arrange(desc(salary_2022)) |>
+  select(name, salary_2022, service_time_floor, ops_2, pred, resid ) |>
+  mutate(expected_salary = 10^pred) |>
+  slice(1:10) |>
+  view()
+```
+
 It looks like in 2022, the most cost-effective player was Albert Pujols, who made $2.5 million in his 21st season with an OPS+ of 151.
 
 ## Pitching Model
 
 ```{r}
 
-lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9,
+lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9 + service_time_floor,
                  data = merged_pitching)
 
 summary(lm_pitching)
 
+```
+
+```{r}
+
 plot(residuals(lm_pitching) ~ fitted.values(lm_pitching),
-     main = "Residuals vs. Fitted Values Plot for Pitching Model")
+     main = "Residuals vs. Fitted Values Plot for Pitching Model",
+     xlab = "Fitted Values",
+     ylab = "Residuals")
 abline(0,0)
+
+```
+
+```{r}
 
 qqnorm(residuals(lm_pitching),
        main = "Normal Q-Q Plot for Pitching Model")
@@ -482,12 +503,48 @@ We decided to log-transform the salary variable because it is heavily right-skew
 
 We accounted for pitcher handedness (right vs. left) as well as pitcher type (the default type is a closing pitcher, with relief pitchers and starting pitchers also included in the model). Finally, we explored the interaction between handedness and pitcher type to see if pitcher type affects the relationship between handedness and salary.
 
-From our model, we can see that relief pitchers have significantly lower salaries than closing pitchers, which makes sense, since closing pitchers have very strong reputations as some of the most effective pitchers in the game and therefore will draw high salaries. Additionally, the `era_2` predictor, even when accounting for pitcher handedness, pitcher type, and the number of innings pitched, has an insignificant $P$-value, implying that there is no significant association between one of the most highly regarded summative statistics for pitching effectiveness and pitcher salary.
+From our model, we can see that pitcher handedness and pitcher type have no significant effect on expected salary. Interestingly, the `era_2` predictor, even when accounting for pitcher handedness, pitcher type, and the number of innings pitched, has an insignificant $P$-value, implying that there is no significant association between one of the most highly regarded summative statistics for pitching effectiveness and pitcher salary when accounting for pitcher handedness, pitcher type, innings pitched, walk and strikeout rates, and service time.
 
-The residuals vs. fitted values plot shows that residuals are slightly more likely to be positive when salary is low; this is likely because of the large number of MLB players who are still on their rookie contracts, and therefore make somewhere between \$700,000 and \$1,000,000 per year. The Normal Q-Q plot shows only minor deviations of the model's residuals from Normal behavior; the deviations between theoretical quantities of -1 and 0.5 can also be explained by the players on their rookie contracts.
+The residuals vs. fitted values plot shows that the residuals are generally evenly spread out; the straight line on the left side of the plot represents the large number of MLB players who are still on their rookie contracts, and therefore have a low fitted value (as they usually make between \$700,000 and \$1,000,000 per year, which is quite low by MLB standards). The Normal Q-Q plot shows that the model's residuals deviate only slightly from Normal behavior.
+
+### Top 5 Pitchers by Value
+
+```{r}
+
+merged_pitching |>
+  modelr::add_predictions(lm_pitching) |>
+  modelr::add_residuals(lm_pitching) |>
+  arrange(resid) |>
+  select(name, salary_2022, service_time_floor, era_2, pred, resid ) |>
+  mutate(expected_salary = 10^pred) |>
+  slice(1:5)
+
+```
+
+### Top 10 Pitchers by Salary
+
+```{r}
+
+merged_pitching |>
+  modelr::add_predictions(lm_pitching) |>
+  modelr::add_residuals(lm_pitching) |>
+  arrange(desc(salary_2022)) |>
+  select(name, salary_2022, service_time_floor, era_2, pred, resid ) |>
+  mutate(expected_salary = 10^pred) |>
+  slice(1:10)
+
+```
 
 # Discussion
 
-What were your findings? Are they what you expect? What insights into the data can you make?
+As MLB salaries continue to rise at exponential rates, it is important to assess whether the league's biggest contracts are worth it. Baseball is currently undergoing an analytics-fueled revolution, inspired by statisticians such as Bill James and teams such as the 2002 "Moneyball" Oakland A's, that is drastically changing the way the game is played and the way in which front offices choose which players to sign and how to maximize their talent. As a consequence of this revolution, MLB teams have deemphasized simpler statistics once thought of as key indicators of performance -- such as batting average for hitters and wins for pitchers -- in favor of more complex ones, such as OPS+ and ERA+, that more thoroughly encapsulate a player's value to their team.
 
-Checking to see if committing works.
+We sought to use these advanced statistics in order to explore whether players with top salaries are truly earning them. We found that while OPS+ had a significant positive association with salary for hitters, ERA+ had no significant association with salary for pitchers, implying that other indicators -- specifically service time, innings pitched, walk rate, and strikeout rate -- were stronger predictors of a player's salary. The team-building implications of these results are fascinating, especially with respect to pitchers. If there is little to no association between a pitcher's ability to limit runs and their salary, which kinds of pitchers should teams sign in order to maximize the value of their contracts?
+
+The top five batters and top five pitchers, by salary below expected, came from similar demographics: veterans on cheap deals. All ten of these players had at least nine years' worth of service time, and only Albert Pujols, in his 22nd and final season, made more than half of the average MLB salary in 2022. The implications for team-building based on these results are clear: instead of spending large amounts on a select few players, give deals to veterans who may be undervalued by the market, as they are more likely to produce value than the most expensive players. The Tampa Bay Rays, a team known for their reluctance to spend as much as their success, have utilized this strategy quite well, riding a combination of young players on rookie contracts and veterans let go by other teams -- such as Yandy Diaz, Manuel Margot, Ji-Man Choi, Corey Kluber, and Jeffrey Springs -- to the fifth-highest winning percentage in MLB (out of 30 teams) over the last 10 seasons.
+
+So, what does this mean for the players who earn top-dollar contracts? On the pitching side, eight of the top 10 pitchers by salary recorded an ERA+ above 110, meaning that they were a good deal more effective at getting outs than the average pitcher. And yet, only one of them (Justin Verlander, who won the AL Cy Young Award as the AL's top pitcher in 2022) had an expected salary that was higher than their actual salary. In other words, even though many of these pitchers enjoyed good if not great seasons, their performance was still not quite strong enough to justify their salaries.
+
+However, these results should be interpreted with some caution, given the importance of service time with respect to our model's predicted salary. For example, since the `service_time` coefficient of our pitching model is about 0.091, ten years' worth of service time would result in an $0.91$-unit increase in the log of salary, or a $10^{0.91} = 8.13$-fold increase in salary. Therefore, veteran pitchers such as Verlander, are much more likely to be given higher expected salaries by our model than young pitchers, even if their statistics are strong.
+
+There is an inherent trade-off between including an excluding service time from our models. For example, the pitching model has an adjusted $R^2$ of 0.687 with the service time parameter and 0.337 without it, meaning that adding service time to the model more than doubles the portion of the variance in salary that can be explained by the model. However, including service time potentially undervalues the contributions of young players, almost all of whom are on cheap contracts, that significantly outperform their salary. 
