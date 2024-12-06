@@ -93,7 +93,9 @@ salaries = read_excel(
                                        c("c", "1b", "2b", "3b", "ss",
                                          "lf", "cf", "rf", "inf", "of",
                                          "dh", "rhp", "lhp")),
-         service_time_floor = floor(service_time_yrs))
+         service_time_floor = floor(service_time_yrs),
+         experience_group = case_when(service_time_floor <= 2 ~ "0-2 years",
+                                      service_time_floor >= 3 ~ "3+ years"))
 ```
 
 ### Batting Data
@@ -212,6 +214,18 @@ salaries %>%
 ```
 
 ```{r}
+# Salary by Experience
+salaries %>%
+  ggplot(aes(x=experience_group, y=salary_2022)) +
+  geom_boxplot() +
+  labs(title = "Salary Distribution for Years of Experience",
+       x = "Years of Experience",
+       y = "") +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
+```
+
+```{r}
 # Experience by Position
 salaries |>
   ggplot(aes(x = service_time_floor, 
@@ -279,7 +293,7 @@ merged_batting |>
 ```{r}
 # Distributions for Used Statistics
 yrsCol = merged_batting |>
-  count(service_time_floor) |>
+  count(experience_group) |>
   ggplot(aes(x = service_time_floor, y=n)) + 
   geom_col(fill = 'blue', col = 'black') +
   labs(x="Years of Experience",y="") +
@@ -308,8 +322,8 @@ dist_patch + plot_annotation(title = "Distribution of Important Batting Statisti
 ```{r}
 # Scatter for Used Statistics
 yrs = merged_batting |>
-  ggplot(aes(x = service_time_floor, y = salary_2022)) + 
-  geom_point(col = 'blue') +
+  ggplot(aes(x = experience_group, y = salary_2022)) + 
+  geom_boxplot(col = 'blue') +
   labs(x="Years of Experience",y="") +
   scale_y_continuous(labels = label_comma()) +
   theme_bw()
@@ -430,7 +444,7 @@ Interestingly, the pitchers with the highest ERA+ often had considerably lower s
 ## Batting Model
 
 ```{r}
-lm_batting = lm(log10(salary_2022) ~ ops_2 + service_time_floor,
+lm_batting = lm(log10(salary_2022) ~ ops_2 + experience_group,
                  data = merged_batting)
 
 summary(lm_batting)
@@ -468,7 +482,7 @@ merged_batting |>
   modelr::add_predictions(lm_batting) |>
   modelr::add_residuals(lm_batting) |>
   arrange(resid) |>
-  select(name, salary_2022, service_time_floor, ops_2, pred, resid ) |>
+  select(name, salary_2022, service_time_floor, experience_group, ops_2, pred, resid ) |>
   mutate(expected_salary = 10^pred) |>
   slice(1:5)
 ```
@@ -480,10 +494,9 @@ merged_batting |>
   modelr::add_predictions(lm_batting) |>
   modelr::add_residuals(lm_batting) |>
   arrange(desc(salary_2022)) |>
-  select(name, salary_2022, service_time_floor, ops_2, pred, resid ) |>
+  select(name, salary_2022, service_time_floor,experience_group, ops_2, pred, resid ) |>
   mutate(expected_salary = 10^pred) |>
-  slice(1:10) |>
-  view()
+  slice(1:10)
 ```
 
 It looks like in 2022, the most cost-effective player was Albert Pujols, who made $2.5 million in his 21st season with an OPS+ of 151.
@@ -492,7 +505,7 @@ It looks like in 2022, the most cost-effective player was Albert Pujols, who mad
 
 ```{r}
 
-lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9 + service_time_floor,
+lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9 + experience_group,
                  data = merged_pitching)
 
 summary(lm_pitching)
@@ -533,7 +546,7 @@ merged_pitching |>
   modelr::add_predictions(lm_pitching) |>
   modelr::add_residuals(lm_pitching) |>
   arrange(resid) |>
-  select(name, salary_2022, service_time_floor, era_2, pred, resid ) |>
+  select(name, salary_2022, service_time_floor, experience_group, era_2, pred, resid ) |>
   mutate(expected_salary = 10^pred) |>
   slice(1:5)
 
@@ -547,7 +560,7 @@ merged_pitching |>
   modelr::add_predictions(lm_pitching) |>
   modelr::add_residuals(lm_pitching) |>
   arrange(desc(salary_2022)) |>
-  select(name, salary_2022, service_time_floor, era_2, pred, resid ) |>
+  select(name, salary_2022, service_time_floor, experience_group, era_2, pred, resid ) |>
   mutate(expected_salary = 10^pred) |>
   slice(1:10)
 
