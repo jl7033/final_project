@@ -249,20 +249,7 @@ salaries |>
                     "rhp" = "Right Hand Pitcher",
                     "dh" = "Designated Hitter",
                     "ss" = "Shortstop")) +
-  scale_fill_discrete(name = "Position",
-                      labels = c("1b" = "1st Base",
-                    "2b" = "2nd Base",
-                    "3b" = "3rd Base",
-                    "inf" = "Infield",
-                    "c" = "Catcher",
-                    "rf" = "Right Field",
-                    "lf" = "Left Field",
-                    "cf" = "Center Field",
-                    "of" = "Outfield",
-                    "lhp" = "Left Hand Pitcher",
-                    "rhp" = "Right Hand Pitcher",
-                    "dh" = "Designated Hitter",
-                    "ss" = "Shortstop")) +
+  guides(fill="none") +
   theme_bw()
 ```
 
@@ -360,7 +347,7 @@ ip_plot = merged_pitching |>
   geom_histogram(binwidth = 5, fill = "red", col = "black") +
   labs(
        x = "Innings Pitched",
-       y = "Pitcher Count") +
+       y = "") +
   theme_bw()
 
 era_plot = merged_pitching |>
@@ -368,7 +355,7 @@ era_plot = merged_pitching |>
   geom_histogram(fill = "lightblue", col = "black") +
     labs(
        x = "ERA+",
-       y = "Pitcher Count") +
+       y = "") +
   theme_bw()
 
 bb_plot = merged_pitching |>
@@ -376,7 +363,7 @@ bb_plot = merged_pitching |>
   geom_histogram(fill = "darkgreen", col = "black") +
     labs(
        x = "Walks per 9 Innings (BB/9)",
-       y = "Pitcher Count") +
+       y = "") +
   theme_bw()
 
 so_plot = merged_pitching |>
@@ -384,7 +371,8 @@ so_plot = merged_pitching |>
   geom_histogram(fill = "orange", col = "black") +
     labs(
        x = "Strikeouts per 9 Innings (SO/9)",
-       y = "Pitcher Count") +
+       y = "") +
+  guides() +
   theme_bw()
 
 hist_pitch = (ip_plot + era_plot) / (bb_plot + so_plot)
@@ -402,7 +390,7 @@ ip_sal = merged_pitching |>
   scale_x_continuous(lim = c(0, 250)) +
   scale_y_continuous(labels = label_comma()) +
   labs(x = "Innings Pitched",
-       y = "2022 Salary") +
+       y = "") +
   theme_bw()
 
 era_sal = merged_pitching |> 
@@ -411,7 +399,8 @@ era_sal = merged_pitching |>
   scale_x_continuous(lim = c(0, 400)) + 
   scale_y_continuous(labels = label_comma()) +
   labs(x = "ERA+",
-       y = "2022 Salary") +
+       y = "") +
+    guides(y="none") +
   theme_bw()
 
 bb_sal = merged_pitching |> 
@@ -420,7 +409,7 @@ bb_sal = merged_pitching |>
   scale_x_continuous(lim = c(0, 10)) + 
   scale_y_continuous(labels = label_comma()) +
    labs(x = "Walks per 9 Innings (BB/9)",
-       y = "2022 Salary") +
+       y = "") +
   theme_bw()
 
 so_sal = merged_pitching |> 
@@ -429,11 +418,12 @@ so_sal = merged_pitching |>
   scale_x_continuous(lim = c(0, 20)) + 
   scale_y_continuous(labels = label_comma()) +
    labs(x = "Strikeouts Per 9 Innings (SO/9)",
-       y = "2022 Salary") +
+       y = "") +
+    guides(y="none") +
   theme_bw()
 
 scatt_pitch = (ip_sal + era_sal) / (bb_sal + so_sal)
-scatt_pitch + plot_annotation(title = "Scatterplots of Pitching Statistics vs. Salary")
+scatt_pitch + plot_annotation(title = "Scatterplots of Pitching Statistics and Salary")
 
 ```
 

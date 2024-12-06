@@ -612,20 +612,7 @@ salaries |&gt;
                     &quot;rhp&quot; = &quot;Right Hand Pitcher&quot;,
                     &quot;dh&quot; = &quot;Designated Hitter&quot;,
                     &quot;ss&quot; = &quot;Shortstop&quot;)) +
-  scale_fill_discrete(name = &quot;Position&quot;,
-                      labels = c(&quot;1b&quot; = &quot;1st Base&quot;,
-                    &quot;2b&quot; = &quot;2nd Base&quot;,
-                    &quot;3b&quot; = &quot;3rd Base&quot;,
-                    &quot;inf&quot; = &quot;Infield&quot;,
-                    &quot;c&quot; = &quot;Catcher&quot;,
-                    &quot;rf&quot; = &quot;Right Field&quot;,
-                    &quot;lf&quot; = &quot;Left Field&quot;,
-                    &quot;cf&quot; = &quot;Center Field&quot;,
-                    &quot;of&quot; = &quot;Outfield&quot;,
-                    &quot;lhp&quot; = &quot;Left Hand Pitcher&quot;,
-                    &quot;rhp&quot; = &quot;Right Hand Pitcher&quot;,
-                    &quot;dh&quot; = &quot;Designated Hitter&quot;,
-                    &quot;ss&quot; = &quot;Shortstop&quot;)) +
+  guides(fill=&quot;none&quot;) +
   theme_bw()</code></pre>
 <p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 </div>
@@ -720,7 +707,7 @@ scatter_patch + plot_annotation(title = &quot;Scatterplot of Batting Statistics 
   geom_histogram(binwidth = 5, fill = &quot;red&quot;, col = &quot;black&quot;) +
   labs(
        x = &quot;Innings Pitched&quot;,
-       y = &quot;Pitcher Count&quot;) +
+       y = &quot;&quot;) +
   theme_bw()
 
 era_plot = merged_pitching |&gt;
@@ -728,7 +715,7 @@ era_plot = merged_pitching |&gt;
   geom_histogram(fill = &quot;lightblue&quot;, col = &quot;black&quot;) +
     labs(
        x = &quot;ERA+&quot;,
-       y = &quot;Pitcher Count&quot;) +
+       y = &quot;&quot;) +
   theme_bw()
 
 bb_plot = merged_pitching |&gt;
@@ -736,7 +723,7 @@ bb_plot = merged_pitching |&gt;
   geom_histogram(fill = &quot;darkgreen&quot;, col = &quot;black&quot;) +
     labs(
        x = &quot;Walks per 9 Innings (BB/9)&quot;,
-       y = &quot;Pitcher Count&quot;) +
+       y = &quot;&quot;) +
   theme_bw()
 
 so_plot = merged_pitching |&gt;
@@ -744,7 +731,8 @@ so_plot = merged_pitching |&gt;
   geom_histogram(fill = &quot;orange&quot;, col = &quot;black&quot;) +
     labs(
        x = &quot;Strikeouts per 9 Innings (SO/9)&quot;,
-       y = &quot;Pitcher Count&quot;) +
+       y = &quot;&quot;) +
+  guides() +
   theme_bw()
 
 hist_pitch = (ip_plot + era_plot) / (bb_plot + so_plot)
@@ -761,7 +749,7 @@ are mostly symmetric, with peaks around 3 and 9, respectively.</p>
   scale_x_continuous(lim = c(0, 250)) +
   scale_y_continuous(labels = label_comma()) +
   labs(x = &quot;Innings Pitched&quot;,
-       y = &quot;2022 Salary&quot;) +
+       y = &quot;&quot;) +
   theme_bw()
 
 era_sal = merged_pitching |&gt; 
@@ -770,7 +758,8 @@ era_sal = merged_pitching |&gt;
   scale_x_continuous(lim = c(0, 400)) + 
   scale_y_continuous(labels = label_comma()) +
   labs(x = &quot;ERA+&quot;,
-       y = &quot;2022 Salary&quot;) +
+       y = &quot;&quot;) +
+    guides(y=&quot;none&quot;) +
   theme_bw()
 
 bb_sal = merged_pitching |&gt; 
@@ -779,7 +768,7 @@ bb_sal = merged_pitching |&gt;
   scale_x_continuous(lim = c(0, 10)) + 
   scale_y_continuous(labels = label_comma()) +
    labs(x = &quot;Walks per 9 Innings (BB/9)&quot;,
-       y = &quot;2022 Salary&quot;) +
+       y = &quot;&quot;) +
   theme_bw()
 
 so_sal = merged_pitching |&gt; 
@@ -788,11 +777,12 @@ so_sal = merged_pitching |&gt;
   scale_x_continuous(lim = c(0, 20)) + 
   scale_y_continuous(labels = label_comma()) +
    labs(x = &quot;Strikeouts Per 9 Innings (SO/9)&quot;,
-       y = &quot;2022 Salary&quot;) +
+       y = &quot;&quot;) +
+    guides(y=&quot;none&quot;) +
   theme_bw()
 
 scatt_pitch = (ip_sal + era_sal) / (bb_sal + so_sal)
-scatt_pitch + plot_annotation(title = &quot;Scatterplots of Pitching Statistics vs. Salary&quot;)</code></pre>
+scatt_pitch + plot_annotation(title = &quot;Scatterplots of Pitching Statistics and Salary&quot;)</code></pre>
 <p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-13-1.png" width="90%" /></p>
 <p>Interestingly, the pitchers with the highest ERA+ often had
 considerably lower salaries.</p>
