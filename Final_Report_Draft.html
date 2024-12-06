@@ -460,7 +460,9 @@ on the ‘worst’ contract?</p></li>
                                        c(&quot;c&quot;, &quot;1b&quot;, &quot;2b&quot;, &quot;3b&quot;, &quot;ss&quot;,
                                          &quot;lf&quot;, &quot;cf&quot;, &quot;rf&quot;, &quot;inf&quot;, &quot;of&quot;,
                                          &quot;dh&quot;, &quot;rhp&quot;, &quot;lhp&quot;)),
-         service_time_floor = floor(service_time_yrs))</code></pre>
+         service_time_floor = floor(service_time_yrs),
+         experience_group = case_when(service_time_floor &lt;= 2 ~ &quot;0-2 years&quot;,
+                                      service_time_floor &gt;= 3 ~ &quot;3+ years&quot;))</code></pre>
 </div>
 <div id="batting-data" class="section level3">
 <h3>Batting Data</h3>
@@ -577,6 +579,16 @@ salaries %&gt;%
   scale_y_continuous(labels = label_comma()) +
   theme_bw()</code></pre>
 <p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-5-1.png" width="90%" /></p>
+<pre class="r"><code># Salary by Experience
+salaries %&gt;%
+  ggplot(aes(x=experience_group, y=salary_2022)) +
+  geom_boxplot() +
+  labs(title = &quot;Salary Distribution for Years of Experience&quot;,
+       x = &quot;Years of Experience&quot;,
+       y = &quot;&quot;) +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()</code></pre>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
 <pre class="r"><code># Experience by Position
 salaries |&gt;
   ggplot(aes(x = service_time_floor, 
@@ -615,7 +627,7 @@ salaries |&gt;
                     &quot;dh&quot; = &quot;Designated Hitter&quot;,
                     &quot;ss&quot; = &quot;Shortstop&quot;)) +
   theme_bw()</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-6-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
 </div>
 <div id="batting-eda" class="section level3">
 <h3>Batting EDA</h3>
@@ -637,16 +649,16 @@ merged_batting %&gt;%
        y = &quot;Number of Home Runs&quot;) +
   scale_color_continuous(&quot;OPS&quot;) +
   theme_bw()</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-7-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
 <pre class="r"><code># Corrs for Batting Data
 merged_batting |&gt;
   select(hr, ba, ops) |&gt;
   GGally::ggpairs()</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-8-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
 <pre class="r"><code># Distributions for Used Statistics
 yrsCol = merged_batting |&gt;
-  count(service_time_floor) |&gt;
-  ggplot(aes(x = service_time_floor, y=n)) + 
+  count(experience_group) |&gt;
+  ggplot(aes(x = experience_group, y=n)) + 
   geom_col(fill = &#39;blue&#39;, col = &#39;black&#39;) +
   labs(x=&quot;Years of Experience&quot;,y=&quot;&quot;) +
   theme_bw()
@@ -669,11 +681,11 @@ opsHist = merged_batting |&gt;
 dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
 
 dist_patch + plot_annotation(title = &quot;Distribution of Important Batting Statistics&quot;)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
 <pre class="r"><code># Scatter for Used Statistics
 yrs = merged_batting |&gt;
-  ggplot(aes(x = service_time_floor, y = salary_2022)) + 
-  geom_point(col = &#39;blue&#39;) +
+  ggplot(aes(x = experience_group, y = salary_2022)) + 
+  geom_boxplot(col = &#39;blue&#39;) +
   labs(x=&quot;Years of Experience&quot;,y=&quot;&quot;) +
   scale_y_continuous(labels = label_comma()) +
   theme_bw()
@@ -699,7 +711,7 @@ ops = merged_batting |&gt;
 scatter_patch = (yrs+hrs)/(bas+ops)
 
 scatter_patch + plot_annotation(title = &quot;Scatterplot of Batting Statistics and Salary&quot;)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
 </div>
 <div id="pitching-eda" class="section level3">
 <h3>Pitching EDA</h3>
@@ -737,7 +749,7 @@ so_plot = merged_pitching |&gt;
 
 hist_pitch = (ip_plot + era_plot) / (bb_plot + so_plot)
 hist_pitch + plot_annotation(title = &quot;Histograms of Pitching Statistics&quot;)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-11-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
 <p>The distribution of innings pitched is quite right-skewed, with a
 peak around 70 innings pitched. The distribution of ERA+ is right-skewed
 as well, with a peak around 100 (the league average) and a small number
@@ -781,7 +793,7 @@ so_sal = merged_pitching |&gt;
 
 scatt_pitch = (ip_sal + era_sal) / (bb_sal + so_sal)
 scatt_pitch + plot_annotation(title = &quot;Scatterplots of Pitching Statistics vs. Salary&quot;)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-13-1.png" width="90%" /></p>
 <p>Interestingly, the pitchers with the highest ERA+ often had
 considerably lower salaries.</p>
 </div>
@@ -790,41 +802,40 @@ considerably lower salaries.</p>
 <h1>Additional analysis</h1>
 <div id="batting-model" class="section level2">
 <h2>Batting Model</h2>
-<pre class="r"><code>lm_batting = lm(log10(salary_2022) ~ ops_2 + service_time_floor,
+<pre class="r"><code>lm_batting = lm(log10(salary_2022) ~ ops_2 + experience_group,
                  data = merged_batting)
 
 summary(lm_batting)</code></pre>
 <pre><code>## 
 ## Call:
-## lm(formula = log10(salary_2022) ~ ops_2 + service_time_floor, 
-##     data = merged_batting)
+## lm(formula = log10(salary_2022) ~ ops_2 + experience_group, data = merged_batting)
 ## 
 ## Residuals:
 ##      Min       1Q   Median       3Q      Max 
-## -2.21562 -0.25145 -0.01364  0.25646  0.93865 
+## -0.95350 -0.18334 -0.02296  0.21119  1.09670 
 ## 
 ## Coefficients:
-##                     Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)        5.5528133  0.0689038  80.588  &lt; 2e-16 ***
-## ops_2              0.0045456  0.0006639   6.847 3.38e-11 ***
-## service_time_floor 0.1130646  0.0052915  21.367  &lt; 2e-16 ***
+##                           Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)              5.5217232  0.0669508  82.474  &lt; 2e-16 ***
+## ops_2                    0.0043860  0.0006429   6.823 3.93e-11 ***
+## experience_group3+ years 0.8509329  0.0376350  22.610  &lt; 2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.3547 on 351 degrees of freedom
+## Residual standard error: 0.3432 on 351 degrees of freedom
 ##   (44 observations deleted due to missingness)
-## Multiple R-squared:  0.5973, Adjusted R-squared:  0.595 
-## F-statistic: 260.3 on 2 and 351 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Multiple R-squared:  0.6228, Adjusted R-squared:  0.6207 
+## F-statistic: 289.8 on 2 and 351 DF,  p-value: &lt; 2.2e-16</code></pre>
 <pre class="r"><code>plot(residuals(lm_batting) ~ fitted.values(lm_batting), 
      main = &quot;Residuals vs. Fitted Values Plot for Batting Model&quot;,
      xlab = &quot;Fitted Values&quot;,
      ylab = &quot;Residuals&quot;)
 abline(h = 0)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-14-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-15-1.png" width="90%" /></p>
 <pre class="r"><code>qqnorm(residuals(lm_batting),
        main = &quot;Normal Q-Q Plot for Batting Model&quot;)
 qqline(residuals(lm_batting))</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-15-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-16-1.png" width="90%" /></p>
 <p>We decided to log-transform the salary variable because it is heavily
 right-skewed, and decided to use <span
 class="math inline">\(log_{10}\)</span> instead of <span
@@ -845,25 +856,27 @@ than predicted based on their performance.</p>
   modelr::add_predictions(lm_batting) |&gt;
   modelr::add_residuals(lm_batting) |&gt;
   arrange(resid) |&gt;
-  select(name, salary_2022, service_time_floor, ops_2, pred, resid ) |&gt;
+  select(name, salary_2022, service_time_floor, experience_group, ops_2, pred, resid ) |&gt;
   mutate(expected_salary = 10^pred) |&gt;
   slice(1:5)</code></pre>
 <div class="kable-table">
-<table>
+<table style="width:100%;">
 <colgroup>
-<col width="19%" />
-<col width="13%" />
-<col width="20%" />
-<col width="6%" />
-<col width="9%" />
-<col width="12%" />
+<col width="15%" />
+<col width="11%" />
 <col width="17%" />
+<col width="16%" />
+<col width="5%" />
+<col width="8%" />
+<col width="10%" />
+<col width="15%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">name</th>
 <th align="right">salary_2022</th>
 <th align="right">service_time_floor</th>
+<th align="left">experience_group</th>
 <th align="right">ops_2</th>
 <th align="right">pred</th>
 <th align="right">resid</th>
@@ -872,49 +885,54 @@ than predicted based on their performance.</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Albert Pujols</td>
-<td align="right">2500000</td>
-<td align="right">21</td>
-<td align="right">151</td>
-<td align="right">8.613562</td>
-<td align="right">-2.2156220</td>
-<td align="right">410735252</td>
-</tr>
-<tr class="even">
-<td align="left">Jed Lowrie</td>
-<td align="right">850000</td>
-<td align="right">13</td>
-<td align="right">50</td>
-<td align="right">7.249935</td>
-<td align="right">-1.3205162</td>
-<td align="right">17780138</td>
-</tr>
-<tr class="odd">
-<td align="left">Kurt Suzuki</td>
-<td align="right">1750000</td>
-<td align="right">14</td>
-<td align="right">59</td>
-<td align="right">7.403911</td>
-<td align="right">-1.1608725</td>
-<td align="right">25346063</td>
-</tr>
-<tr class="even">
-<td align="left">Alcides Escobar</td>
-<td align="right">1000000</td>
-<td align="right">10</td>
-<td align="right">58</td>
-<td align="right">6.947107</td>
-<td align="right">-0.9471065</td>
-<td align="right">8853328</td>
-</tr>
-<tr class="odd">
-<td align="left">Robinson Chirinos</td>
+<td align="left">Brandon Drury</td>
 <td align="right">900000</td>
-<td align="right">9</td>
-<td align="right">60</td>
-<td align="right">6.843133</td>
-<td align="right">-0.8888907</td>
-<td align="right">6968403</td>
+<td align="right">5</td>
+<td align="left">3+ years</td>
+<td align="right">122</td>
+<td align="right">6.907744</td>
+<td align="right">-0.9535020</td>
+<td align="right">8086200</td>
+</tr>
+<tr class="even">
+<td align="left">Luke Maile</td>
+<td align="right">900000</td>
+<td align="right">4</td>
+<td align="left">3+ years</td>
+<td align="right">82</td>
+<td align="right">6.732306</td>
+<td align="right">-0.7780632</td>
+<td align="right">5398905</td>
+</tr>
+<tr class="odd">
+<td align="left">Kyle Higashioka</td>
+<td align="right">935000</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">85</td>
+<td align="right">6.745464</td>
+<td align="right">-0.7746520</td>
+<td align="right">5564980</td>
+</tr>
+<tr class="even">
+<td align="left">Dylan Moore</td>
+<td align="right">1350000</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">121</td>
+<td align="right">6.903359</td>
+<td align="right">-0.7730247</td>
+<td align="right">8004948</td>
+</tr>
+<tr class="odd">
+<td align="left">Colin Moran</td>
+<td align="right">1000000</td>
+<td align="right">4</td>
+<td align="left">3+ years</td>
+<td align="right">85</td>
+<td align="right">6.745464</td>
+<td align="right">-0.7454636</td>
+<td align="right">5564980</td>
 </tr>
 </tbody>
 </table>
@@ -926,10 +944,137 @@ than predicted based on their performance.</p>
   modelr::add_predictions(lm_batting) |&gt;
   modelr::add_residuals(lm_batting) |&gt;
   arrange(desc(salary_2022)) |&gt;
-  select(name, salary_2022, service_time_floor, ops_2, pred, resid ) |&gt;
+  select(name, salary_2022, service_time_floor,experience_group, ops_2, pred, resid ) |&gt;
   mutate(expected_salary = 10^pred) |&gt;
-  slice(1:10) |&gt;
-  view()</code></pre>
+  slice(1:10)</code></pre>
+<div class="kable-table">
+<table style="width:100%;">
+<colgroup>
+<col width="16%" />
+<col width="11%" />
+<col width="17%" />
+<col width="16%" />
+<col width="5%" />
+<col width="8%" />
+<col width="9%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="right">salary_2022</th>
+<th align="right">service_time_floor</th>
+<th align="left">experience_group</th>
+<th align="right">ops_2</th>
+<th align="right">pred</th>
+<th align="right">resid</th>
+<th align="right">expected_salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Mike Trout</td>
+<td align="right">37116667</td>
+<td align="right">10</td>
+<td align="left">3+ years</td>
+<td align="right">176</td>
+<td align="right">7.144587</td>
+<td align="right">0.4249821</td>
+<td align="right">13950407</td>
+</tr>
+<tr class="even">
+<td align="left">Anthony Rendon</td>
+<td align="right">36571429</td>
+<td align="right">8</td>
+<td align="left">3+ years</td>
+<td align="right">100</td>
+<td align="right">6.811253</td>
+<td align="right">0.7518888</td>
+<td align="right">6475199</td>
+</tr>
+<tr class="odd">
+<td align="left">Carlos Correa</td>
+<td align="right">35100000</td>
+<td align="right">6</td>
+<td align="left">3+ years</td>
+<td align="right">137</td>
+<td align="right">6.973534</td>
+<td align="right">0.5717731</td>
+<td align="right">9408796</td>
+</tr>
+<tr class="even">
+<td align="left">Manny Machado</td>
+<td align="right">34000000</td>
+<td align="right">9</td>
+<td align="left">3+ years</td>
+<td align="right">158</td>
+<td align="right">7.065639</td>
+<td align="right">0.4658395</td>
+<td align="right">11631599</td>
+</tr>
+<tr class="odd">
+<td align="left">Corey Seager</td>
+<td align="right">33000000</td>
+<td align="right">6</td>
+<td align="left">3+ years</td>
+<td align="right">117</td>
+<td align="right">6.885815</td>
+<td align="right">0.6326993</td>
+<td align="right">7688022</td>
+</tr>
+<tr class="even">
+<td align="left">Nolan Arenado</td>
+<td align="right">32974847</td>
+<td align="right">8</td>
+<td align="left">3+ years</td>
+<td align="right">151</td>
+<td align="right">7.034938</td>
+<td align="right">0.4832452</td>
+<td align="right">10837712</td>
+</tr>
+<tr class="odd">
+<td align="left">Francisco Lindor</td>
+<td align="right">32477277</td>
+<td align="right">6</td>
+<td align="left">3+ years</td>
+<td align="right">126</td>
+<td align="right">6.925288</td>
+<td align="right">0.5862912</td>
+<td align="right">8419540</td>
+</tr>
+<tr class="even">
+<td align="left">Miguel Cabrera</td>
+<td align="right">32000000</td>
+<td align="right">18</td>
+<td align="left">3+ years</td>
+<td align="right">81</td>
+<td align="right">6.727920</td>
+<td align="right">0.7772303</td>
+<td align="right">5344655</td>
+</tr>
+<tr class="odd">
+<td align="left">George Springer</td>
+<td align="right">29666667</td>
+<td align="right">7</td>
+<td align="left">3+ years</td>
+<td align="right">133</td>
+<td align="right">6.955990</td>
+<td align="right">0.5162786</td>
+<td align="right">9036290</td>
+</tr>
+<tr class="even">
+<td align="left">Jose Altuve</td>
+<td align="right">29200000</td>
+<td align="right">10</td>
+<td align="left">3+ years</td>
+<td align="right">161</td>
+<td align="right">7.078797</td>
+<td align="right">0.3865855</td>
+<td align="right">11989397</td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>It looks like in 2022, the most cost-effective player was Albert
 Pujols, who made $2.5 million in his 21st season with an OPS+ of
 151.</p>
@@ -937,50 +1082,50 @@ Pujols, who made $2.5 million in his 21st season with an OPS+ of
 </div>
 <div id="pitching-model" class="section level2">
 <h2>Pitching Model</h2>
-<pre class="r"><code>lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9 + service_time_floor,
+<pre class="r"><code>lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9 + experience_group,
                  data = merged_pitching)
 
 summary(lm_pitching)</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = log10(salary_2022) ~ hand + pitcher_type + hand * 
-##     pitcher_type + ip_total + era_2 + bb9 + so9 + service_time_floor, 
+##     pitcher_type + ip_total + era_2 + bb9 + so9 + experience_group, 
 ##     data = merged_pitching)
 ## 
 ## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -1.01892 -0.15485 -0.01045  0.15063  0.91612 
+##     Min      1Q  Median      3Q     Max 
+## -0.7256 -0.1353  0.0000  0.1118  0.9380 
 ## 
 ## Coefficients:
-##                         Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)            6.0379508  0.2975878  20.290  &lt; 2e-16 ***
-## handrhp               -0.0785198  0.2978772  -0.264  0.79222    
-## pitcher_typer         -0.3960877  0.2784062  -1.423  0.15559    
-## pitcher_types         -0.1447753  0.2800345  -0.517  0.60544    
-## ip_total               0.0010815  0.0003334   3.244  0.00128 ** 
-## era_2                 -0.0002924  0.0002800  -1.044  0.29703    
-## bb9                   -0.0269317  0.0124884  -2.157  0.03163 *  
-## so9                    0.0307699  0.0070773   4.348 1.74e-05 ***
-## service_time_floor     0.0917183  0.0042819  21.420  &lt; 2e-16 ***
-## handrhp:pitcher_typer  0.0501314  0.2997480   0.167  0.86726    
-## handrhp:pitcher_types  0.0410864  0.3023104   0.136  0.89196    
+##                            Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)               6.5815420  0.3024707  21.759  &lt; 2e-16 ***
+## handrhp                  -0.4242111  0.3054319  -1.389 0.165624    
+## pitcher_typer            -0.8528043  0.2839805  -3.003 0.002838 ** 
+## pitcher_types            -0.5941512  0.2867592  -2.072 0.038898 *  
+## ip_total                  0.0014225  0.0003437   4.139 4.24e-05 ***
+## era_2                    -0.0004776  0.0002877  -1.660 0.097707 .  
+## bb9                      -0.0377370  0.0128069  -2.947 0.003397 ** 
+## so9                       0.0247501  0.0072925   3.394 0.000756 ***
+## experience_group3+ years  0.6080049  0.0299496  20.301  &lt; 2e-16 ***
+## handrhp:pitcher_typer     0.4144199  0.3072509   1.349 0.178149    
+## handrhp:pitcher_types     0.3405457  0.3101460   1.098 0.272844    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.271 on 408 degrees of freedom
+## Residual standard error: 0.2786 on 408 degrees of freedom
 ##   (50 observations deleted due to missingness)
-## Multiple R-squared:  0.6944, Adjusted R-squared:  0.6869 
-## F-statistic: 92.72 on 10 and 408 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Multiple R-squared:  0.677,  Adjusted R-squared:  0.6691 
+## F-statistic: 85.52 on 10 and 408 DF,  p-value: &lt; 2.2e-16</code></pre>
 <pre class="r"><code>plot(residuals(lm_pitching) ~ fitted.values(lm_pitching),
      main = &quot;Residuals vs. Fitted Values Plot for Pitching Model&quot;,
      xlab = &quot;Fitted Values&quot;,
      ylab = &quot;Residuals&quot;)
 abline(h = 0)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-19-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-20-1.png" width="90%" /></p>
 <pre class="r"><code>qqnorm(residuals(lm_pitching),
        main = &quot;Normal Q-Q Plot for Pitching Model&quot;)
 qqline(residuals(lm_pitching))</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-20-1.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-21-1.png" width="90%" /></p>
 <p>We decided to log-transform the salary variable because it is heavily
 right-skewed, and decided to use <span
 class="math inline">\(log_{10}\)</span> instead of <span
@@ -1018,25 +1163,27 @@ only slightly from Normal behavior.</p>
   modelr::add_predictions(lm_pitching) |&gt;
   modelr::add_residuals(lm_pitching) |&gt;
   arrange(resid) |&gt;
-  select(name, salary_2022, service_time_floor, era_2, pred, resid ) |&gt;
+  select(name, salary_2022, service_time_floor, experience_group, era_2, pred, resid ) |&gt;
   mutate(expected_salary = 10^pred) |&gt;
   slice(1:5)</code></pre>
 <div class="kable-table">
-<table>
+<table style="width:100%;">
 <colgroup>
+<col width="15%" />
+<col width="11%" />
 <col width="17%" />
-<col width="13%" />
-<col width="21%" />
-<col width="6%" />
+<col width="16%" />
+<col width="5%" />
+<col width="8%" />
 <col width="10%" />
-<col width="12%" />
-<col width="18%" />
+<col width="15%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">name</th>
 <th align="right">salary_2022</th>
 <th align="right">service_time_floor</th>
+<th align="left">experience_group</th>
 <th align="right">era_2</th>
 <th align="right">pred</th>
 <th align="right">resid</th>
@@ -1045,49 +1192,54 @@ only slightly from Normal behavior.</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td align="left">Darren O’Day</td>
+<td align="left">Drew Hutchison</td>
+<td align="right">800000</td>
+<td align="right">4</td>
+<td align="left">3+ years</td>
+<td align="right">85</td>
+<td align="right">6.628671</td>
+<td align="right">-0.7255811</td>
+<td align="right">4252762</td>
+</tr>
+<tr class="even">
+<td align="left">Ryan Borucki</td>
+<td align="right">825000</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">68</td>
+<td align="right">6.637406</td>
+<td align="right">-0.7209523</td>
+<td align="right">4339166</td>
+</tr>
+<tr class="odd">
+<td align="left">Trevor Richards</td>
 <td align="right">1000000</td>
-<td align="right">13</td>
-<td align="right">101</td>
-<td align="right">7.018917</td>
-<td align="right">-1.0189172</td>
-<td align="right">10445210</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">72</td>
+<td align="right">6.668099</td>
+<td align="right">-0.6680993</td>
+<td align="right">4656926</td>
 </tr>
 <tr class="even">
-<td align="left">Anibal Sanchez</td>
-<td align="right">2000000</td>
-<td align="right">14</td>
-<td align="right">91</td>
-<td align="right">7.263145</td>
-<td align="right">-0.9621150</td>
-<td align="right">18329263</td>
+<td align="left">Sean Newcomb</td>
+<td align="right">900000</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">48</td>
+<td align="right">6.603083</td>
+<td align="right">-0.6488400</td>
+<td align="right">4009429</td>
 </tr>
 <tr class="odd">
-<td align="left">Jhoulys Chacin</td>
-<td align="right">1250000</td>
-<td align="right">10</td>
-<td align="right">61</td>
-<td align="right">6.913945</td>
-<td align="right">-0.8170349</td>
-<td align="right">8202476</td>
-</tr>
-<tr class="even">
-<td align="left">Jesse Chavez</td>
-<td align="right">1250000</td>
-<td align="right">11</td>
-<td align="right">111</td>
-<td align="right">6.890277</td>
-<td align="right">-0.7933667</td>
-<td align="right">7767418</td>
-</tr>
-<tr class="odd">
-<td align="left">Jose Quintana</td>
-<td align="right">2000000</td>
-<td align="right">9</td>
-<td align="right">138</td>
-<td align="right">7.015140</td>
-<td align="right">-0.7141095</td>
-<td align="right">10354747</td>
+<td align="left">Jeffrey Springs</td>
+<td align="right">947500</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">150</td>
+<td align="right">6.615970</td>
+<td align="right">-0.6393911</td>
+<td align="right">4130192</td>
 </tr>
 </tbody>
 </table>
@@ -1099,25 +1251,27 @@ only slightly from Normal behavior.</p>
   modelr::add_predictions(lm_pitching) |&gt;
   modelr::add_residuals(lm_pitching) |&gt;
   arrange(desc(salary_2022)) |&gt;
-  select(name, salary_2022, service_time_floor, era_2, pred, resid ) |&gt;
+  select(name, salary_2022, service_time_floor, experience_group, era_2, pred, resid ) |&gt;
   mutate(expected_salary = 10^pred) |&gt;
   slice(1:10)</code></pre>
 <div class="kable-table">
 <table>
 <colgroup>
-<col width="19%" />
-<col width="13%" />
-<col width="20%" />
-<col width="6%" />
-<col width="9%" />
-<col width="12%" />
+<col width="16%" />
+<col width="11%" />
 <col width="17%" />
+<col width="15%" />
+<col width="5%" />
+<col width="8%" />
+<col width="9%" />
+<col width="14%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th align="left">name</th>
 <th align="right">salary_2022</th>
 <th align="right">service_time_floor</th>
+<th align="left">experience_group</th>
 <th align="right">era_2</th>
 <th align="right">pred</th>
 <th align="right">resid</th>
@@ -1129,91 +1283,101 @@ only slightly from Normal behavior.</p>
 <td align="left">Max Scherzer</td>
 <td align="right">43333333</td>
 <td align="right">13</td>
+<td align="left">3+ years</td>
 <td align="right">169</td>
-<td align="right">7.444691</td>
-<td align="right">0.1921314</td>
-<td align="right">27841374</td>
+<td align="right">6.845976</td>
+<td align="right">0.7908462</td>
+<td align="right">7014163</td>
 </tr>
 <tr class="even">
 <td align="left">Gerrit Cole</td>
 <td align="right">36000000</td>
 <td align="right">8</td>
+<td align="left">3+ years</td>
 <td align="right">110</td>
-<td align="right">7.068957</td>
-<td align="right">0.4873451</td>
-<td align="right">11720804</td>
+<td align="right">6.946254</td>
+<td align="right">0.6100489</td>
+<td align="right">8835957</td>
 </tr>
 <tr class="odd">
 <td align="left">David Price</td>
 <td align="right">32000000</td>
 <td align="right">11</td>
+<td align="left">3+ years</td>
 <td align="right">167</td>
-<td align="right">7.098398</td>
-<td align="right">0.4067521</td>
-<td align="right">12542899</td>
+<td align="right">6.702960</td>
+<td align="right">0.8021897</td>
+<td align="right">5046151</td>
 </tr>
 <tr class="even">
 <td align="left">Jacob deGrom</td>
 <td align="right">27257728</td>
 <td align="right">7</td>
+<td align="left">3+ years</td>
 <td align="right">126</td>
-<td align="right">6.940894</td>
-<td align="right">0.4945959</td>
-<td align="right">8727578</td>
+<td align="right">6.855482</td>
+<td align="right">0.5800073</td>
+<td align="right">7169392</td>
 </tr>
 <tr class="odd">
 <td align="left">Zack Wheeler</td>
 <td align="right">26000000</td>
 <td align="right">8</td>
+<td align="left">3+ years</td>
 <td align="right">142</td>
-<td align="right">6.954973</td>
-<td align="right">0.4600008</td>
-<td align="right">9015141</td>
+<td align="right">6.823685</td>
+<td align="right">0.5912886</td>
+<td align="right">6663229</td>
 </tr>
 <tr class="even">
 <td align="left">Justin Verlander</td>
 <td align="right">25000000</td>
 <td align="right">16</td>
+<td align="left">3+ years</td>
 <td align="right">218</td>
-<td align="right">7.700681</td>
-<td align="right">-0.3027407</td>
-<td align="right">50197344</td>
+<td align="right">6.835075</td>
+<td align="right">0.5628650</td>
+<td align="right">6840298</td>
 </tr>
 <tr class="odd">
 <td align="left">Marcus Stroman</td>
 <td align="right">25000000</td>
 <td align="right">7</td>
+<td align="left">3+ years</td>
 <td align="right">117</td>
-<td align="right">6.788519</td>
-<td align="right">0.6094213</td>
-<td align="right">6144954</td>
+<td align="right">6.756888</td>
+<td align="right">0.6410518</td>
+<td align="right">5713316</td>
 </tr>
 <tr class="even">
 <td align="left">Patrick Corbin</td>
 <td align="right">23416667</td>
 <td align="right">9</td>
+<td align="left">3+ years</td>
 <td align="right">62</td>
-<td align="right">7.018298</td>
-<td align="right">0.3512270</td>
-<td align="right">10430332</td>
+<td align="right">6.859146</td>
+<td align="right">0.5103788</td>
+<td align="right">7230134</td>
 </tr>
 <tr class="odd">
 <td align="left">Madison Bumgarner</td>
 <td align="right">21882892</td>
 <td align="right">11</td>
+<td align="left">3+ years</td>
 <td align="right">82</td>
-<td align="right">7.171223</td>
-<td align="right">0.1688821</td>
-<td align="right">14832781</td>
+<td align="right">6.834678</td>
+<td align="right">0.5054269</td>
+<td align="right">6834044</td>
 </tr>
 <tr class="even">
 <td align="left">Carlos Rodon</td>
 <td align="right">21500000</td>
 <td align="right">6</td>
+<td align="left">3+ years</td>
 <td align="right">138</td>
-<td align="right">6.894866</td>
-<td align="right">0.4375727</td>
-<td align="right">7849930</td>
+<td align="right">6.981582</td>
+<td align="right">0.3508561</td>
+<td align="right">9584786</td>
 </tr>
 </tbody>
 </table>

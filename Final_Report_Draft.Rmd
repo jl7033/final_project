@@ -294,7 +294,7 @@ merged_batting |>
 # Distributions for Used Statistics
 yrsCol = merged_batting |>
   count(experience_group) |>
-  ggplot(aes(x = service_time_floor, y=n)) + 
+  ggplot(aes(x = experience_group, y=n)) + 
   geom_col(fill = 'blue', col = 'black') +
   labs(x="Years of Experience",y="") +
   theme_bw()
