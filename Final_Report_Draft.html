@@ -809,10 +809,16 @@ summary(lm_batting)</code></pre>
 ##   (44 observations deleted due to missingness)
 ## Multiple R-squared:  0.5973, Adjusted R-squared:  0.595 
 ## F-statistic: 260.3 on 2 and 351 DF,  p-value: &lt; 2.2e-16</code></pre>
-<pre class="r"><code>plot(lm_batting, which = 1)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-13-1.png" width="90%" /></p>
-<pre class="r"><code>plot(lm_batting, which = 2)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-13-2.png" width="90%" /></p>
+<pre class="r"><code>plot(residuals(lm_batting) ~ fitted.values(lm_batting), 
+     main = &quot;Residuals vs. Fitted Values Plot for Batting Model&quot;,
+     xlab = &quot;Fitted Values&quot;,
+     ylab = &quot;Residuals&quot;)
+abline(h = 0)</code></pre>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-14-1.png" width="90%" /></p>
+<pre class="r"><code>qqnorm(residuals(lm_batting),
+       main = &quot;Normal Q-Q Plot for Batting Model&quot;)
+qqline(residuals(lm_batting))</code></pre>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-15-1.png" width="90%" /></p>
 <p>We decided to log-transform the salary variable because it is heavily
 right-skewed, and decided to use <span
 class="math inline">\(log_{10}\)</span> instead of <span
@@ -827,6 +833,8 @@ who perform better) have significantly higher salaries.</p>
 Who was most cost effective? That would be the player with a high OPS+
 and the lowest residual, indicating that their actual salary was lower
 than predicted based on their performance.</p>
+<div id="top-5-batters-by-value" class="section level3">
+<h3>Top 5 Batters by Value</h3>
 <pre class="r"><code>merged_batting |&gt;
   modelr::add_predictions(lm_batting) |&gt;
   modelr::add_residuals(lm_batting) |&gt;
@@ -905,52 +913,68 @@ than predicted based on their performance.</p>
 </tbody>
 </table>
 </div>
+</div>
+<div id="top-10-batters-by-salary" class="section level3">
+<h3>Top 10 Batters by Salary</h3>
+<pre class="r"><code>merged_batting |&gt;
+  modelr::add_predictions(lm_batting) |&gt;
+  modelr::add_residuals(lm_batting) |&gt;
+  arrange(desc(salary_2022)) |&gt;
+  select(name, salary_2022, service_time_floor, ops_2, pred, resid ) |&gt;
+  mutate(expected_salary = 10^pred) |&gt;
+  slice(1:10) |&gt;
+  view()</code></pre>
 <p>It looks like in 2022, the most cost-effective player was Albert
 Pujols, who made $2.5 million in his 21st season with an OPS+ of
 151.</p>
 </div>
+</div>
 <div id="pitching-model" class="section level2">
 <h2>Pitching Model</h2>
-<pre class="r"><code>lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9,
+<pre class="r"><code>lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9 + service_time_floor,
                  data = merged_pitching)
 
 summary(lm_pitching)</code></pre>
 <pre><code>## 
 ## Call:
 ## lm(formula = log10(salary_2022) ~ hand + pitcher_type + hand * 
-##     pitcher_type + ip_total + era_2 + bb9 + so9, data = merged_pitching)
+##     pitcher_type + ip_total + era_2 + bb9 + so9 + service_time_floor, 
+##     data = merged_pitching)
 ## 
 ## Residuals:
-##     Min      1Q  Median      3Q     Max 
-## -0.9091 -0.2543 -0.1055  0.2800  1.0887 
+##      Min       1Q   Median       3Q      Max 
+## -1.01892 -0.15485 -0.01045  0.15063  0.91612 
 ## 
 ## Coefficients:
 ##                         Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)            7.1698385  0.4263438  16.817  &lt; 2e-16 ***
-## handrhp               -0.5627367  0.4323993  -1.301 0.193844    
-## pitcher_typer         -1.2404041  0.4012211  -3.092 0.002127 ** 
-## pitcher_types         -0.6852709  0.4060161  -1.688 0.092213 .  
-## ip_total               0.0008592  0.0004851   1.771 0.077299 .  
-## era_2                 -0.0004753  0.0004075  -1.167 0.244057    
-## bb9                   -0.0491949  0.0181176  -2.715 0.006902 ** 
-## so9                    0.0358753  0.0102973   3.484 0.000547 ***
-## handrhp:pitcher_typer  0.5681287  0.4349509   1.306 0.192222    
-## handrhp:pitcher_types  0.4854323  0.4390664   1.106 0.269549    
+## (Intercept)            6.0379508  0.2975878  20.290  &lt; 2e-16 ***
+## handrhp               -0.0785198  0.2978772  -0.264  0.79222    
+## pitcher_typer         -0.3960877  0.2784062  -1.423  0.15559    
+## pitcher_types         -0.1447753  0.2800345  -0.517  0.60544    
+## ip_total               0.0010815  0.0003334   3.244  0.00128 ** 
+## era_2                 -0.0002924  0.0002800  -1.044  0.29703    
+## bb9                   -0.0269317  0.0124884  -2.157  0.03163 *  
+## so9                    0.0307699  0.0070773   4.348 1.74e-05 ***
+## service_time_floor     0.0917183  0.0042819  21.420  &lt; 2e-16 ***
+## handrhp:pitcher_typer  0.0501314  0.2997480   0.167  0.86726    
+## handrhp:pitcher_types  0.0410864  0.3023104   0.136  0.89196    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
-## Residual standard error: 0.3945 on 409 degrees of freedom
+## Residual standard error: 0.271 on 408 degrees of freedom
 ##   (50 observations deleted due to missingness)
-## Multiple R-squared:  0.3508, Adjusted R-squared:  0.3365 
-## F-statistic: 24.55 on 9 and 409 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Multiple R-squared:  0.6944, Adjusted R-squared:  0.6869 
+## F-statistic: 92.72 on 10 and 408 DF,  p-value: &lt; 2.2e-16</code></pre>
 <pre class="r"><code>plot(residuals(lm_pitching) ~ fitted.values(lm_pitching),
-     main = &quot;Residuals vs. Fitted Values Plot for Pitching Model&quot;)
-abline(0,0)</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-15-1.png" width="90%" /></p>
+     main = &quot;Residuals vs. Fitted Values Plot for Pitching Model&quot;,
+     xlab = &quot;Fitted Values&quot;,
+     ylab = &quot;Residuals&quot;)
+abline(h = 0)</code></pre>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-19-1.png" width="90%" /></p>
 <pre class="r"><code>qqnorm(residuals(lm_pitching),
        main = &quot;Normal Q-Q Plot for Pitching Model&quot;)
 qqline(residuals(lm_pitching))</code></pre>
-<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-15-2.png" width="90%" /></p>
+<p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-20-1.png" width="90%" /></p>
 <p>We decided to log-transform the salary variable because it is heavily
 right-skewed, and decided to use <span
 class="math inline">\(log_{10}\)</span> instead of <span
@@ -966,31 +990,297 @@ pitcher type (the default type is a closing pitcher, with relief
 pitchers and starting pitchers also included in the model). Finally, we
 explored the interaction between handedness and pitcher type to see if
 pitcher type affects the relationship between handedness and salary.</p>
-<p>From our model, we can see that relief pitchers have significantly
-lower salaries than closing pitchers, which makes sense, since closing
-pitchers have very strong reputations as some of the most effective
-pitchers in the game and therefore will draw high salaries.
-Additionally, the <code>era_2</code> predictor, even when accounting for
-pitcher handedness, pitcher type, and the number of innings pitched, has
-an insignificant <span class="math inline">\(P\)</span>-value, implying
+<p>From our model, we can see that pitcher handedness and pitcher type
+have no significant effect on expected salary. Interestingly, the
+<code>era_2</code> predictor, even when accounting for pitcher
+handedness, pitcher type, and the number of innings pitched, has an
+insignificant <span class="math inline">\(P\)</span>-value, implying
 that there is no significant association between one of the most highly
 regarded summative statistics for pitching effectiveness and pitcher
-salary.</p>
-<p>The residuals vs. fitted values plot shows that residuals are
-slightly more likely to be positive when salary is low; this is likely
-because of the large number of MLB players who are still on their rookie
-contracts, and therefore make somewhere between $700,000 and $1,000,000
-per year. The Normal Q-Q plot shows only minor deviations of the model’s
-residuals from Normal behavior; the deviations between theoretical
-quantities of -1 and 0.5 can also be explained by the players on their
-rookie contracts.</p>
+salary when accounting for pitcher handedness, pitcher type, innings
+pitched, walk and strikeout rates, and service time.</p>
+<p>The residuals vs. fitted values plot shows that the residuals are
+generally evenly spread out; the straight line on the left side of the
+plot represents the large number of MLB players who are still on their
+rookie contracts, and therefore have a low fitted value (as they usually
+make between $700,000 and $1,000,000 per year, which is quite low by MLB
+standards). The Normal Q-Q plot shows that the model’s residuals deviate
+only slightly from Normal behavior.</p>
+<div id="top-5-pitchers-by-value" class="section level3">
+<h3>Top 5 Pitchers by Value</h3>
+<pre class="r"><code>merged_pitching |&gt;
+  modelr::add_predictions(lm_pitching) |&gt;
+  modelr::add_residuals(lm_pitching) |&gt;
+  arrange(resid) |&gt;
+  select(name, salary_2022, service_time_floor, era_2, pred, resid ) |&gt;
+  mutate(expected_salary = 10^pred) |&gt;
+  slice(1:5)</code></pre>
+<div class="kable-table">
+<table>
+<colgroup>
+<col width="17%" />
+<col width="13%" />
+<col width="21%" />
+<col width="6%" />
+<col width="10%" />
+<col width="12%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="right">salary_2022</th>
+<th align="right">service_time_floor</th>
+<th align="right">era_2</th>
+<th align="right">pred</th>
+<th align="right">resid</th>
+<th align="right">expected_salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Darren O’Day</td>
+<td align="right">1000000</td>
+<td align="right">13</td>
+<td align="right">101</td>
+<td align="right">7.018917</td>
+<td align="right">-1.0189172</td>
+<td align="right">10445210</td>
+</tr>
+<tr class="even">
+<td align="left">Anibal Sanchez</td>
+<td align="right">2000000</td>
+<td align="right">14</td>
+<td align="right">91</td>
+<td align="right">7.263145</td>
+<td align="right">-0.9621150</td>
+<td align="right">18329263</td>
+</tr>
+<tr class="odd">
+<td align="left">Jhoulys Chacin</td>
+<td align="right">1250000</td>
+<td align="right">10</td>
+<td align="right">61</td>
+<td align="right">6.913945</td>
+<td align="right">-0.8170349</td>
+<td align="right">8202476</td>
+</tr>
+<tr class="even">
+<td align="left">Jesse Chavez</td>
+<td align="right">1250000</td>
+<td align="right">11</td>
+<td align="right">111</td>
+<td align="right">6.890277</td>
+<td align="right">-0.7933667</td>
+<td align="right">7767418</td>
+</tr>
+<tr class="odd">
+<td align="left">Jose Quintana</td>
+<td align="right">2000000</td>
+<td align="right">9</td>
+<td align="right">138</td>
+<td align="right">7.015140</td>
+<td align="right">-0.7141095</td>
+<td align="right">10354747</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="top-10-pitchers-by-salary" class="section level3">
+<h3>Top 10 Pitchers by Salary</h3>
+<pre class="r"><code>merged_pitching |&gt;
+  modelr::add_predictions(lm_pitching) |&gt;
+  modelr::add_residuals(lm_pitching) |&gt;
+  arrange(desc(salary_2022)) |&gt;
+  select(name, salary_2022, service_time_floor, era_2, pred, resid ) |&gt;
+  mutate(expected_salary = 10^pred) |&gt;
+  slice(1:10)</code></pre>
+<div class="kable-table">
+<table>
+<colgroup>
+<col width="19%" />
+<col width="13%" />
+<col width="20%" />
+<col width="6%" />
+<col width="9%" />
+<col width="12%" />
+<col width="17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="right">salary_2022</th>
+<th align="right">service_time_floor</th>
+<th align="right">era_2</th>
+<th align="right">pred</th>
+<th align="right">resid</th>
+<th align="right">expected_salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Max Scherzer</td>
+<td align="right">43333333</td>
+<td align="right">13</td>
+<td align="right">169</td>
+<td align="right">7.444691</td>
+<td align="right">0.1921314</td>
+<td align="right">27841374</td>
+</tr>
+<tr class="even">
+<td align="left">Gerrit Cole</td>
+<td align="right">36000000</td>
+<td align="right">8</td>
+<td align="right">110</td>
+<td align="right">7.068957</td>
+<td align="right">0.4873451</td>
+<td align="right">11720804</td>
+</tr>
+<tr class="odd">
+<td align="left">David Price</td>
+<td align="right">32000000</td>
+<td align="right">11</td>
+<td align="right">167</td>
+<td align="right">7.098398</td>
+<td align="right">0.4067521</td>
+<td align="right">12542899</td>
+</tr>
+<tr class="even">
+<td align="left">Jacob deGrom</td>
+<td align="right">27257728</td>
+<td align="right">7</td>
+<td align="right">126</td>
+<td align="right">6.940894</td>
+<td align="right">0.4945959</td>
+<td align="right">8727578</td>
+</tr>
+<tr class="odd">
+<td align="left">Zack Wheeler</td>
+<td align="right">26000000</td>
+<td align="right">8</td>
+<td align="right">142</td>
+<td align="right">6.954973</td>
+<td align="right">0.4600008</td>
+<td align="right">9015141</td>
+</tr>
+<tr class="even">
+<td align="left">Justin Verlander</td>
+<td align="right">25000000</td>
+<td align="right">16</td>
+<td align="right">218</td>
+<td align="right">7.700681</td>
+<td align="right">-0.3027407</td>
+<td align="right">50197344</td>
+</tr>
+<tr class="odd">
+<td align="left">Marcus Stroman</td>
+<td align="right">25000000</td>
+<td align="right">7</td>
+<td align="right">117</td>
+<td align="right">6.788519</td>
+<td align="right">0.6094213</td>
+<td align="right">6144954</td>
+</tr>
+<tr class="even">
+<td align="left">Patrick Corbin</td>
+<td align="right">23416667</td>
+<td align="right">9</td>
+<td align="right">62</td>
+<td align="right">7.018298</td>
+<td align="right">0.3512270</td>
+<td align="right">10430332</td>
+</tr>
+<tr class="odd">
+<td align="left">Madison Bumgarner</td>
+<td align="right">21882892</td>
+<td align="right">11</td>
+<td align="right">82</td>
+<td align="right">7.171223</td>
+<td align="right">0.1688821</td>
+<td align="right">14832781</td>
+</tr>
+<tr class="even">
+<td align="left">Carlos Rodon</td>
+<td align="right">21500000</td>
+<td align="right">6</td>
+<td align="right">138</td>
+<td align="right">6.894866</td>
+<td align="right">0.4375727</td>
+<td align="right">7849930</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="discussion" class="section level1">
 <h1>Discussion</h1>
-<p>What were your findings? Are they what you expect? What insights into
-the data can you make?</p>
-<p>Checking to see if committing works.</p>
+<p>As MLB salaries continue to rise at exponential rates, it is
+important to assess whether the league’s biggest contracts are worth it.
+Baseball is currently undergoing an analytics-fueled revolution,
+inspired by statisticians such as Bill James and teams such as the 2002
+“Moneyball” Oakland A’s, that is drastically changing the way the game
+is played and the way in which front offices choose which players to
+sign and how to maximize their talent. As a consequence of this
+revolution, MLB teams have deemphasized simpler statistics once thought
+of as key indicators of performance – such as batting average for
+hitters and wins for pitchers – in favor of more complex ones, such as
+OPS+ and ERA+, that more thoroughly encapsulate a player’s value to
+their team.</p>
+<p>We sought to use these advanced statistics in order to explore
+whether players with top salaries are truly earning them. We found that
+while OPS+ had a significant positive association with salary for
+hitters, ERA+ had no significant association with salary for pitchers,
+implying that other indicators – specifically service time, innings
+pitched, walk rate, and strikeout rate – were stronger predictors of a
+player’s salary. The team-building implications of these results are
+fascinating, especially with respect to pitchers. If there is little to
+no association between a pitcher’s ability to limit runs and their
+salary, which kinds of pitchers should teams sign in order to maximize
+the value of their contracts?</p>
+<p>The top five batters and top five pitchers, by salary below expected,
+came from similar demographics: veterans on cheap deals. All ten of
+these players had at least nine years’ worth of service time, and only
+Albert Pujols, in his 22nd and final season, made more than half of the
+average MLB salary in 2022. The implications for team-building based on
+these results are clear: instead of spending large amounts on a select
+few players, give deals to veterans who may be undervalued by the
+market, as they are more likely to produce value than the most expensive
+players. The Tampa Bay Rays, a team known for their reluctance to spend
+as much as their success, have utilized this strategy quite well, riding
+a combination of young players on rookie contracts and veterans let go
+by other teams – such as Yandy Diaz, Manuel Margot, Ji-Man Choi, Corey
+Kluber, and Jeffrey Springs – to the fifth-highest winning percentage in
+MLB (out of 30 teams) over the last 10 seasons.</p>
+<p>So, what does this mean for the players who earn top-dollar
+contracts? On the pitching side, eight of the top 10 pitchers by salary
+recorded an ERA+ above 110, meaning that they were a good deal more
+effective at getting outs than the average pitcher. And yet, only one of
+them (Justin Verlander, who won the AL Cy Young Award as the AL’s top
+pitcher in 2022) had an expected salary that was higher than their
+actual salary. In other words, even though many of these pitchers
+enjoyed good if not great seasons, their performance was still not quite
+strong enough to justify their salaries.</p>
+<p>However, these results should be interpreted with some caution, given
+the importance of service time with respect to our model’s predicted
+salary. For example, since the <code>service_time</code> coefficient of
+our pitching model is about 0.091, ten years’ worth of service time
+would result in an <span class="math inline">\(0.91\)</span>-unit
+increase in the log of salary, or a <span
+class="math inline">\(10^{0.91} = 8.13\)</span>-fold increase in salary.
+Therefore, veteran pitchers such as Verlander, are much more likely to
+be given higher expected salaries by our model than young pitchers, even
+if their statistics are strong.</p>
+<p>There is an inherent trade-off between including an excluding service
+time from our models. For example, the pitching model has an adjusted
+<span class="math inline">\(R^2\)</span> of 0.687 with the service time
+parameter and 0.337 without it, meaning that adding service time to the
+model more than doubles the portion of the variance in salary that can
+be explained by the model. However, including service time potentially
+undervalues the contributions of young players, almost all of whom are
+on cheap contracts, that significantly outperform their salary.</p>
 </div>
 
 

@@ -432,8 +432,23 @@ lm_batting = lm(log10(salary_2022) ~ ops_2 + service_time_floor,
 
 summary(lm_batting)
 
-plot(lm_batting, which = 1)
-plot(lm_batting, which = 2)
+```
+
+```{r}
+
+plot(residuals(lm_batting) ~ fitted.values(lm_batting), 
+     main = "Residuals vs. Fitted Values Plot for Batting Model",
+     xlab = "Fitted Values",
+     ylab = "Residuals")
+abline(h = 0)
+
+```
+
+```{r}
+
+qqnorm(residuals(lm_batting),
+       main = "Normal Q-Q Plot for Batting Model")
+qqline(residuals(lm_batting))
 
 ```
 
@@ -487,7 +502,7 @@ plot(residuals(lm_pitching) ~ fitted.values(lm_pitching),
      main = "Residuals vs. Fitted Values Plot for Pitching Model",
      xlab = "Fitted Values",
      ylab = "Residuals")
-abline(0,0)
+abline(h = 0)
 
 ```
 
