@@ -7,6 +7,8 @@ navbar:
       href: Final_Report_Draft.html
     - text: "EDA"
       href: preliminary_analysis.html
+    - text: "Data Collection"
+      href: data_coll.html
     - text: "EDA!"
       menu:
       - text: "Salary"
