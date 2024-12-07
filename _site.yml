@@ -5,8 +5,6 @@ navbar:
   right:
     - text: "Report"
       href: Final_Report_Draft.html
-    - text: "EDA"
-      href: preliminary_analysis.html
     - text: "Data Collection"
       href: data_coll.html
     - text: "EDA!"
@@ -17,6 +15,12 @@ navbar:
         href: batting_eda.html
       - text: "Pitching"
         href: pitching_eda.html
+    - text: "Models!"
+      menu:
+      - text: "Batting Model"
+        href: batting_model.html
+      - text: "Pitching Model"
+        href: pitching_model.html
     - text: "Conclusion"
       href: conclusion.html
     - text: "About the Group"
