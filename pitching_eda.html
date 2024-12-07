@@ -386,7 +386,90 @@ div.tocify {
 </div>
 
 
-<p>test!</p>
+<pre class="r"><code>ip_plot = merged_pitching |&gt; 
+  ggplot(aes(x = ip_total)) + 
+  geom_histogram(binwidth = 5, fill = &quot;red&quot;, col = &quot;black&quot;) +
+  labs(
+       x = &quot;Innings Pitched&quot;,
+       y = &quot;&quot;) +
+  theme_bw()
+
+era_plot = merged_pitching |&gt;
+  ggplot(aes(x = era_2)) + 
+  geom_histogram(fill = &quot;lightblue&quot;, col = &quot;black&quot;) +
+    labs(
+       x = &quot;ERA+&quot;,
+       y = &quot;&quot;) +
+  theme_bw()
+
+bb_plot = merged_pitching |&gt;
+  ggplot(aes(x = bb9)) + 
+  geom_histogram(fill = &quot;darkgreen&quot;, col = &quot;black&quot;) +
+    labs(
+       x = &quot;Walks per 9 Innings (BB/9)&quot;,
+       y = &quot;&quot;) +
+  theme_bw()
+
+so_plot = merged_pitching |&gt;
+  ggplot(aes(x = so9)) + 
+  geom_histogram(fill = &quot;orange&quot;, col = &quot;black&quot;) +
+    labs(
+       x = &quot;Strikeouts per 9 Innings (SO/9)&quot;,
+       y = &quot;&quot;) +
+  guides() +
+  theme_bw()
+
+hist_pitch = (ip_plot + era_plot) / (bb_plot + so_plot)
+hist_pitch + plot_annotation(title = &quot;Histograms of Pitching Statistics&quot;)</code></pre>
+<p><img src="pitching_eda_files/figure-html/unnamed-chunk-1-1.png" width="90%" /></p>
+<p>The distribution of innings pitched is quite right-skewed, with a
+peak around 70 innings pitched. The distribution of ERA+ is right-skewed
+as well, with a peak around 100 (the league average) and a small number
+of pitchers with an ERA+ above 200. The distributions of BB/9 and SO/9
+are mostly symmetric, with peaks around 3 and 9, respectively.</p>
+<pre class="r"><code>ip_sal = merged_pitching |&gt; 
+  ggplot(aes(x = ip_total, y = salary_2022)) + 
+  geom_point(col = &quot;red&quot;) + 
+  scale_x_continuous(lim = c(0, 250)) +
+  scale_y_continuous(labels = label_comma()) +
+  labs(x = &quot;Innings Pitched&quot;,
+       y = &quot;&quot;) +
+  theme_bw()
+
+era_sal = merged_pitching |&gt; 
+  ggplot(aes(x = era_2, y = salary_2022)) + 
+  geom_point(col = &quot;lightblue&quot;) +
+  scale_x_continuous(lim = c(0, 400)) + 
+  scale_y_continuous(labels = label_comma()) +
+  labs(x = &quot;ERA+&quot;,
+       y = &quot;&quot;) +
+    guides(y=&quot;none&quot;) +
+  theme_bw()
+
+bb_sal = merged_pitching |&gt; 
+  ggplot(aes(x = bb9, y = salary_2022)) + 
+  geom_point(col = &quot;darkgreen&quot;) +
+  scale_x_continuous(lim = c(0, 10)) + 
+  scale_y_continuous(labels = label_comma()) +
+   labs(x = &quot;Walks per 9 Innings (BB/9)&quot;,
+       y = &quot;&quot;) +
+  theme_bw()
+
+so_sal = merged_pitching |&gt; 
+  ggplot(aes(x = so9, y = salary_2022)) + 
+  geom_point(col = &quot;orange&quot;) +
+  scale_x_continuous(lim = c(0, 20)) + 
+  scale_y_continuous(labels = label_comma()) +
+   labs(x = &quot;Strikeouts Per 9 Innings (SO/9)&quot;,
+       y = &quot;&quot;) +
+    guides(y=&quot;none&quot;) +
+  theme_bw()
+
+scatt_pitch = (ip_sal + era_sal) / (bb_sal + so_sal)
+scatt_pitch + plot_annotation(title = &quot;Scatterplots of Pitching Statistics and Salary&quot;)</code></pre>
+<p><img src="pitching_eda_files/figure-html/unnamed-chunk-2-1.png" width="90%" /></p>
+<p>Interestingly, the pitchers with the highest ERA+ often had
+considerably lower salaries.</p>
 
 
 

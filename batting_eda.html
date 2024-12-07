@@ -386,7 +386,87 @@ div.tocify {
 </div>
 
 
-<p>Test!</p>
+<p>Many of the counting statistics for batting are right skewed, as most
+players are not hitting multiple home runs in the season. Some of the
+advanced statistics such as OPS+ are more normally distributed. An
+important idea to keep in mind is that many of these collected
+statistics are strongly correlated with each other as the advanced
+statistics are often a formula taking input from the counting
+statistics. Looking at the relation with salary, it seems that there may
+be an association between salary and home runs as well as OPS+.</p>
+<pre class="r"><code># Chances at Bat by Home Runs
+merged_batting %&gt;%
+  ggplot(aes(x = ab,y= hr)) +
+  geom_point(aes(color = ops)) +
+  geom_smooth(method = lm, se = FALSE, color = &quot;firebrick&quot;) +
+  labs(title = &quot;Who is the most &#39;effective&#39; at the plate?&quot;,
+       x = &quot;Chances at Bat&quot;,
+       y = &quot;Number of Home Runs&quot;) +
+  scale_color_continuous(&quot;OPS&quot;) +
+  theme_bw()</code></pre>
+<p><img src="batting_eda_files/figure-html/unnamed-chunk-1-1.png" width="90%" /></p>
+<pre class="r"><code># Corrs for Batting Data
+merged_batting |&gt;
+  select(hr, ba, ops) |&gt;
+  GGally::ggpairs()</code></pre>
+<p><img src="batting_eda_files/figure-html/unnamed-chunk-2-1.png" width="90%" /></p>
+<pre class="r"><code># Distributions for Used Statistics
+yrsCol = merged_batting |&gt;
+  count(experience_group) |&gt;
+  ggplot(aes(x = experience_group, y=n)) + 
+  geom_col(fill = &#39;blue&#39;, col = &#39;black&#39;) +
+  labs(x=&quot;Years of Experience&quot;,y=&quot;&quot;) +
+  theme_bw()
+hrsHist = merged_batting |&gt;
+  ggplot(aes(x = hr)) + 
+  geom_histogram(fill = &#39;purple&#39;, col = &#39;black&#39;) +
+  labs(x=&quot;Home Runs&quot;,y=&quot;&quot;) +
+  theme_bw()
+basHist = merged_batting |&gt;
+  ggplot(aes(x = ba)) + 
+  geom_histogram(fill = &#39;yellow&#39;, col = &#39;black&#39;) +
+  labs(x=&quot;Batting Averages&quot;,y=&quot;&quot;) +
+  theme_bw()
+opsHist = merged_batting |&gt;
+  ggplot(aes(x = ops_2)) + 
+  geom_histogram(fill = &#39;lightgreen&#39;, col = &#39;black&#39;) +
+  labs(x=&quot;OPS+&quot;,y=&quot;&quot;) +
+  theme_bw()
+
+dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
+
+dist_patch + plot_annotation(title = &quot;Distribution of Important Batting Statistics&quot;)</code></pre>
+<p><img src="batting_eda_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<pre class="r"><code># Scatter for Used Statistics
+yrs = merged_batting |&gt;
+  ggplot(aes(x = experience_group, y = salary_2022)) + 
+  geom_boxplot(col = &#39;blue&#39;) +
+  labs(x=&quot;Years of Experience&quot;,y=&quot;&quot;) +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
+hrs = merged_batting |&gt;
+  ggplot(aes(x = hr, y = salary_2022)) + 
+  geom_point(col = &#39;purple&#39;) +
+  guides(y=&quot;none&quot;) +
+  labs(x=&quot;Home Runs&quot;,y=&quot;&quot;) +
+  theme_bw()
+bas = merged_batting |&gt;
+  ggplot(aes(x = ba, y = salary_2022)) + 
+  geom_point(col = &#39;yellow&#39;) +
+  labs(x=&quot;Batting Averages&quot;,y=&quot;&quot;) +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
+ops = merged_batting |&gt;
+  ggplot(aes(x = ops_2, y = salary_2022)) + 
+  geom_point(col = &#39;lightgreen&#39;) +
+  guides(y=&quot;none&quot;) +
+  labs(x=&quot;OPS+&quot;,y=&quot;&quot;) +
+  theme_bw()
+
+scatter_patch = (yrs+hrs)/(bas+ops)
+
+scatter_patch + plot_annotation(title = &quot;Scatterplot of Batting Statistics and Salary&quot;)</code></pre>
+<p><img src="batting_eda_files/figure-html/unnamed-chunk-4-1.png" width="90%" /></p>
 
 
 
