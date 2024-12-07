@@ -9,5 +9,143 @@ output:
 
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rvest)
+library(readxl)
+library(scales)
+library(patchwork)
 
-Test!
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%",
+  dpi = 300,
+  warning = FALSE,
+  message = FALSE
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
+                     locale = locale(encoding = "latin1")) |>
+  janitor::clean_names() %>%
+  group_by(name) |>
+  mutate(name_count = n(),
+         keep_row = case_when(name_count == 1 ~ TRUE,
+                              name_count > 1 & tm == "TOT" ~ TRUE,
+                              .default = FALSE)) |>
+  filter(keep_row == TRUE) %>%
+  mutate(name_count = n(),
+         keep_row = case_when(name_count == 1 ~ TRUE,
+                              name_count > 1 & lg == "MLB" ~ TRUE,
+                              .default = FALSE)) |>
+  ungroup() |>
+  filter(keep_row == TRUE) %>%
+  mutate(name = str_split(name, "\\s+"),
+         name = map_chr(name, str_c, collapse = " "),
+         name = str_trim(name),
+         name = str_replace_all(name, "[*#\\.]", ""),
+         name = stringi::stri_trans_general(name,id = "Latin-ASCII"))
+
+merged_batting <- salaries |>
+  mutate(simple_position = str_split_i(position, "-", 1)) |>
+  filter(!simple_position %in% c("rhp","lhp")) |>
+  inner_join(batting, by = "name") |>
+  filter(pa >= 100)
+
+salary_not_in_batting <- anti_join(salaries, batting, by = "name")
+batting_not_in_salary <- anti_join(batting, salaries, by = "name")
+```
+
+Many of the counting statistics for batting are right skewed, as most players are not hitting multiple home runs in the season. Some of the advanced statistics such as OPS+ are more normally distributed. An important idea to keep in mind is that many of these collected statistics are strongly correlated with each other as the advanced statistics are often a formula taking input from the counting statistics. Looking at the relation with salary, it seems that there may be an association between salary and home runs as well as OPS+. 
+
+```{r}
+# Chances at Bat by Home Runs
+merged_batting %>%
+  ggplot(aes(x = ab,y= hr)) +
+  geom_point(aes(color = ops)) +
+  geom_smooth(method = lm, se = FALSE, color = "firebrick") +
+  labs(title = "Who is the most 'effective' at the plate?",
+       x = "Chances at Bat",
+       y = "Number of Home Runs") +
+  scale_color_continuous("OPS") +
+  theme_bw()
+```
+
+```{r}
+# Corrs for Batting Data
+merged_batting |>
+  select(hr, ba, ops) |>
+  GGally::ggpairs()
+```
+
+```{r}
+# Distributions for Used Statistics
+yrsCol = merged_batting |>
+  count(experience_group) |>
+  ggplot(aes(x = experience_group, y=n)) + 
+  geom_col(fill = 'blue', col = 'black') +
+  labs(x="Years of Experience",y="") +
+  theme_bw()
+hrsHist = merged_batting |>
+  ggplot(aes(x = hr)) + 
+  geom_histogram(fill = 'purple', col = 'black') +
+  labs(x="Home Runs",y="") +
+  theme_bw()
+basHist = merged_batting |>
+  ggplot(aes(x = ba)) + 
+  geom_histogram(fill = 'yellow', col = 'black') +
+  labs(x="Batting Averages",y="") +
+  theme_bw()
+opsHist = merged_batting |>
+  ggplot(aes(x = ops_2)) + 
+  geom_histogram(fill = 'lightgreen', col = 'black') +
+  labs(x="OPS+",y="") +
+  theme_bw()
+
+dist_patch = (yrsCol+hrsHist)/(basHist+opsHist)
+
+dist_patch + plot_annotation(title = "Distribution of Important Batting Statistics")
+```
+
+```{r}
+# Scatter for Used Statistics
+yrs = merged_batting |>
+  ggplot(aes(x = experience_group, y = salary_2022)) + 
+  geom_boxplot(col = 'blue') +
+  labs(x="Years of Experience",y="") +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
+hrs = merged_batting |>
+  ggplot(aes(x = hr, y = salary_2022)) + 
+  geom_point(col = 'purple') +
+  guides(y="none") +
+  labs(x="Home Runs",y="") +
+  theme_bw()
+bas = merged_batting |>
+  ggplot(aes(x = ba, y = salary_2022)) + 
+  geom_point(col = 'yellow') +
+  labs(x="Batting Averages",y="") +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
+ops = merged_batting |>
+  ggplot(aes(x = ops_2, y = salary_2022)) + 
+  geom_point(col = 'lightgreen') +
+  guides(y="none") +
+  labs(x="OPS+",y="") +
+  theme_bw()
+
+scatter_patch = (yrs+hrs)/(bas+ops)
+
+scatter_patch + plot_annotation(title = "Scatterplot of Batting Statistics and Salary")
+```

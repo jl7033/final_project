@@ -9,5 +9,134 @@ output:
 
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rvest)
+library(readxl)
+library(scales)
+library(patchwork)
 
-Test!
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%",
+  dpi = 300,
+  warning = FALSE,
+  message = FALSE
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+salaries = read_excel(
+  "data/MLB-Salaries 2000-24.xlsx", 
+  sheet = "2022.xls",
+  skip = 1) |>
+  select(1:4) |>
+  rename(position = "Pos'n",
+         salary_2022 = "2022.0",
+         service_time_yrs = "MLS",
+         name = "Player") %>%
+  mutate(name = str_split(name, ","),
+         name = map(name, rev),       
+         name = map_chr(name, str_c, collapse = " "),
+         name = str_trim(name),
+         name = str_replace_all(name, "[*#\\.,]", ""),
+         junior = str_detect(name, "Jr"),
+         name = if_else(junior == TRUE, str_remove(name, " Jr"), name),
+         name = if_else(junior == TRUE, str_c(name, " Jr"), name),
+         name = stringi::stri_trans_general(name,id = "Latin-ASCII")) |>
+  select(-junior) %>%
+  mutate(simple_position = str_split_i(position, "-", 1),
+         simple_position = fct_relevel(simple_position,
+                                       c("c", "1b", "2b", "3b", "ss",
+                                         "lf", "cf", "rf", "inf", "of",
+                                         "dh", "rhp", "lhp")),
+         service_time_floor = floor(service_time_yrs),
+         experience_group = case_when(service_time_floor <= 2 ~ "0-2 years",
+                                      service_time_floor >= 3 ~ "3+ years"))
+```
+
+Player salaries were highly right-skewed. This was expected, as many players make the league minimum salary of 700,000. The one position group not so heavily right skewed are the Designated Hitters. Similarly, the Designated Hitters had a higher average years of experience. Intuitively this makes sense as teams will want to select the better players for the position. Overall, most players were in their first year of the MLB with 68.2% having 5 or less years of experience. Players with more years of experience seem to get higher salaries, increasing as their years of experience.
+
+```{r}
+# Salary by Posiition Group
+salaries |>
+  mutate(position_group = case_match(simple_position,
+                                     c("rhp","lhp") ~ "pitcher",
+                                     c("cf","lf","rf","of") ~ "outfield",
+                                     "dh" ~ "dh",
+                                     .default = "infield")) |>
+  ggplot(aes(x = salary_2022, color = position_group)) +
+  geom_density() +
+  labs(title = "Salary by Position Group",
+       x = "2022 Salary",
+       y = "") +
+  scale_x_continuous(labels = label_comma()) +
+  scale_color_discrete(name = "Position Group",
+                       labels = c("Designated Hitter",
+                                "Infield",
+                                "Outfield",
+                                "Pitcher")) +
+  theme_bw()
+```
+
+```{r}
+# Salary by Experience
+salaries %>%
+  ggplot(aes(x=factor(floor(service_time_yrs)), y=salary_2022)) +
+  geom_boxplot() +
+  labs(title = "Salary Distribution for Years of Experience",
+       x = "Years of Experience",
+       y = "") +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
+```
+
+```{r}
+# Salary by Experience
+salaries %>%
+  ggplot(aes(x=experience_group, y=salary_2022)) +
+  geom_boxplot() +
+  labs(title = "Salary Distribution for Years of Experience",
+       x = "Years of Experience",
+       y = "") +
+  scale_y_continuous(labels = label_comma()) +
+  theme_bw()
+```
+
+```{r}
+# Experience by Position
+salaries |>
+  ggplot(aes(x = service_time_floor, 
+             y = simple_position, 
+             fill = simple_position)) + 
+  ggridges::geom_density_ridges(alpha = 0.5) +
+  labs(title = "Experience by Position",
+       x = "Years of Experience",
+       y = "") +
+  xlim(0,25) +
+  scale_y_discrete(labels = c("1b" = "1st Base",
+                    "2b" = "2nd Base",
+                    "3b" = "3rd Base",
+                    "inf" = "Infield",
+                    "c" = "Catcher",
+                    "rf" = "Right Field",
+                    "lf" = "Left Field",
+                    "cf" = "Center Field",
+                    "of" = "Outfield",
+                    "lhp" = "Left Hand Pitcher",
+                    "rhp" = "Right Hand Pitcher",
+                    "dh" = "Designated Hitter",
+                    "ss" = "Shortstop")) +
+  guides(fill="none") +
+  theme_bw()
+```
