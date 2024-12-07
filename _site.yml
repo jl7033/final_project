@@ -32,5 +32,5 @@ output:
     toc : TRUE
     toc_float: TRUE
     hide_code : TRUE
-    theme: cerulean
+    theme: readable
     css: styles.css
