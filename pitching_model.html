@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Pitching Model</title>
+
+<script src="site_libs/header-attrs-2.28/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cerulean.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.4.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="Final_Report_Draft.html">Report</a>
+</li>
+<li>
+  <a href="preliminary_analysis.html">EDA</a>
+</li>
+<li>
+  <a href="data_coll.html">Data Collection</a>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    EDA!
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="salary_eda.html">Salary</a>
+    </li>
+    <li>
+      <a href="batting_eda.html">Batting</a>
+    </li>
+    <li>
+      <a href="pitching_eda.html">Pitching</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="conclusion.html">Conclusion</a>
+</li>
+<li>
+  <a href="about_us.html">About the Group</a>
+</li>
+<li>
+  <a href="https://github.com/jl7033/final_project">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Pitching Model</h1>
+
+</div>
+
+
+<pre class="r"><code>lm_pitching = lm(log10(salary_2022) ~ hand + pitcher_type + hand*pitcher_type + ip_total + era_2 + bb9 + so9 + experience_group,
+                 data = merged_pitching)
+
+broom::tidy(lm_pitching)</code></pre>
+<div class="kable-table">
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="right">estimate</th>
+<th align="right">std.error</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">(Intercept)</td>
+<td align="right">6.5815420</td>
+<td align="right">0.3024707</td>
+<td align="right">21.759271</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">handrhp</td>
+<td align="right">-0.4242111</td>
+<td align="right">0.3054319</td>
+<td align="right">-1.388890</td>
+<td align="right">0.1656240</td>
+</tr>
+<tr class="odd">
+<td align="left">pitcher_typer</td>
+<td align="right">-0.8528043</td>
+<td align="right">0.2839805</td>
+<td align="right">-3.003038</td>
+<td align="right">0.0028375</td>
+</tr>
+<tr class="even">
+<td align="left">pitcher_types</td>
+<td align="right">-0.5941512</td>
+<td align="right">0.2867592</td>
+<td align="right">-2.071952</td>
+<td align="right">0.0388977</td>
+</tr>
+<tr class="odd">
+<td align="left">ip_total</td>
+<td align="right">0.0014225</td>
+<td align="right">0.0003437</td>
+<td align="right">4.138882</td>
+<td align="right">0.0000424</td>
+</tr>
+<tr class="even">
+<td align="left">era_2</td>
+<td align="right">-0.0004776</td>
+<td align="right">0.0002877</td>
+<td align="right">-1.659882</td>
+<td align="right">0.0977066</td>
+</tr>
+<tr class="odd">
+<td align="left">bb9</td>
+<td align="right">-0.0377370</td>
+<td align="right">0.0128069</td>
+<td align="right">-2.946623</td>
+<td align="right">0.0033969</td>
+</tr>
+<tr class="even">
+<td align="left">so9</td>
+<td align="right">0.0247501</td>
+<td align="right">0.0072925</td>
+<td align="right">3.393930</td>
+<td align="right">0.0007564</td>
+</tr>
+<tr class="odd">
+<td align="left">experience_group3+ years</td>
+<td align="right">0.6080049</td>
+<td align="right">0.0299496</td>
+<td align="right">20.300925</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">handrhp:pitcher_typer</td>
+<td align="right">0.4144199</td>
+<td align="right">0.3072509</td>
+<td align="right">1.348800</td>
+<td align="right">0.1781494</td>
+</tr>
+<tr class="odd">
+<td align="left">handrhp:pitcher_types</td>
+<td align="right">0.3405457</td>
+<td align="right">0.3101460</td>
+<td align="right">1.098017</td>
+<td align="right">0.2728445</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>broom::glance(lm_pitching)</code></pre>
+<div class="kable-table">
+<table>
+<colgroup>
+<col width="9%" />
+<col width="12%" />
+<col width="9%" />
+<col width="9%" />
+<col width="7%" />
+<col width="2%" />
+<col width="9%" />
+<col width="8%" />
+<col width="8%" />
+<col width="8%" />
+<col width="11%" />
+<col width="4%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">r.squared</th>
+<th align="right">adj.r.squared</th>
+<th align="right">sigma</th>
+<th align="right">statistic</th>
+<th align="right">p.value</th>
+<th align="right">df</th>
+<th align="right">logLik</th>
+<th align="right">AIC</th>
+<th align="right">BIC</th>
+<th align="right">deviance</th>
+<th align="right">df.residual</th>
+<th align="right">nobs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right">0.6770215</td>
+<td align="right">0.6691053</td>
+<td align="right">0.2785755</td>
+<td align="right">85.52419</td>
+<td align="right">0</td>
+<td align="right">10</td>
+<td align="right">-53.45206</td>
+<td align="right">130.9041</td>
+<td align="right">179.3586</td>
+<td align="right">31.66256</td>
+<td align="right">408</td>
+<td align="right">419</td>
+</tr>
+</tbody>
+</table>
+</div>
+<pre class="r"><code>plot(residuals(lm_pitching) ~ fitted.values(lm_pitching),
+     main = &quot;Residuals vs. Fitted Values Plot for Pitching Model&quot;,
+     xlab = &quot;Fitted Values&quot;,
+     ylab = &quot;Residuals&quot;)
+abline(h = 0)</code></pre>
+<p><img src="pitching_model_files/figure-html/unnamed-chunk-2-1.png" width="90%" /></p>
+<pre class="r"><code>qqnorm(residuals(lm_pitching),
+       main = &quot;Normal Q-Q Plot for Pitching Model&quot;)
+qqline(residuals(lm_pitching))</code></pre>
+<p><img src="pitching_model_files/figure-html/unnamed-chunk-3-1.png" width="90%" /></p>
+<p>We decided to log-transform the salary variable because it is heavily
+right-skewed, and decided to use <span
+class="math inline">\(log_{10}\)</span> instead of <span
+class="math inline">\(ln\)</span> for the sake of interpretability. We
+included ERA+, the measure of a pitcher’s ERA relative to the league
+average, as well as innings pitched (<code>ip_total</code>), walks per
+nine innings (<code>bb9</code>) and strikeouts per nine innings
+(<code>so9</code>); we used walks/strikeouts per nine innings since the
+total number of walks/strikeouts would be highly correlated with the
+number of innings pitched.</p>
+<p>We accounted for pitcher handedness (right vs. left) as well as
+pitcher type (the default type is a closing pitcher, with relief
+pitchers and starting pitchers also included in the model). Finally, we
+explored the interaction between handedness and pitcher type to see if
+pitcher type affects the relationship between handedness and salary.</p>
+<p>From our model, we can see that pitcher handedness and pitcher type
+have no significant effect on expected salary. Interestingly, the
+<code>era_2</code> predictor, even when accounting for pitcher
+handedness, pitcher type, and the number of innings pitched, has an
+insignificant <span class="math inline">\(P\)</span>-value, implying
+that there is no significant association between one of the most highly
+regarded summative statistics for pitching effectiveness and pitcher
+salary when accounting for pitcher handedness, pitcher type, innings
+pitched, walk and strikeout rates, and service time.</p>
+<p>The residuals vs. fitted values plot shows that the residuals are
+generally evenly spread out; the straight line on the left side of the
+plot represents the large number of MLB players who are still on their
+rookie contracts, and therefore have a low fitted value (as they usually
+make between $700,000 and $1,000,000 per year, which is quite low by MLB
+standards). The Normal Q-Q plot shows that the model’s residuals deviate
+only slightly from Normal behavior.</p>
+<div id="top-5-pitchers-by-value" class="section level3">
+<h3>Top 5 Pitchers by Value</h3>
+<pre class="r"><code>merged_pitching |&gt;
+  modelr::add_predictions(lm_pitching) |&gt;
+  modelr::add_residuals(lm_pitching) |&gt;
+  arrange(resid) |&gt;
+  select(name, salary_2022, service_time_floor, experience_group, era_2, pred, resid ) |&gt;
+  mutate(expected_salary = 10^pred) |&gt;
+  slice(1:5) </code></pre>
+<div class="kable-table">
+<table style="width:100%;">
+<colgroup>
+<col width="15%" />
+<col width="11%" />
+<col width="17%" />
+<col width="16%" />
+<col width="5%" />
+<col width="8%" />
+<col width="10%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="right">salary_2022</th>
+<th align="right">service_time_floor</th>
+<th align="left">experience_group</th>
+<th align="right">era_2</th>
+<th align="right">pred</th>
+<th align="right">resid</th>
+<th align="right">expected_salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Drew Hutchison</td>
+<td align="right">800000</td>
+<td align="right">4</td>
+<td align="left">3+ years</td>
+<td align="right">85</td>
+<td align="right">6.628671</td>
+<td align="right">-0.7255811</td>
+<td align="right">4252762</td>
+</tr>
+<tr class="even">
+<td align="left">Ryan Borucki</td>
+<td align="right">825000</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">68</td>
+<td align="right">6.637406</td>
+<td align="right">-0.7209523</td>
+<td align="right">4339166</td>
+</tr>
+<tr class="odd">
+<td align="left">Trevor Richards</td>
+<td align="right">1000000</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">72</td>
+<td align="right">6.668099</td>
+<td align="right">-0.6680993</td>
+<td align="right">4656926</td>
+</tr>
+<tr class="even">
+<td align="left">Sean Newcomb</td>
+<td align="right">900000</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">48</td>
+<td align="right">6.603083</td>
+<td align="right">-0.6488400</td>
+<td align="right">4009429</td>
+</tr>
+<tr class="odd">
+<td align="left">Jeffrey Springs</td>
+<td align="right">947500</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">150</td>
+<td align="right">6.615970</td>
+<td align="right">-0.6393911</td>
+<td align="right">4130192</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="top-10-pitchers-by-salary" class="section level3">
+<h3>Top 10 Pitchers by Salary</h3>
+<pre class="r"><code>merged_pitching |&gt;
+  modelr::add_predictions(lm_pitching) |&gt;
+  modelr::add_residuals(lm_pitching) |&gt;
+  arrange(desc(salary_2022)) |&gt;
+  select(name, salary_2022, service_time_floor, experience_group, era_2, pred, resid ) |&gt;
+  mutate(expected_salary = 10^pred) |&gt;
+  slice(1:10) </code></pre>
+<div class="kable-table">
+<table>
+<colgroup>
+<col width="16%" />
+<col width="11%" />
+<col width="17%" />
+<col width="15%" />
+<col width="5%" />
+<col width="8%" />
+<col width="9%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="right">salary_2022</th>
+<th align="right">service_time_floor</th>
+<th align="left">experience_group</th>
+<th align="right">era_2</th>
+<th align="right">pred</th>
+<th align="right">resid</th>
+<th align="right">expected_salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Max Scherzer</td>
+<td align="right">43333333</td>
+<td align="right">13</td>
+<td align="left">3+ years</td>
+<td align="right">169</td>
+<td align="right">6.845976</td>
+<td align="right">0.7908462</td>
+<td align="right">7014163</td>
+</tr>
+<tr class="even">
+<td align="left">Gerrit Cole</td>
+<td align="right">36000000</td>
+<td align="right">8</td>
+<td align="left">3+ years</td>
+<td align="right">110</td>
+<td align="right">6.946254</td>
+<td align="right">0.6100489</td>
+<td align="right">8835957</td>
+</tr>
+<tr class="odd">
+<td align="left">David Price</td>
+<td align="right">32000000</td>
+<td align="right">11</td>
+<td align="left">3+ years</td>
+<td align="right">167</td>
+<td align="right">6.702960</td>
+<td align="right">0.8021897</td>
+<td align="right">5046151</td>
+</tr>
+<tr class="even">
+<td align="left">Jacob deGrom</td>
+<td align="right">27257728</td>
+<td align="right">7</td>
+<td align="left">3+ years</td>
+<td align="right">126</td>
+<td align="right">6.855482</td>
+<td align="right">0.5800073</td>
+<td align="right">7169392</td>
+</tr>
+<tr class="odd">
+<td align="left">Zack Wheeler</td>
+<td align="right">26000000</td>
+<td align="right">8</td>
+<td align="left">3+ years</td>
+<td align="right">142</td>
+<td align="right">6.823685</td>
+<td align="right">0.5912886</td>
+<td align="right">6663229</td>
+</tr>
+<tr class="even">
+<td align="left">Justin Verlander</td>
+<td align="right">25000000</td>
+<td align="right">16</td>
+<td align="left">3+ years</td>
+<td align="right">218</td>
+<td align="right">6.835075</td>
+<td align="right">0.5628650</td>
+<td align="right">6840298</td>
+</tr>
+<tr class="odd">
+<td align="left">Marcus Stroman</td>
+<td align="right">25000000</td>
+<td align="right">7</td>
+<td align="left">3+ years</td>
+<td align="right">117</td>
+<td align="right">6.756888</td>
+<td align="right">0.6410518</td>
+<td align="right">5713316</td>
+</tr>
+<tr class="even">
+<td align="left">Patrick Corbin</td>
+<td align="right">23416667</td>
+<td align="right">9</td>
+<td align="left">3+ years</td>
+<td align="right">62</td>
+<td align="right">6.859146</td>
+<td align="right">0.5103788</td>
+<td align="right">7230134</td>
+</tr>
+<tr class="odd">
+<td align="left">Madison Bumgarner</td>
+<td align="right">21882892</td>
+<td align="right">11</td>
+<td align="left">3+ years</td>
+<td align="right">82</td>
+<td align="right">6.834678</td>
+<td align="right">0.5054269</td>
+<td align="right">6834044</td>
+</tr>
+<tr class="even">
+<td align="left">Carlos Rodon</td>
+<td align="right">21500000</td>
+<td align="right">6</td>
+<td align="left">3+ years</td>
+<td align="right">138</td>
+<td align="right">6.981582</td>
+<td align="right">0.3508561</td>
+<td align="right">9584786</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
