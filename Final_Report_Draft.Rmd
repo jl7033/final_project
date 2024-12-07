@@ -480,8 +480,7 @@ merged_batting |>
   arrange(resid) |>
   select(name, salary_2022, service_time_floor, experience_group, ops_2, pred, resid ) |>
   mutate(expected_salary = 10^pred) |>
-  slice(1:5) |>
-  view()
+  slice(1:5) 
 ```
 
 ### Top 10 Batters by Salary
@@ -493,8 +492,7 @@ merged_batting |>
   arrange(desc(salary_2022)) |>
   select(name, salary_2022, service_time_floor,experience_group, ops_2, pred, resid ) |>
   mutate(expected_salary = 10^pred) |>
-  slice(1:10) |>
-  view()
+  slice(1:10)
 ```
 
 It looks like in 2022, the most cost-effective player was Albert Pujols, who made $2.5 million in his 21st season with an OPS+ of 151.
@@ -547,8 +545,7 @@ merged_pitching |>
   arrange(resid) |>
   select(name, salary_2022, service_time_floor, experience_group, era_2, pred, resid ) |>
   mutate(expected_salary = 10^pred) |>
-  slice(1:5) |>
-  view()
+  slice(1:5)
 
 ```
 
@@ -562,8 +559,7 @@ merged_pitching |>
   arrange(desc(salary_2022)) |>
   select(name, salary_2022, service_time_floor, experience_group, era_2, pred, resid ) |>
   mutate(expected_salary = 10^pred) |>
-  slice(1:10) |>
-  view()
+  slice(1:10) 
 
 ```
 

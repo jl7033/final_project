@@ -23,7 +23,7 @@ In recent years, Major League Baseball (MLB) player salaries have been rising at
 \
 \
 <p class="aligncenter">
-  <iframe width="560" height="315" src="https://www.youtube.com/embed/VjzZO-V2kSc?si=HXyaTLDcqwdGPMLV" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+  <iframe width="560" height="315" src="https://www.youtube.com/embed/lMUpCVHo_s4?si=ysp45I8Q0SPH_ePy" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
   </p>
   <style>
 .aligncenter {

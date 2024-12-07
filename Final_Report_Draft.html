@@ -985,8 +985,85 @@ than predicted based on their performance.</p>
   arrange(resid) |&gt;
   select(name, salary_2022, service_time_floor, experience_group, ops_2, pred, resid ) |&gt;
   mutate(expected_salary = 10^pred) |&gt;
-  slice(1:5) |&gt;
-  view()</code></pre>
+  slice(1:5) </code></pre>
+<div class="kable-table">
+<table style="width:100%;">
+<colgroup>
+<col width="15%" />
+<col width="11%" />
+<col width="17%" />
+<col width="16%" />
+<col width="5%" />
+<col width="8%" />
+<col width="10%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="right">salary_2022</th>
+<th align="right">service_time_floor</th>
+<th align="left">experience_group</th>
+<th align="right">ops_2</th>
+<th align="right">pred</th>
+<th align="right">resid</th>
+<th align="right">expected_salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Brandon Drury</td>
+<td align="right">900000</td>
+<td align="right">5</td>
+<td align="left">3+ years</td>
+<td align="right">122</td>
+<td align="right">6.907744</td>
+<td align="right">-0.9535020</td>
+<td align="right">8086200</td>
+</tr>
+<tr class="even">
+<td align="left">Luke Maile</td>
+<td align="right">900000</td>
+<td align="right">4</td>
+<td align="left">3+ years</td>
+<td align="right">82</td>
+<td align="right">6.732306</td>
+<td align="right">-0.7780632</td>
+<td align="right">5398905</td>
+</tr>
+<tr class="odd">
+<td align="left">Kyle Higashioka</td>
+<td align="right">935000</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">85</td>
+<td align="right">6.745464</td>
+<td align="right">-0.7746520</td>
+<td align="right">5564980</td>
+</tr>
+<tr class="even">
+<td align="left">Dylan Moore</td>
+<td align="right">1350000</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">121</td>
+<td align="right">6.903359</td>
+<td align="right">-0.7730247</td>
+<td align="right">8004948</td>
+</tr>
+<tr class="odd">
+<td align="left">Colin Moran</td>
+<td align="right">1000000</td>
+<td align="right">4</td>
+<td align="left">3+ years</td>
+<td align="right">85</td>
+<td align="right">6.745464</td>
+<td align="right">-0.7454636</td>
+<td align="right">5564980</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div id="top-10-batters-by-salary" class="section level3">
 <h3>Top 10 Batters by Salary</h3>
@@ -996,8 +1073,135 @@ than predicted based on their performance.</p>
   arrange(desc(salary_2022)) |&gt;
   select(name, salary_2022, service_time_floor,experience_group, ops_2, pred, resid ) |&gt;
   mutate(expected_salary = 10^pred) |&gt;
-  slice(1:10) |&gt;
-  view()</code></pre>
+  slice(1:10)</code></pre>
+<div class="kable-table">
+<table style="width:100%;">
+<colgroup>
+<col width="16%" />
+<col width="11%" />
+<col width="17%" />
+<col width="16%" />
+<col width="5%" />
+<col width="8%" />
+<col width="9%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="right">salary_2022</th>
+<th align="right">service_time_floor</th>
+<th align="left">experience_group</th>
+<th align="right">ops_2</th>
+<th align="right">pred</th>
+<th align="right">resid</th>
+<th align="right">expected_salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Mike Trout</td>
+<td align="right">37116667</td>
+<td align="right">10</td>
+<td align="left">3+ years</td>
+<td align="right">176</td>
+<td align="right">7.144587</td>
+<td align="right">0.4249821</td>
+<td align="right">13950407</td>
+</tr>
+<tr class="even">
+<td align="left">Anthony Rendon</td>
+<td align="right">36571429</td>
+<td align="right">8</td>
+<td align="left">3+ years</td>
+<td align="right">100</td>
+<td align="right">6.811253</td>
+<td align="right">0.7518888</td>
+<td align="right">6475199</td>
+</tr>
+<tr class="odd">
+<td align="left">Carlos Correa</td>
+<td align="right">35100000</td>
+<td align="right">6</td>
+<td align="left">3+ years</td>
+<td align="right">137</td>
+<td align="right">6.973534</td>
+<td align="right">0.5717731</td>
+<td align="right">9408796</td>
+</tr>
+<tr class="even">
+<td align="left">Manny Machado</td>
+<td align="right">34000000</td>
+<td align="right">9</td>
+<td align="left">3+ years</td>
+<td align="right">158</td>
+<td align="right">7.065639</td>
+<td align="right">0.4658395</td>
+<td align="right">11631599</td>
+</tr>
+<tr class="odd">
+<td align="left">Corey Seager</td>
+<td align="right">33000000</td>
+<td align="right">6</td>
+<td align="left">3+ years</td>
+<td align="right">117</td>
+<td align="right">6.885815</td>
+<td align="right">0.6326993</td>
+<td align="right">7688022</td>
+</tr>
+<tr class="even">
+<td align="left">Nolan Arenado</td>
+<td align="right">32974847</td>
+<td align="right">8</td>
+<td align="left">3+ years</td>
+<td align="right">151</td>
+<td align="right">7.034938</td>
+<td align="right">0.4832452</td>
+<td align="right">10837712</td>
+</tr>
+<tr class="odd">
+<td align="left">Francisco Lindor</td>
+<td align="right">32477277</td>
+<td align="right">6</td>
+<td align="left">3+ years</td>
+<td align="right">126</td>
+<td align="right">6.925288</td>
+<td align="right">0.5862912</td>
+<td align="right">8419540</td>
+</tr>
+<tr class="even">
+<td align="left">Miguel Cabrera</td>
+<td align="right">32000000</td>
+<td align="right">18</td>
+<td align="left">3+ years</td>
+<td align="right">81</td>
+<td align="right">6.727920</td>
+<td align="right">0.7772303</td>
+<td align="right">5344655</td>
+</tr>
+<tr class="odd">
+<td align="left">George Springer</td>
+<td align="right">29666667</td>
+<td align="right">7</td>
+<td align="left">3+ years</td>
+<td align="right">133</td>
+<td align="right">6.955990</td>
+<td align="right">0.5162786</td>
+<td align="right">9036290</td>
+</tr>
+<tr class="even">
+<td align="left">Jose Altuve</td>
+<td align="right">29200000</td>
+<td align="right">10</td>
+<td align="left">3+ years</td>
+<td align="right">161</td>
+<td align="right">7.078797</td>
+<td align="right">0.3865855</td>
+<td align="right">11989397</td>
+</tr>
+</tbody>
+</table>
+</div>
 <p>It looks like in 2022, the most cost-effective player was Albert
 Pujols, who made $2.5 million in his 21st season with an OPS+ of
 151.</p>
@@ -1201,8 +1405,85 @@ only slightly from Normal behavior.</p>
   arrange(resid) |&gt;
   select(name, salary_2022, service_time_floor, experience_group, era_2, pred, resid ) |&gt;
   mutate(expected_salary = 10^pred) |&gt;
-  slice(1:5) |&gt;
-  view()</code></pre>
+  slice(1:5)</code></pre>
+<div class="kable-table">
+<table style="width:100%;">
+<colgroup>
+<col width="15%" />
+<col width="11%" />
+<col width="17%" />
+<col width="16%" />
+<col width="5%" />
+<col width="8%" />
+<col width="10%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="right">salary_2022</th>
+<th align="right">service_time_floor</th>
+<th align="left">experience_group</th>
+<th align="right">era_2</th>
+<th align="right">pred</th>
+<th align="right">resid</th>
+<th align="right">expected_salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Drew Hutchison</td>
+<td align="right">800000</td>
+<td align="right">4</td>
+<td align="left">3+ years</td>
+<td align="right">85</td>
+<td align="right">6.628671</td>
+<td align="right">-0.7255811</td>
+<td align="right">4252762</td>
+</tr>
+<tr class="even">
+<td align="left">Ryan Borucki</td>
+<td align="right">825000</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">68</td>
+<td align="right">6.637406</td>
+<td align="right">-0.7209523</td>
+<td align="right">4339166</td>
+</tr>
+<tr class="odd">
+<td align="left">Trevor Richards</td>
+<td align="right">1000000</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">72</td>
+<td align="right">6.668099</td>
+<td align="right">-0.6680993</td>
+<td align="right">4656926</td>
+</tr>
+<tr class="even">
+<td align="left">Sean Newcomb</td>
+<td align="right">900000</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">48</td>
+<td align="right">6.603083</td>
+<td align="right">-0.6488400</td>
+<td align="right">4009429</td>
+</tr>
+<tr class="odd">
+<td align="left">Jeffrey Springs</td>
+<td align="right">947500</td>
+<td align="right">3</td>
+<td align="left">3+ years</td>
+<td align="right">150</td>
+<td align="right">6.615970</td>
+<td align="right">-0.6393911</td>
+<td align="right">4130192</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 <div id="top-10-pitchers-by-salary" class="section level3">
 <h3>Top 10 Pitchers by Salary</h3>
@@ -1212,8 +1493,135 @@ only slightly from Normal behavior.</p>
   arrange(desc(salary_2022)) |&gt;
   select(name, salary_2022, service_time_floor, experience_group, era_2, pred, resid ) |&gt;
   mutate(expected_salary = 10^pred) |&gt;
-  slice(1:10) |&gt;
-  view()</code></pre>
+  slice(1:10) </code></pre>
+<div class="kable-table">
+<table>
+<colgroup>
+<col width="16%" />
+<col width="11%" />
+<col width="17%" />
+<col width="15%" />
+<col width="5%" />
+<col width="8%" />
+<col width="9%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">name</th>
+<th align="right">salary_2022</th>
+<th align="right">service_time_floor</th>
+<th align="left">experience_group</th>
+<th align="right">era_2</th>
+<th align="right">pred</th>
+<th align="right">resid</th>
+<th align="right">expected_salary</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Max Scherzer</td>
+<td align="right">43333333</td>
+<td align="right">13</td>
+<td align="left">3+ years</td>
+<td align="right">169</td>
+<td align="right">6.845976</td>
+<td align="right">0.7908462</td>
+<td align="right">7014163</td>
+</tr>
+<tr class="even">
+<td align="left">Gerrit Cole</td>
+<td align="right">36000000</td>
+<td align="right">8</td>
+<td align="left">3+ years</td>
+<td align="right">110</td>
+<td align="right">6.946254</td>
+<td align="right">0.6100489</td>
+<td align="right">8835957</td>
+</tr>
+<tr class="odd">
+<td align="left">David Price</td>
+<td align="right">32000000</td>
+<td align="right">11</td>
+<td align="left">3+ years</td>
+<td align="right">167</td>
+<td align="right">6.702960</td>
+<td align="right">0.8021897</td>
+<td align="right">5046151</td>
+</tr>
+<tr class="even">
+<td align="left">Jacob deGrom</td>
+<td align="right">27257728</td>
+<td align="right">7</td>
+<td align="left">3+ years</td>
+<td align="right">126</td>
+<td align="right">6.855482</td>
+<td align="right">0.5800073</td>
+<td align="right">7169392</td>
+</tr>
+<tr class="odd">
+<td align="left">Zack Wheeler</td>
+<td align="right">26000000</td>
+<td align="right">8</td>
+<td align="left">3+ years</td>
+<td align="right">142</td>
+<td align="right">6.823685</td>
+<td align="right">0.5912886</td>
+<td align="right">6663229</td>
+</tr>
+<tr class="even">
+<td align="left">Justin Verlander</td>
+<td align="right">25000000</td>
+<td align="right">16</td>
+<td align="left">3+ years</td>
+<td align="right">218</td>
+<td align="right">6.835075</td>
+<td align="right">0.5628650</td>
+<td align="right">6840298</td>
+</tr>
+<tr class="odd">
+<td align="left">Marcus Stroman</td>
+<td align="right">25000000</td>
+<td align="right">7</td>
+<td align="left">3+ years</td>
+<td align="right">117</td>
+<td align="right">6.756888</td>
+<td align="right">0.6410518</td>
+<td align="right">5713316</td>
+</tr>
+<tr class="even">
+<td align="left">Patrick Corbin</td>
+<td align="right">23416667</td>
+<td align="right">9</td>
+<td align="left">3+ years</td>
+<td align="right">62</td>
+<td align="right">6.859146</td>
+<td align="right">0.5103788</td>
+<td align="right">7230134</td>
+</tr>
+<tr class="odd">
+<td align="left">Madison Bumgarner</td>
+<td align="right">21882892</td>
+<td align="right">11</td>
+<td align="left">3+ years</td>
+<td align="right">82</td>
+<td align="right">6.834678</td>
+<td align="right">0.5054269</td>
+<td align="right">6834044</td>
+</tr>
+<tr class="even">
+<td align="left">Carlos Rodon</td>
+<td align="right">21500000</td>
+<td align="right">6</td>
+<td align="left">3+ years</td>
+<td align="right">138</td>
+<td align="right">6.981582</td>
+<td align="right">0.3508561</td>
+<td align="right">9584786</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>

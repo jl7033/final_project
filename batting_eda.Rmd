@@ -35,6 +35,33 @@ options(
 
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
+salaries = read_excel(
+  "data/MLB-Salaries 2000-24.xlsx", 
+  sheet = "2022.xls",
+  skip = 1) |>
+  select(1:4) |>
+  rename(position = "Pos'n",
+         salary_2022 = "2022.0",
+         service_time_yrs = "MLS",
+         name = "Player") %>%
+  mutate(name = str_split(name, ","),
+         name = map(name, rev),       
+         name = map_chr(name, str_c, collapse = " "),
+         name = str_trim(name),
+         name = str_replace_all(name, "[*#\\.,]", ""),
+         junior = str_detect(name, "Jr"),
+         name = if_else(junior == TRUE, str_remove(name, " Jr"), name),
+         name = if_else(junior == TRUE, str_c(name, " Jr"), name),
+         name = stringi::stri_trans_general(name,id = "Latin-ASCII")) |>
+  select(-junior) %>%
+  mutate(simple_position = str_split_i(position, "-", 1),
+         simple_position = fct_relevel(simple_position,
+                                       c("c", "1b", "2b", "3b", "ss",
+                                         "lf", "cf", "rf", "inf", "of",
+                                         "dh", "rhp", "lhp")),
+         service_time_floor = floor(service_time_yrs),
+         experience_group = case_when(service_time_floor <= 2 ~ "0-2 years",
+                                      service_time_floor >= 3 ~ "3+ years"))
 
 batting = read_delim("data/2022 MLB Player Stats - Batting.csv", delim = ";",
                      locale = locale(encoding = "latin1")) |>
