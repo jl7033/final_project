@@ -435,11 +435,17 @@ analytics in the evaluation of player performances and whether the
 decision to pay players can be aided by these methods. <a
 href="https://sabr.org/sabermetrics">Sabermetrics</a> is one of the more
 popular ways of applying statistics to baseball to be an addition to
-traditional evaluations. The famous movie <a
-href="https://www.imdb.com/title/tt1210166/">Moneyball</a> tells the
-story of the Oakland Athletic’s, an underdog using statistics over
-traditional evaluations to gain an edge. One of the hopes of our project
-is to approach some of these same problems from our own perspective.</p>
+traditional evaluations. The famous Michael Lewis book <a
+href="https://www.goodreads.com/book/show/1301.Moneyball">Moneyball</a>
+and its <a href="https://www.imdb.com/title/tt1210166/">film
+adaptation</a> tell the story of the 2002 Oakland Athletics, an
+already-strong team that exceeded their 2001 win total despite losing
+three key players to free agency, in no small part due to their use of
+advanced statistics over traditional measures of value. Given that the
+2002 A’s were able to enjoy so much success despite having the
+28th-ranked payroll out of the 30 MLB teams, we hope to provide further
+insight into how MLB teams can maximize their money to build the most
+effective rosters they can.</p>
 </div>
 <div id="initial-questions" class="section level1">
 <h1>Initial questions</h1>
@@ -524,10 +530,13 @@ information, several transformations were needed. First, because players
 could be listed with multiple teams due to trades, we filtered based on
 unique name and league memebership. We merged the batting data with the
 salary data by player name, focusing on players with at least 100 plate
-appearances, to create the merged_batting dataset. We also created two
-datasets identifying discrepancies: one where salary data is missing in
-the batting dataset and one where batting data is missing in the salary
-dataset.</p>
+appearances, to create the merged_batting dataset. We decided to only
+include batters who had at least 100 plate appearances because rate
+statistics in particular are highly sensitive to small sample sizes (a
+position player starting for a full season usually records between 600
+and 750 plate appearances). We also created two datasets identifying
+discrepancies: one where salary data is missing in the batting dataset
+and one where batting data is missing in the salary dataset.</p>
 <pre class="r"><code>batting = read_delim(&quot;data/2022 MLB Player Stats - Batting.csv&quot;, delim = &quot;;&quot;,
                      locale = locale(encoding = &quot;latin1&quot;)) |&gt;
   janitor::clean_names() %&gt;%
@@ -562,12 +571,15 @@ batting_not_in_salary &lt;- anti_join(batting, salaries, by = &quot;name&quot;)<
 <h3>Pitching Data</h3>
 <p>To create a merged dataset of player pitching statistics and salary
 information, we performed similar transofrmations to the batting data
-above. Then wee merged the pitching data with the salary data by player
-name, focusing on players with at least 20 innings pitched, to create
-the merged_pitching dataset. We then processed that pitching data,
-including total innings pitched (ip_total), pitcher hand, and pitcher
-type. Missing player data in either the salaries or pitching dataset is
-also identified.</p>
+above. Then we merged the pitching data with the salary data by player
+name, selecting for players with at least 20 innings pitched, to create
+the merged_pitching dataset. We decided to only include pitchers who had
+thrown at least 20 innings since many pitchers who threw fewer than that
+amount are either rookies who debuted late in the season or position
+players (such as first basemen) who came in to pitch in blowouts. We
+then processed that pitching data, including total innings pitched
+(ip_total), pitcher hand, and pitcher type. Missing player data in
+either the salaries or pitching dataset is also identified.</p>
 <pre class="r"><code>pitching = read_delim(&quot;data/2022 MLB Player Stats - Pitching.csv&quot;, delim = &quot;;&quot;,
                      locale = locale(encoding = &quot;latin1&quot;)) |&gt;
   janitor::clean_names() %&gt;%
@@ -611,14 +623,14 @@ salary, batting, and pitching.</p>
 <div id="salary-eda" class="section level3">
 <h3>Salary EDA</h3>
 <p>Player salaries were highly right-skewed. This was expected, as many
-players make the league minimum salary of 700,000. The one position
-group not so heavily right skewed are the Designated Hitters. Similarly,
-the Designated Hitters had a higher average years of experience.
-Intuitively this makes sense as teams will want to select the better
-players for the position. Overall, most players were in their first year
-of the MLB with 68.2% having 5 or less years of experience. Players with
-more years of experience seem to get higher salaries, increasing as
-their years of experience.</p>
+players – particularly young players still on their rookie contracts –
+make the league minimum salary of $700,000. The least right skewed
+position group in terms of salary is the designated hitters, who as a
+group had more years of experience than the MLB average. Intuitively,
+this makes sense as designated hitters are often veterans who used to
+play in the field but no longer have the athletic ability to do so.
+Notably, there is a clear positive correlation between salary and years
+of experience.</p>
 <pre class="r"><code># Salary by Posiition Group
 salaries |&gt;
   mutate(position_group = case_match(simple_position,
@@ -688,14 +700,16 @@ salaries |&gt;
 </div>
 <div id="batting-eda" class="section level3">
 <h3>Batting EDA</h3>
-<p>Many of the counting statistics for batting are right skewed, as most
-players are not hitting multiple home runs in the season. Some of the
-advanced statistics such as OPS+ are more normally distributed. An
-important idea to keep in mind is that many of these collected
-statistics are strongly correlated with each other as the advanced
-statistics are often a formula taking input from the counting
-statistics. Looking at the relation with salary, it seems that there may
-be an association between salary and home runs as well as OPS+.</p>
+<p>Many counting statistics for batting, such as home runs, are right
+skewed, as players who hit for as much power as Aaron Judge and Kyle
+Schwarber, who led the American and National Leagues with 62 and 46
+homers, respectively, are quite rare. Some of the advanced statistics
+such as OPS+ are more normally distributed. An important idea to keep in
+mind is that many of these collected statistics are strongly correlated
+with each other as the advanced statistics are often a formula taking
+input from the counting statistics. Looking at the relation with salary,
+it seems that there may be an association between salary and home runs
+as well as OPS+.</p>
 <pre class="r"><code># Chances at Bat by Home Runs
 merged_batting %&gt;%
   ggplot(aes(x = ab,y= hr)) +
@@ -772,6 +786,14 @@ scatter_patch + plot_annotation(title = &quot;Scatterplot of Batting Statistics 
 </div>
 <div id="pitching-eda" class="section level3">
 <h3>Pitching EDA</h3>
+<p>The distributions of innings pitched and ERA+ are both right-skewed,
+with peaks around 70 and 100 (the league-average ERA+), respectively.
+The distributions of BB/9 and SO/9 are mostly symmetric, with peaks
+around 3 and 9, respectively. Interestingly, the pitchers with the
+highest ERA+ often had considerably lower salaries, while higher-salary
+pitchers often gave up fewer walks per nine innings. There does not seem
+to be a strong association between salary and innings pitched or salary
+and SO/9.</p>
 <pre class="r"><code>ip_plot = merged_pitching |&gt; 
   ggplot(aes(x = ip_total)) + 
   geom_histogram(binwidth = 5, fill = &quot;red&quot;, col = &quot;black&quot;) +
@@ -808,11 +830,6 @@ so_plot = merged_pitching |&gt;
 hist_pitch = (ip_plot + era_plot) / (bb_plot + so_plot)
 hist_pitch + plot_annotation(title = &quot;Histograms of Pitching Statistics&quot;)</code></pre>
 <p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-12-1.png" width="90%" /></p>
-<p>The distribution of innings pitched is quite right-skewed, with a
-peak around 70 innings pitched. The distribution of ERA+ is right-skewed
-as well, with a peak around 100 (the league average) and a small number
-of pitchers with an ERA+ above 200. The distributions of BB/9 and SO/9
-are mostly symmetric, with peaks around 3 and 9, respectively.</p>
 <pre class="r"><code>ip_sal = merged_pitching |&gt; 
   ggplot(aes(x = ip_total, y = salary_2022)) + 
   geom_point(col = &quot;red&quot;) + 
@@ -854,8 +871,6 @@ so_sal = merged_pitching |&gt;
 scatt_pitch = (ip_sal + era_sal) / (bb_sal + so_sal)
 scatt_pitch + plot_annotation(title = &quot;Scatterplots of Pitching Statistics and Salary&quot;)</code></pre>
 <p><img src="Final_Report_Draft_files/figure-html/unnamed-chunk-13-1.png" width="90%" /></p>
-<p>Interestingly, the pitchers with the highest ERA+ often had
-considerably lower salaries.</p>
 </div>
 </div>
 <div id="additional-analysis" class="section level1">
